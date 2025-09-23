@@ -10,8 +10,10 @@ import SwiftData
 @Model
 class Category {
     var name: String
+    var isActive: Bool
     
-    init(name: String) {
+    init(name: String, isActive: Bool = true) {
         self.name = name
+        self.isActive = isActive
     }
 }

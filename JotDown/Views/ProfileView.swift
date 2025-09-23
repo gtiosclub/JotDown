@@ -6,9 +6,12 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ProfileView: View {
     @Environment(\.dismiss) private var dismiss
+    @Query var users: [User]
+    private var user: User? { users.first }
     
     var body: some View {
         NavigationStack {
