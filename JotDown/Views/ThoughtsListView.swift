@@ -9,9 +9,13 @@ import SwiftData
 import SwiftUI
 
 struct ThoughtsListView: View {
+    @Query(sort: \Thought.dateCreated, order: .reverse) var thoughts: [Thought]
+    
     var body: some View {
         List {
-            // TODO: Complete this.
+            ForEach(thoughts) { thought in
+                Text(thought.content)
+            }
         }
         .navigationTitle("Thoughts")
     }

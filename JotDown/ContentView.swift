@@ -10,6 +10,7 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var isShowingProfileView = false
+    @Environment(\.modelContext) private var context
     
     var body: some View {
         NavigationStack {
