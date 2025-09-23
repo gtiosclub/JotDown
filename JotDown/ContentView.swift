@@ -10,6 +10,7 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var isShowingProfileView = false
+    @State private var isShowingThoughtEntry = true
     
     var body: some View {
         NavigationStack {
@@ -24,6 +25,9 @@ struct ContentView: View {
         }
         .sheet(isPresented: $isShowingProfileView) {
             ProfileView()
+        }
+        .sheet(isPresented: $isShowingThoughtEntry) {
+            ThoughtsEntryView()
         }
     }
 }
