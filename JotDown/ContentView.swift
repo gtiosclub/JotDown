@@ -5,20 +5,30 @@
 //  Created by Rahul on 9/22/25.
 //
 
+import SwiftData
 import SwiftUI
 
 struct ContentView: View {
+    @State private var isShowingProfileView = false
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        NavigationStack {
+            ThoughtsListView()
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Profile", systemImage: "gear") {
+                            isShowingProfileView = true
+                        }
+                    }
+                }
         }
-        .padding()
+        .sheet(isPresented: $isShowingProfileView) {
+            ProfileView()
+        }
     }
 }
 
 #Preview {
     ContentView()
+        .modelContainer(for: [Thought.self, Category.self], inMemory: false)
 }
