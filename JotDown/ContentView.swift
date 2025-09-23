@@ -20,6 +20,11 @@ struct ContentView: View {
                             isShowingProfileView = true
                         }
                     }
+                    ToolbarItem() {
+                        Button("Add Thought", systemImage: "plus") {
+                            //TODO: Add Functionality to Lead to ThoughtEntryView
+                        }
+                    }
                 }
         }
         .sheet(isPresented: $isShowingProfileView) {
