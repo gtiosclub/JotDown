@@ -10,6 +10,7 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var isShowingProfileView = false
+    @State private var isShowingThoughtEntry = true
     @Environment(\.modelContext) private var context
     
     var body: some View {
