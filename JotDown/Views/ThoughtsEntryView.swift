@@ -10,7 +10,8 @@ import SwiftUI
 
 struct ThoughtsEntryView: View {
     @State private var thought: String = ""
-    
+    @Environment(\.dismiss) private var dismiss
+
     var body: some View {
         VStack {
             VStack {
@@ -24,6 +25,13 @@ struct ThoughtsEntryView: View {
                 }
                 .padding()
                 .buttonStyle(.borderedProminent)
+                Button("Cancel") {
+                    thought = ""
+                    dismiss()
+                }
+                .padding()
+                .buttonStyle(.borderedProminent)
+                .tint(.red)
             }
         }
     }
