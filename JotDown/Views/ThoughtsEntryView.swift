@@ -11,7 +11,7 @@ import SwiftUI
 struct ThoughtsEntryView: View {
     @State private var thought: String = ""
     @State private var characterLimit: Int = 250
-    @Environment(\.dismiss) private var dismiss: DismissAction
+    @Environment(\.dismiss) private var dismiss
     @Query var thoughts: [Thought]
     @Environment(\.modelContext) private var modelContext
     
@@ -44,6 +44,13 @@ struct ThoughtsEntryView: View {
                 
                 Text("\(thought.count)/\(characterLimit)")
                     .foregroundStyle(calculateColor())
+                Button("Cancel") {
+                    thought = ""
+                    dismiss()
+                }
+                .padding()
+                .buttonStyle(.borderedProminent)
+                .tint(.red)
             }
         }
     }
