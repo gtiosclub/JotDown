@@ -10,11 +10,13 @@ import SwiftData
 
 struct ProfileView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var context
     
     @Query private var users: [User]
     @Query private var categories: [Category]
     private var user: User? { users.first }
 //    @Query var categories: [Category]
+    
     @State private var bio: String = ""
     @State private var showArchivedCategories: Bool = false
     private var activeCategories: [Category] {
