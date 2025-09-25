@@ -9,16 +9,15 @@ import SwiftData
 import SwiftUI
 
 struct ThoughtsEntryView: View {
-    @State private var thought: String = ""
+    @State private var thoughtInput: String = ""
     @State private var characterLimit: Int = 250
     @Environment(\.dismiss) private var dismiss
-    @Query var thoughts: [Thought]
     @Environment(\.modelContext) private var modelContext
     
     func calculateColor() -> Color {
-        if thought.count > characterLimit {
+        if thoughtInput.count > characterLimit {
             return Color.red
-        } else if thought.isEmpty {
+        } else if thoughtInput.isEmpty {
             return Color.gray
         } else {
             return Color.blue
@@ -28,24 +27,24 @@ struct ThoughtsEntryView: View {
     var body: some View {
         VStack {
             VStack {
-                TextField("What's on your mind?", text: $thought)
+                TextField("What's on your mind?", text: $thoughtInput)
                     .padding()
                     .background()
                     .font(.title)
                     .cornerRadius(10)
                 Button("Submit") {
-                    let thought = Thought(content: thought)
+                    let thought = Thought(content: thoughtInput)
                     modelContext.insert(thought)
                     dismiss()
                 }
                 .padding()
                 .buttonStyle(.borderedProminent)
-                .disabled(thought.count > characterLimit)
+                .disabled(thoughtInput.count > characterLimit)
                 
-                Text("\(thought.count)/\(characterLimit)")
+                Text("\(thoughtInput.count)/\(characterLimit)")
                     .foregroundStyle(calculateColor())
                 Button("Cancel") {
-                    thought = ""
+                    thoughtInput = ""
                     dismiss()
                 }
                 .padding()
