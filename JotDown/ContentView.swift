@@ -26,6 +26,9 @@ struct ContentView: View {
         .sheet(isPresented: $isShowingProfileView) {
             ProfileView()
         }
+        .sheet(isPresented: $isShowingThoughtEntry) {
+            ThoughtsEntryView()
+        }
     }
 }
 
