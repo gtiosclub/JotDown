@@ -32,6 +32,16 @@ struct ProfileView: View {
                                 set: { user.bio = $0 }
                             ))
                         }
+                        Button("Generate Categories"){
+                            Task{
+                                do{
+                                    let generator = CategoryGenerator()
+                                    try await generator.generateCategories(using: user.bio)
+                                } catch {
+                                    print("Failed to generate categories: \(error)")
+                                }
+                            }
+                        }
                         Section("Categories") {
                             // FIXME: Implement
                             ForEach(categories, id: \.name) { category in
