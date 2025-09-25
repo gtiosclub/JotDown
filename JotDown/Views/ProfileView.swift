@@ -20,13 +20,14 @@ struct ProfileView: View {
         NavigationStack {
             VStack{
                 if let user = user {
-                    Text(user.name)
-                        .font(.title)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding()
                     Form {
+                        Section("Username") {
+                            TextField("Username", text: Binding(
+                                get: { user.name },
+                                set: {user.bio = $0}
+                            ))
+                        }
                         Section("Bio") {
-                            // FIXME: Implement
                             TextField("Describe yourself...", text: Binding(
                                 get: { user.bio },
                                 set: { user.bio = $0 }
