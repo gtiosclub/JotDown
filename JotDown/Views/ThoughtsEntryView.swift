@@ -13,7 +13,7 @@ struct ThoughtsEntryView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        VStack {
+        NavigationStack {
             VStack {
                 TextField("What's on your mind?", text: $thought)
                     .padding()
@@ -33,6 +33,15 @@ struct ThoughtsEntryView: View {
                 .buttonStyle(.borderedProminent)
                 .tint(.red)
             }
+            .toolbar {
+                Button(role: .close) {
+                    dismiss()
+                }
+            }
         }
     }
+}
+
+#Preview {
+    ThoughtsEntryView()
 }
