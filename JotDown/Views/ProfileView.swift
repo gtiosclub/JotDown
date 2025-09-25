@@ -14,36 +14,47 @@ struct ProfileView: View {
     @Query private var users: [User]
     @Query private var categories: [Category]
     private var user: User? { users.first }
-
+//    @Query var categories: [Category]
+    @State private var bio: String = ""
+    @State private var showArchivedCategories: Bool = false
+    private var activeCategories: [Category] {
+        Category.dummyCategories.filter{$0.isActive}
+    }
+    private var inactiveCategories: [Category] {
+        Category.dummyCategories.filter{!$0.isActive}
+    }
     
     var body: some View {
         NavigationStack {
-            VStack{
-                if let user = user {
-                    Form {
-                        Section("Username") {
-                            TextField("Username", text: Binding(
-                                get: { user.name },
-                                set: {user.bio = $0}
-                            ))
-                        }
-                        Section("Bio") {
-                            TextField("Describe yourself...", text: Binding(
-                                get: { user.bio },
-                                set: { user.bio = $0 }
-                            ))
-                        }
-                        Section("Categories") {
-                            // FIXME: Implement
-                            ForEach(categories, id: \.name) { category in
-                                Text(category.name)
-                            }
-                        }
-                    }
-                } else {
-                    Text("No user found")
+            Form {
+                Section("Bio") {
+                    // FIXME: Implement
+                    TextField("Desribe yourself...", text: $bio)
                 }
+                
+                Section("Active Categories") {
+                    ForEach(activeCategories) { category in
+                        Text(category.name)
+                            .swipeActions(allowsFullSwipe: true) {
+                                Button(role: .destructive, action: {
+                                    withAnimation {
+                                        category.isActive.toggle()
+                                    }
+                                }) {
+                                   Text("Archive")
+                                }
+                            }
+                    }
+                    NavigationLink(destination: ArchivedCategoriesView(cateogries: inactiveCategories)) {
+                        Text("\(inactiveCategories.count) inactive \(String(inactiveCategories.count).last == "1" ? "category" : "categories")")
+                    }
+                    .disabled(inactiveCategories.count == 0)
+                }
+                
+                
+                
             }
+            
             .navigationTitle("Profile")
             .toolbar {
                 Button(role: .close) {
