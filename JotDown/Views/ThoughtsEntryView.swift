@@ -11,6 +11,9 @@ import SwiftUI
 struct ThoughtsEntryView: View {
     @State private var thought: String = ""
     @State private var characterLimit: Int = 250
+    @Environment(\.dismiss) private var dismiss: DismissAction
+    @Query var thoughts: [Thought]
+    @Environment(\.modelContext) private var modelContext
     
     func calculateColor() -> Color {
         if thought.count > characterLimit {
@@ -31,7 +34,9 @@ struct ThoughtsEntryView: View {
                     .font(.title)
                     .cornerRadius(10)
                 Button("Submit") {
-                    // TODO: Implement Submit Functionality
+                    let thought = Thought(content: thought)
+                    modelContext.insert(thought)
+                    dismiss()
                 }
                 .padding()
                 .buttonStyle(.borderedProminent)
