@@ -6,8 +6,6 @@
 //
 
 import FoundationModels
-import SwiftUI
-
 
 class CategoryGenerator {
     let session = LanguageModelSession(instructions: "Generate categories for a user depending on their interests in their bio.")
