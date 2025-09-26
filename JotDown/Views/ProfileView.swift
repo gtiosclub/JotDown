@@ -6,20 +6,51 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ProfileView: View {
     @Environment(\.dismiss) private var dismiss
     
+    @Query private var users: [User]
+    @Query private var categories: [Category]
+    private var user: User? { users.first }
+
+    
     var body: some View {
         NavigationStack {
-            Form {
-                Section("Bio") {
-                    // FIXME: Implement
-                    TextField("Describe yourself...", text: .constant(""))
-                }
-                
-                Section("Categories") {
-                    // FIXME: Implement
+            VStack{
+                if let user = user {
+                    Text(user.name)
+                        .font(.title)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding()
+                    Form {
+                        Section("Bio") {
+                            // FIXME: Implement
+                            TextField("Describe yourself...", text: Binding(
+                                get: { user.bio },
+                                set: { user.bio = $0 }
+                            ))
+                        }
+                        Button("Generate Categories"){
+                            Task{
+                                do{
+                                    let generator = CategoryGenerator()
+                                    try await generator.generateCategories(using: user.bio)
+                                } catch {
+                                    print("Failed to generate categories: \(error)")
+                                }
+                            }
+                        }
+                        Section("Categories") {
+                            // FIXME: Implement
+                            ForEach(categories, id: \.name) { category in
+                                Text(category.name)
+                            }
+                        }
+                    }
+                } else {
+                    Text("No user found")
                 }
             }
             .navigationTitle("Profile")
@@ -33,5 +64,12 @@ struct ProfileView: View {
 }
 
 #Preview {
-    ProfileView()
+    let config = ModelConfiguration(isStoredInMemoryOnly: true)
+    let container = try! ModelContainer(for: User.self, configurations: config)
+    let context = container.mainContext
+    let previewUser = User(name: "Preview User", bio: "Loves iOS dev")
+    context.insert(previewUser)
+
+    return ProfileView()
+        .modelContainer(container)
 }
