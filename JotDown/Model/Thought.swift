@@ -12,9 +12,11 @@ import SwiftData
 class Thought {
     var dateCreated: Date
     var content: String
+    var category: Category
         
     init(content: String) {
         self.dateCreated = Date()
         self.content = content
+        self.category = Category(name: "Dummy")
     }
 }
