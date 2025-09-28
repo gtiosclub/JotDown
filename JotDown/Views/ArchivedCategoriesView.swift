@@ -14,20 +14,28 @@ struct ArchivedCategoriesView: View {
             Text("No archived categories")
         }
         Form {
-            ForEach(cateogries) {category in
-                Text(category.name)
-                    .foregroundStyle(.secondary)
-                    .swipeActions(allowsFullSwipe: true) {
-                        Button(action: {
-                            withAnimation {
-                                category.isActive.toggle()
+            Section {
+                ForEach(cateogries) {category in
+                    Text(category.name)
+                        .foregroundStyle(.secondary)
+                        .swipeActions(allowsFullSwipe: true) {
+                            Button(action: {
+                                withAnimation {
+                                    category.isActive.toggle()
+                                }
+                            }) {
+                                Text("Activate")
                             }
-                        }) {
-                           Text("Activate")
                         }
-                    }
+                }
+            } footer: {
+                Text("Swipe left to activate a category.")
+                    .font(.caption)
+                    .foregroundColor(.gray)
             }
+            
         }
+        
     }
 }
 

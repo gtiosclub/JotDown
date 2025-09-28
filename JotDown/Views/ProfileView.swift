@@ -10,27 +10,40 @@ import SwiftData
 
 struct ProfileView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var context
     @Query var users: [User]
     private var user: User? { users.first }
-//    @Query var categories: [Category]
-    @State private var bio: String = ""
+    @Query var categories: [Category]
     @State private var showArchivedCategories: Bool = false
     private var activeCategories: [Category] {
-        Category.dummyCategories.filter{$0.isActive}
+        categories.filter{$0.isActive}
+        //        Category.dummyCategories.filter{$0.isActive}
     }
     private var inactiveCategories: [Category] {
-        Category.dummyCategories.filter{!$0.isActive}
+        categories.filter{!$0.isActive}
+        //        Category.dummyCategories.filter{!$0.isActive}
     }
     
     var body: some View {
         NavigationStack {
             Form {
-                Section("Bio") {
-                    // FIXME: Implement
-                    TextField("Desribe yourself...", text: $bio)
+                if let user = user {
+                    @Bindable var bindableUser = user
+                    
+                    Section("Name") {
+                        TextField("What is your name?", text: $bindableUser.name)
+                            .lineLimit(1)
+                    }
+                    Section("Bio") {
+                        TextField("Describe yourself...",
+                                  text: $bindableUser.bio,
+                                  axis: .vertical)
+                            .lineLimit(5...10)
+                            .multilineTextAlignment(.leading)
+                    }
                 }
                 
-                Section("Active Categories") {
+                Section {
                     ForEach(activeCategories) { category in
                         Text(category.name)
                             .swipeActions(allowsFullSwipe: true) {
@@ -39,7 +52,7 @@ struct ProfileView: View {
                                         category.isActive.toggle()
                                     }
                                 }) {
-                                   Text("Archive")
+                                    Text("Archive")
                                 }
                             }
                     }
@@ -47,6 +60,36 @@ struct ProfileView: View {
                         Text("\(inactiveCategories.count) inactive \(String(inactiveCategories.count).last == "1" ? "category" : "categories")")
                     }
                     .disabled(inactiveCategories.count == 0)
+                } header: {
+                    Text("Active Categories")
+                        .foregroundColor(.gray)
+                } footer: {
+                    Text("Swipe left to archive a category.")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                }
+                Section {
+                    Button("Generate Categories"){
+                        Task{
+                            do {
+                                if let user = user {
+                                    let generator = CategoryGenerator()
+                                    let newCategories = try await generator.generateCategories(using: user.bio)
+                                    for category in categories {
+                                        category.isActive = false
+                                    }
+                                    for newCategory in newCategories {
+                                        context.insert(newCategory)
+                                    }
+                                    
+                                } else {
+                                    print("Failed to generate categories, no user found")
+                                }
+                            } catch {
+                                print("Failed to generate categories: \(error)")
+                            }
+                        }
+                    }
                 }
                 
                 
@@ -64,5 +107,12 @@ struct ProfileView: View {
 }
 
 #Preview {
-    ProfileView()
+    let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let container = try! ModelContainer(for: User.self, configurations: config)
+        let context = container.mainContext
+        let previewUser = User(name: "Preview User", bio: "Loves iOS dev")
+        context.insert(previewUser)
+
+        return ProfileView()
+            .modelContainer(container)
 }
