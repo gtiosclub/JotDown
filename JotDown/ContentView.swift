@@ -23,6 +23,11 @@ struct ContentView: View {
                             isShowingProfileView = true
                         }
                     }
+                    ToolbarItem() {
+                        Button("Add Thought", systemImage: "plus") {
+                            isShowingThoughtEntry = true
+                        }
+                    }
                 }
         }
         .sheet(isPresented: $isShowingProfileView) {
