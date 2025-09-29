@@ -29,43 +29,58 @@ struct ProfileView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Bio") {
-                    // FIXME: Implement
-                    TextField("Desribe yourself...", text: $bio)
-                }
-                
-                Section("Active Categories") {
-                    ForEach(activeCategories) { category in
-                        Text(category.name)
-                            .swipeActions(allowsFullSwipe: true) {
-                                Button(role: .destructive, action: {
-                                    withAnimation {
-                                        category.isActive.toggle()
-                                    }
-                                }) {
-                                   Text("Archive")
-                                }
+                if let user = user {
+                    Section("Username") {
+                        TextField("Username", text: Binding(
+                            get: { user.name },
+                            set: {user.bio = $0}
+                        ))
+                    }
+                    Section("Bio") {
+                        TextField("Describe yourself...", text: Binding(
+                            get: { user.bio },
+                            set: { user.bio = $0 }
+                        ))
+                    }
+                    Button("Generate Categories"){
+                        Task{
+                            do{
+                                let generator = CategoryGenerator()
+                                try await generator.generateCategories(using: user.bio)
+                            } catch {
+                                print("Failed to generate categories: \(error)")
                             }
                         }
-                        Section("Categories") {
-                            // FIXME: Implement
-                            ForEach(categories, id: \.name) { category in
-                                Text(category.name)
-                            }
                     }
-                    NavigationLink(destination: ArchivedCategoriesView(cateogries: inactiveCategories)) {
-                        Text("\(inactiveCategories.count) inactive \(String(inactiveCategories.count).last == "1" ? "category" : "categories")")
+                    Section("Active Categories") {
+                        ForEach(activeCategories) { category in
+                            Text(category.name)
+                                .swipeActions(allowsFullSwipe: true) {
+                                    Button(role: .destructive, action: {
+                                        withAnimation {
+                                            category.isActive.toggle()
+                                        }
+                                    }) {
+                                       Text("Archive")
+                                    }
+                                }
+                        }
+                        NavigationLink(destination: ArchivedCategoriesView(cateogries: inactiveCategories)) {
+                            Text("\(inactiveCategories.count) inactive \(String(inactiveCategories.count).last == "1" ? "category" : "categories")")
+                        }
+                        .disabled(inactiveCategories.count == 0)
                     }
-                    .disabled(inactiveCategories.count == 0)
                 }
-                
-                
                 
             }
             
             .navigationTitle("Profile")
             .toolbar {
-                Button(role: .close) {
+                Button("Save") {
+                    try? context.save()
+                    dismiss()
+                }
+                Button(role: .close) { 
                     dismiss()
                 }
             }
