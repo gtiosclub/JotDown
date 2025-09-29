@@ -46,6 +46,12 @@ struct ProfileView: View {
                                    Text("Archive")
                                 }
                             }
+                        }
+                        Section("Categories") {
+                            // FIXME: Implement
+                            ForEach(categories, id: \.name) { category in
+                                Text(category.name)
+                            }
                     }
                     NavigationLink(destination: ArchivedCategoriesView(cateogries: inactiveCategories)) {
                         Text("\(inactiveCategories.count) inactive \(String(inactiveCategories.count).last == "1" ? "category" : "categories")")
