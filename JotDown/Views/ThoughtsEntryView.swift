@@ -9,6 +9,8 @@ import SwiftData
 import SwiftUI
 
 struct ThoughtsEntryView: View {
+    @Query var categories: [Category]
+
     @State private var thoughtInput: String = ""
     @State private var characterLimit: Int = 250
     @Environment(\.dismiss) private var dismiss
@@ -33,9 +35,15 @@ struct ThoughtsEntryView: View {
                     .font(.title)
                     .cornerRadius(10)
                 Button("Submit") {
-                    let thought = Thought(content: thoughtInput)
-                    modelContext.insert(thought)
-                    dismiss()
+                    Task {
+                        let thought = Thought(content: thoughtInput)
+
+                        try? await Categorizer()
+                            .categorizeThought(thought, categories: categories)
+
+                        modelContext.insert(thought)
+                        dismiss()
+                    }
                 }
                 .padding()
                 .buttonStyle(.borderedProminent)

@@ -32,6 +32,7 @@ struct ThoughtsListView: View {
                     VStack {
                         Text(ThoughtsListView.dateFormatter.string(from: thought.dateCreated)).font(.caption)
                         Text(ThoughtsListView.timeFormatter.string(from: thought.dateCreated)).font(.caption)
+                        Text(thought.category.name)
                     }
                 }
             }
