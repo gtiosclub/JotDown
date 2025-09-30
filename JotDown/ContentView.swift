@@ -15,31 +15,43 @@ struct ContentView: View {
     @Query var users: [User]
     
     var body: some View {
-        NavigationStack {
-            ThoughtsListView()
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("Profile", systemImage: "gear") {
-                            isShowingProfileView = true
+        TabView {
+            NavigationStack {
+                ThoughtsListView()
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Profile", systemImage: "gear") {
+                                isShowingProfileView = true
+                            }
+                        }
+                        ToolbarItem() {
+                            Button("Add Thought", systemImage: "plus") {
+                                isShowingThoughtEntry = true
+                            }
                         }
                     }
-                    ToolbarItem() {
-                        Button("Add Thought", systemImage: "plus") {
-                            isShowingThoughtEntry = true
-                        }
-                    }
+            }
+            .sheet(isPresented: $isShowingProfileView) {
+                ProfileView()
+            }
+            .sheet(isPresented: $isShowingThoughtEntry) {
+                ThoughtsEntryView()
+            }
+            .onAppear {
+                if users.isEmpty {
+                    let defaultUser = User(name: "", bio: "")
+                    context.insert(defaultUser)
                 }
-        }
-        .sheet(isPresented: $isShowingProfileView) {
-            ProfileView()
-        }
-        .sheet(isPresented: $isShowingThoughtEntry) {
-            ThoughtsEntryView()
-        }
-        .onAppear {
-            if users.isEmpty {
-                let defaultUser = User(name: "", bio: "")
-                context.insert(defaultUser)
+            }.tabItem {
+                Label("Thoughts", systemImage: "list.bullet")
+            }
+
+            NavigationStack {
+                SearchView()
+                    .navigationTitle("Search")
+            }
+            .tabItem {
+                Label("Search", systemImage: "magnifyingglass")
             }
         }
     }
