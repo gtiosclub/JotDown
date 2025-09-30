@@ -6,11 +6,45 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		91F461BE2E8C8A5C00CF6134 /* JotDownWatch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 91F461B42E8C8A5B00CF6134 /* JotDownWatch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		91F461BC2E8C8A5C00CF6134 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B7F3755D2E821797008F0846 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 91F461B32E8C8A5B00CF6134;
+			remoteInfo = "JotDownWatch Watch App";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		91F461BF2E8C8A5C00CF6134 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				91F461BE2E8C8A5C00CF6134 /* JotDownWatch Watch App.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		91F461B42E8C8A5B00CF6134 /* JotDownWatch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "JotDownWatch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B7F375652E821797008F0846 /* JotDown.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JotDown.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		91F461B52E8C8A5B00CF6134 /* JotDownWatch Watch App */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "JotDownWatch Watch App";
+			sourceTree = "<group>";
+		};
 		B7F375672E821797008F0846 /* JotDown */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = JotDown;
@@ -19,6 +53,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		91F461B12E8C8A5B00CF6134 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B7F375622E821797008F0846 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -33,6 +74,7 @@
 			isa = PBXGroup;
 			children = (
 				B7F375672E821797008F0846 /* JotDown */,
+				91F461B52E8C8A5B00CF6134 /* JotDownWatch Watch App */,
 				B7F375662E821797008F0846 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,6 +83,7 @@
 			isa = PBXGroup;
 			children = (
 				B7F375652E821797008F0846 /* JotDown.app */,
+				91F461B42E8C8A5B00CF6134 /* JotDownWatch Watch App.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,6 +91,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		91F461B32E8C8A5B00CF6134 /* JotDownWatch Watch App */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 91F461C22E8C8A5C00CF6134 /* Build configuration list for PBXNativeTarget "JotDownWatch Watch App" */;
+			buildPhases = (
+				91F461B02E8C8A5B00CF6134 /* Sources */,
+				91F461B12E8C8A5B00CF6134 /* Frameworks */,
+				91F461B22E8C8A5B00CF6134 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				91F461B52E8C8A5B00CF6134 /* JotDownWatch Watch App */,
+			);
+			name = "JotDownWatch Watch App";
+			packageProductDependencies = (
+			);
+			productName = "JotDownWatch Watch App";
+			productReference = 91F461B42E8C8A5B00CF6134 /* JotDownWatch Watch App.app */;
+			productType = "com.apple.product-type.application";
+		};
 		B7F375642E821797008F0846 /* JotDown */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = B7F375702E821798008F0846 /* Build configuration list for PBXNativeTarget "JotDown" */;
@@ -55,10 +120,12 @@
 				B7F375612E821797008F0846 /* Sources */,
 				B7F375622E821797008F0846 /* Frameworks */,
 				B7F375632E821797008F0846 /* Resources */,
+				91F461BF2E8C8A5C00CF6134 /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				91F461BD2E8C8A5C00CF6134 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				B7F375672E821797008F0846 /* JotDown */,
@@ -80,6 +147,9 @@
 				LastSwiftUpdateCheck = 2600;
 				LastUpgradeCheck = 2600;
 				TargetAttributes = {
+					91F461B32E8C8A5B00CF6134 = {
+						CreatedOnToolsVersion = 26.0.1;
+					};
 					B7F375642E821797008F0846 = {
 						CreatedOnToolsVersion = 26.0;
 					};
@@ -100,11 +170,19 @@
 			projectRoot = "";
 			targets = (
 				B7F375642E821797008F0846 /* JotDown */,
+				91F461B32E8C8A5B00CF6134 /* JotDownWatch Watch App */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		91F461B22E8C8A5B00CF6134 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B7F375632E821797008F0846 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -115,6 +193,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		91F461B02E8C8A5B00CF6134 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B7F375612E821797008F0846 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -124,7 +209,81 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		91F461BD2E8C8A5C00CF6134 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 91F461B32E8C8A5B00CF6134 /* JotDownWatch Watch App */;
+			targetProxy = 91F461BC2E8C8A5C00CF6134 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		91F461C02E8C8A5C00CF6134 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 6MTCHYNPAT;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = JotDownWatch;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.gtiosclub.JotDown;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.gtiosclub.JotDown.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Debug;
+		};
+		91F461C12E8C8A5C00CF6134 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 6MTCHYNPAT;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = JotDownWatch;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.gtiosclub.JotDown;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.gtiosclub.JotDown.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Release;
+		};
 		B7F3756E2E821798008F0846 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -313,6 +472,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		91F461C22E8C8A5C00CF6134 /* Build configuration list for PBXNativeTarget "JotDownWatch Watch App" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				91F461C02E8C8A5C00CF6134 /* Debug */,
+				91F461C12E8C8A5C00CF6134 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		B7F375602E821797008F0846 /* Build configuration list for PBXProject "JotDown" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
