@@ -13,7 +13,7 @@ struct JotDownApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .modelContainer(for: [Thought.self, Category.self])
+                .modelContainer(for: [User.self, Thought.self, Category.self])
         }
     }
 }
