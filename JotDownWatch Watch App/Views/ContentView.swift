@@ -9,6 +9,9 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
+        
+        // TODO: Implement Watch App UI. Include WC logic to send thought to the phone upon entry
+        
         VStack {
             Image(systemName: "globe")
                 .imageScale(.large)
