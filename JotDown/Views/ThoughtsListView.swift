@@ -10,7 +10,8 @@ import SwiftUI
 
 struct ThoughtsListView: View {
     @Query(sort: \Thought.dateCreated, order: .reverse) var thoughts: [Thought]
-    
+    @Environment(\.modelContext) private var context
+
     private static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "M/dd/yyyy"
@@ -35,8 +36,15 @@ struct ThoughtsListView: View {
                         Text(thought.category.name)
                     }
                 }
-            }
+            }.onDelete(perform: deleteNote)
         }
         .navigationTitle("Thoughts")
+    }
+    
+    private func deleteNote(at offsets: IndexSet) {
+        for offset in offsets {
+            let itemToDelete = thoughts[offset]
+            context.delete(itemToDelete)
+        }
     }
 }
