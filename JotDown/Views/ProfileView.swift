@@ -45,19 +45,24 @@ struct ProfileView: View {
                 
                 Section {
                     ForEach(activeCategories) { category in
-                        Text(category.name)
-                            .swipeActions(allowsFullSwipe: true) {
-                                Button(role: .destructive, action: {
-                                    withAnimation {
-                                        category.isActive.toggle()
+                        if category.name == "Other" {
+                            Text(category.name)
+                                .foregroundColor(.gray)
+                        } else {
+                            Text(category.name)
+                                .swipeActions(allowsFullSwipe: true) {
+                                    Button(role: .destructive) {
+                                        withAnimation {
+                                            category.isActive.toggle()
+                                        }
+                                    } label: {
+                                        Text("Archive")
                                     }
-                                }) {
-                                    Text("Archive")
                                 }
-                            }
+                        }
                     }
                     NavigationLink(destination: ArchivedCategoriesView(cateogries: inactiveCategories)) {
-                        Text("\(inactiveCategories.count) inactive \(String(inactiveCategories.count).last == "1" ? "category" : "categories")")
+                        Text("\(inactiveCategories.count) inactive \(inactiveCategories.count == 1 ? "category" : "categories")")
                     }
                     .disabled(inactiveCategories.count == 0)
                 } header: {
@@ -75,10 +80,18 @@ struct ProfileView: View {
                                 if let user = user {
                                     let generator = CategoryGenerator()
                                     let newCategories = try await generator.generateCategories(using: user.bio)
+                                    
                                     for category in categories {
-                                        category.isActive = false
+                                        if category.name != "Other" {
+                                            category.isActive = false
+                                        }
                                     }
+                                    
+                                    let hasOther = categories.contains {$0.name == "Other"}
                                     for newCategory in newCategories {
+                                        if (newCategory.name == "Other" && hasOther){
+                                            continue
+                                        }
                                         context.insert(newCategory)
                                     }
                                     
@@ -116,3 +129,4 @@ struct ProfileView: View {
         return ProfileView()
             .modelContainer(container)
 }
+

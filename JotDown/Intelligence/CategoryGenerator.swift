@@ -27,10 +27,14 @@ class CategoryGenerator {
         
         var categoryArray: [Category] = []
         
+        categoryArray.append(Category(name: "Other", isActive: true))
+        
         for category in response.content.categories {
             let newCategory = Category(name: category.name, isActive: true)
             categoryArray.append(newCategory)
         }
+        
+
         
         return categoryArray
     }
