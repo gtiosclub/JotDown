@@ -15,6 +15,8 @@ struct ProfileView: View {
     private var user: User? { users.first }
     @Query var categories: [Category]
     @State private var showArchivedCategories: Bool = false
+    @State private var isShowingAddCategoriesSheet: Bool = false
+    @State private var newCategoryName: String = ""
     private var activeCategories: [Category] {
         categories.filter{$0.isActive}
         //        Category.dummyCategories.filter{$0.isActive}
@@ -69,6 +71,12 @@ struct ProfileView: View {
                         .foregroundColor(.gray)
                 }
                 Section {
+                    //Sets the sheet to true to open the screen to add category
+                    Button ("Add Category") {
+                        isShowingAddCategoriesSheet = true
+                    }
+                }
+                Section {
                     Button("Generate Categories"){
                         Task{
                             do {
@@ -102,6 +110,49 @@ struct ProfileView: View {
                     dismiss()
                 }
             }
+            //Presents the sheet to the user
+            .sheet(isPresented: $isShowingAddCategoriesSheet) {
+                NavigationStack {
+                    Form {
+                        Section("Category Name") {
+                            TextField("i.e. Sports", text: $newCategoryName, axis: .vertical)
+                                .submitLabel(.done)
+                                .lineLimit(1...3)
+                                .multilineTextAlignment(.leading)
+                        }
+                    }
+                    .navigationTitle("New Category")
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Cancel") {
+                                newCategoryName = ""
+                                isShowingAddCategoriesSheet = false
+                            }
+                        }
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Save") {
+                                let trimmed = newCategoryName.trimmingCharacters(in: .whitespacesAndNewlines)
+                                if !trimmed.isEmpty {
+                                    //If the category is already present in inactive categories, the category is made active
+                                    if let matching = inactiveCategories.first(where: { category in category.name.compare(trimmed, options: .caseInsensitive) == .orderedSame }) {
+                                        matching.isActive = true
+                                    }
+                                    //If the category is new, it will be added to the list of active categories
+                                    else if !activeCategories.contains(where: { category in category.name.lowercased() == trimmed.lowercased() }) {
+                                        let category = Category(name: trimmed, isActive: true)
+                                        context.insert(category)
+                                    }
+                                    newCategoryName = ""
+                                    isShowingAddCategoriesSheet = false
+                                } else {
+                                    return
+                                }
+                            }
+                            .disabled(newCategoryName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -116,3 +167,4 @@ struct ProfileView: View {
         return ProfileView()
             .modelContainer(container)
 }
+
