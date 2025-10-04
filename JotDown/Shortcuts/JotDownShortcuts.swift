@@ -12,7 +12,8 @@ struct JotDownShortcuts: AppShortcutsProvider {
         AppShortcut(
             intent: NewThoughtShortcut(),
             phrases: [
-                "New thought in \(.applicationName)"
+                "New thought in \(.applicationName)",
+                "\(.applicationName) New thought"
             ],
             shortTitle: "New Thought",
             systemImageName: "square.and.pencil"
