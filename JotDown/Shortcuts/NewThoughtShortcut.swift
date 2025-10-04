@@ -10,12 +10,8 @@ import SwiftData
 
 struct NewThoughtShortcut: AppIntent {
     @AppDependency var modelContainer: ModelContainer
-    
-    @Parameter(title: "ThoughtTitle")
-    var thoughtTitle: String
-
-
-    @Parameter(title: "ThoughtContent")
+        
+    @Parameter(title: "Thought Content")
     var thoughtContent: String
     
     static var title: LocalizedStringResource = "New Thought"
@@ -23,11 +19,21 @@ struct NewThoughtShortcut: AppIntent {
 
     @MainActor
     func perform() async throws -> some IntentResult {
-        // TODO: Prompts the user and creates a new Thought
+        let newThought = Thought(content: thoughtContent)
+        let modelContext = ModelContext(modelContainer)
         
-        
-        
-        
-        return .result()
+        do {
+            let descriptor = FetchDescriptor<Category>()
+            let categories = try modelContext.fetch(descriptor)
+            
+            try? await Categorizer()
+                .categorizeThought(newThought, categories: categories)
+            
+            modelContext.insert(newThought)
+            return .result()
+        } catch {
+            print(error.localizedDescription)
+            return .result()
+        }
     }
 }
