@@ -72,7 +72,7 @@ struct ProfileView: View {
                 }
                 Section {
                     //Sets the sheet to true to open the screen to add category
-                    Button ("Add Category") {
+                    Button ("Add Custom Category") {
                         isShowingAddCategoriesSheet = true
                     }
                 }
@@ -159,7 +159,7 @@ struct ProfileView: View {
 
 #Preview {
     let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        let container = try! ModelContainer(for: User.self, configurations: config)
+    let container = try! ModelContainer(for: User.self, Category.self, configurations: config)
         let context = container.mainContext
         let previewUser = User(name: "Preview User", bio: "Loves iOS dev")
         context.insert(previewUser)
