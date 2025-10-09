@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import NaturalLanguage
 
 enum SearchMode: String, CaseIterable, Identifiable {
     case regexContains = "Regex/Contains"
@@ -112,7 +113,17 @@ struct SearchView: View {
     }
 
     private func searchRAG(query: String, in thoughts: [Thought]) async -> [Thought] {
-        thoughts.first.map { [$0] } ?? []
+        guard let model = NLEmbedding.wordEmbedding(for: .english) else {
+            print("Unable to load embeddings model")
+            return thoughts
+        }
+        let words = query.lowercased().components(separatedBy: .whitespacesAndNewlines)
+        let embeddings = words.compactMap { model.vector(for: $0) }
+        let queryEmbedding = average(embeddings)
+        let results = thoughts.sorted {
+            cosineSimilarity($0.vectorEmbedding, queryEmbedding) > cosineSimilarity($1.vectorEmbedding, queryEmbedding)
+        }.prefix(4)
+        return Array(results)
     }
 }
 
