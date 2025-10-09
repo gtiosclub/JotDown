@@ -104,8 +104,17 @@ struct SearchView: View {
     // MARK: - Search Implementations
 
     private func searchRegexContains(query: String, in thoughts: [Thought]) -> [Thought] {
-        thoughts.first.map { [$0] } ?? []
-    }
+        do{
+            let regex = try NSRegularExpression(pattern: query, options: [.caseInsensitive])
+            return thoughts.filter { thought in
+                        let range = NSRange(location: 0, length: thought.content.utf16.count)
+                        return regex.firstMatch(in: thought.content, options: [], range: range) != nil
+                    }
+                } catch {
+                    print("Invalid regex: \(error.localizedDescription)")
+                    return []
+                }
+        }
 
     private func searchFoundationModels(query: String, in thoughts: [Thought]) async -> [Thought] {
         thoughts.first.map { [$0] } ?? []
