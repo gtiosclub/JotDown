@@ -16,7 +16,13 @@ struct ProfileView: View {
     @Query var categories: [Category]
     @State private var showArchivedCategories: Bool = false
     private var activeCategories: [Category] {
-        categories.filter{$0.isActive}
+        categories
+            .filter{$0.isActive}
+            .sorted { lhs, rhs in
+                if lhs.name == "Other" {return false}
+                if rhs.name == "Other" {return true}
+                return lhs.name < rhs.name
+            }
         //        Category.dummyCategories.filter{$0.isActive}
     }
     private var inactiveCategories: [Category] {
