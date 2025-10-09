@@ -12,13 +12,13 @@ enum SearchMode: String, CaseIterable, Identifiable {
 struct SearchView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Thought.dateCreated, order: .reverse) private var thoughts: [Thought]
-
+    
     @State private var searchText: String = ""
     @State private var mode: SearchMode = .regexContains
     @State private var results: [Thought] = []
     @State private var isSearching: Bool = false
     @State private var hasSearched: Bool = false
-
+    
     var body: some View {
         List(results) { thought in
             VStack(alignment: .leading) {
@@ -29,7 +29,7 @@ struct SearchView: View {
                 }
                 .font(.caption)
                 .foregroundStyle(.secondary)
-
+                
                 Text(thought.content)
             }
         }
@@ -67,7 +67,7 @@ struct SearchView: View {
         }
         .navigationTitle("Search")
     }
-
+    
     private func performSearch() {
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !query.isEmpty else {
@@ -76,7 +76,7 @@ struct SearchView: View {
             return
         }
         hasSearched = true
-
+        
         switch mode {
         case .regexContains:
             results = searchRegexContains(query: query, in: thoughts)
@@ -100,22 +100,30 @@ struct SearchView: View {
             }
         }
     }
-
+    
     // MARK: - Search Implementations
-
     private func searchRegexContains(query: String, in thoughts: [Thought]) -> [Thought] {
-        thoughts.first.map { [$0] } ?? []
+        do {
+            let regex = try NSRegularExpression(pattern: query, options: [.caseInsensitive])
+            return thoughts.filter { thought in
+                let range = NSRange(location: 0, length: thought.content.utf16.count)
+                return regex.firstMatch(in: thought.content, options: [], range: range) != nil
+            }
+        } catch {
+            print("Invalid regex: \(error.localizedDescription)")
+            return []
+        }
     }
-
+    
+    
     private func searchFoundationModels(query: String, in thoughts: [Thought]) async -> [Thought] {
         thoughts.first.map { [$0] } ?? []
     }
-
+    
     private func searchRAG(query: String, in thoughts: [Thought]) async -> [Thought] {
         thoughts.first.map { [$0] } ?? []
     }
 }
-
 #Preview {
     SearchView()
 }
