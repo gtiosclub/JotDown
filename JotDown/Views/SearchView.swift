@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import FoundationModels
 
 enum SearchMode: String, CaseIterable, Identifiable {
     case regexContains = "Regex/Contains"
@@ -118,8 +119,95 @@ struct SearchView: View {
 
     private func searchFoundationModels(query: String, in thoughts: [Thought]) async -> [Thought] {
         thoughts.first.map { [$0] } ?? []
+        let session = FoundationModels.LanguageModelSession()
+        
+        //1. First try to identify the category of the query
+        var uniqueCategories: [String] = []
+        
+        for thought in thoughts {
+            let name = thought.category.name
+            if (!uniqueCategories.contains(name)) {
+                uniqueCategories.append(name)
+            }
+        }
+        
+        //Makes sure array is not empty
+        if uniqueCategories.isEmpty {
+            return []
+        }
+        
+        do {
+            //2. Determine the cateogry of the query
+            let categoryPrompt = """
+            Given the search query: "\(query)"
+            And these available categories: [\(uniqueCategories.joined(separator: ", "))]
+            
+            Which category is most likely to contain thoughts related to this search query?
+            Return only the exact category name from the list above and nothing else.
+            """
+            
+            let categoryResponse = try await session.respond(to: categoryPrompt)
+            let selectedCategory = categoryResponse.content.trimmingCharacters(in: .whitespacesAndNewlines)
+            
+            let categoryFilteredThoughts = thoughts.filter { $0.category.name.lowercased() == selectedCategory.lowercased() }
+            
+            //3. Search through filtered thoughts and determine relevance
+            var relevantThoughts: [Thought] = [] //Relevant thoughts that will be returned
+            
+            for thought in categoryFilteredThoughts {
+                let relevancePrompt = """
+                    Search query: \(query)
+                    Thought content: \(thought.content)
+                    
+                    Is this thought relevant to the search query? Consider meaning, not just exact words.
+                    Answer only "yes" or "no".
+                    """
+                
+                let relevanceResponse = try await session.respond(to: relevancePrompt)
+                
+                // If relevant then append to search results
+                if relevanceResponse.content.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() == "yes" {
+                    relevantThoughts.append(thought)
+                }
+            }
+            
+            return relevantThoughts
+            
+        } catch {
+            print("Error in Foundation Models search: \(error)")
+            return []
+        }
+    }
+    
+    private func queryResponseGenerator(query: String, in relevantThoughts: [Thought]) async -> String {
+        let session = FoundationModels.LanguageModelSession()
+        var relevantThoughtsContent: [String] = []
+        var i: Int = 1
+        do  {
+            for thought in relevantThoughts{
+                let contents = "Thought \(i):\(thought.content)"
+                i+=1
+                relevantThoughtsContent.append(contents)
+            }
+            let queryResponsePrompt = """
+            Given the search query "\(query)" and these are the available relevant thoughts ["\(relevantThoughtsContent.joined(separator: ", "))"]
+            Find the thought that answers the query and form an answer from the thought's content and return the response to the query.
+            Summarize in one short sentence.
+            """
+            let queryResponse = try await session.respond(to: queryResponsePrompt, generating: generatedResponse.self)
+            return queryResponse.content.response
+        } catch {
+            print("Error in Foundation Models search: \(error)")
+            return ""
+        }
     }
 
+    @Generable
+    struct generatedResponse {
+        @Guide(description: "Clear, concise one sentence summary response to the query")
+        var response: String
+    }
+    
     private func searchRAG(query: String, in thoughts: [Thought]) async -> [Thought] {
         thoughts.first.map { [$0] } ?? []
     }
