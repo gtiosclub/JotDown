@@ -170,7 +170,35 @@ struct SearchView: View {
         }
     }
     
+    private func queryResponseGenerator(query: String, in relevantThoughts: [Thought]) async -> String {
+        let session = FoundationModels.LanguageModelSession()
+        var relevantThoughtsContent: [String] = []
+        var i: Int = 1
+        do  {
+            for thought in relevantThoughts{
+                let contents = "Thought \(i):\(thought.content)"
+                i+=1
+                relevantThoughtsContent.append(contents)
+            }
+            let queryResponsePrompt = """
+            Given the search query "\(query)" and these are the available relevant thoughts ["\(relevantThoughtsContent.joined(separator: ", "))"]
+            Find the thought that answers the query and form an answer from the thought's content and return the response to the query.
+            Summarize in one short sentence.
+            """
+            let queryResponse = try await session.respond(to: queryResponsePrompt, generating: generatedResponse.self)
+            return queryResponse.content.response
+        } catch {
+            print("Error in Foundation Models search: \(error)")
+            return ""
+        }
+    }
 
+    @Generable
+    struct generatedResponse {
+        @Guide(description: "Clear, concise one sentence summary response to the query")
+        var response: String
+    }
+    
     private func searchRAG(query: String, in thoughts: [Thought]) async -> [Thought] {
         thoughts.first.map { [$0] } ?? []
     }
