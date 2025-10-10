@@ -19,6 +19,10 @@ struct SearchView: View {
     @State private var results: [Thought] = []
     @State private var isSearching: Bool = false
     @State private var hasSearched: Bool = false
+    // Only searches after .5 seconds of stopped typing
+    @State private var searchDebounceWorkItem: DispatchWorkItem?
+    private let delayToSearch = 0.5
+
 
     var body: some View {
         List(results) { thought in
@@ -52,9 +56,20 @@ struct SearchView: View {
             }
         }
         .onChange(of: searchText) { _, _ in
-            if !searchText.isEmpty {
+            // Cancel any existing pending search
+            searchDebounceWorkItem?.cancel()
+            
+            // If the search text is empty, don’t schedule a new search
+            guard !searchText.isEmpty else { return }
+            
+            let workItem = DispatchWorkItem {
                 performSearch()
             }
+            // Store it so we can cancel if needed
+            searchDebounceWorkItem = workItem
+            
+            // Schedule it to run after 0.5 seconds
+            DispatchQueue.main.asyncAfter(deadline: .now() + delayToSearch, execute: workItem)
         }
         .toolbar {
             ToolbarItem(placement: .principal) {
@@ -109,7 +124,6 @@ struct SearchView: View {
     }
 
     private func searchFoundationModels(query: String, in thoughts: [Thought]) async -> [Thought] {
-        thoughts.first.map { [$0] } ?? []
         let session = FoundationModels.LanguageModelSession()
         
         //1. First try to identify the category of the query
@@ -121,6 +135,7 @@ struct SearchView: View {
                 uniqueCategories.append(name)
             }
         }
+        
         
         //Makes sure array is not empty
         if uniqueCategories.isEmpty {
@@ -134,34 +149,28 @@ struct SearchView: View {
             And these available categories: [\(uniqueCategories.joined(separator: ", "))]
             
             Which category is most likely to contain thoughts related to this search query?
-            Return only the exact category name from the list above and nothing else.
+            Also, make a list of keywords from the query that can be used to find the most relevant thoguhts.
+            Return only the exact category name from the list of categories above, a list of keywords from the query, and nothing else.
             """
             
-            let categoryResponse = try await session.respond(to: categoryPrompt)
-            let selectedCategory = categoryResponse.content.trimmingCharacters(in: .whitespacesAndNewlines)
+            let queryResponse: QueryResponse = try await session.respond(to: categoryPrompt, generating: QueryResponse.self).content
+            
+            let selectedCategory = queryResponse.category.trimmingCharacters(in: .whitespacesAndNewlines)
             
             let categoryFilteredThoughts = thoughts.filter { $0.category.name.lowercased() == selectedCategory.lowercased() }
             
-            //3. Search through filtered thoughts and determine relevance
-            var relevantThoughts: [Thought] = [] //Relevant thoughts that will be returned
+            
+            //3. Filter thoughts based on queries
+            var relevantThoughts: [Thought] = []
             
             for thought in categoryFilteredThoughts {
-                let relevancePrompt = """
-                    Search query: \(query)
-                    Thought content: \(thought.content)
-                    
-                    Is this thought relevant to the search query? Consider meaning, not just exact words.
-                    Answer only "yes" or "no".
-                    """
-                
-                let relevanceResponse = try await session.respond(to: relevancePrompt)
-                
-                // If relevant then append to search results
-                if relevanceResponse.content.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() == "yes" {
-                    relevantThoughts.append(thought)
+                for keyword in queryResponse.keywords {
+                    if thought.content.lowercased().contains(keyword.lowercased()) {
+                        relevantThoughts.append(thought)
+                        break
+                    }
                 }
             }
-            
             return relevantThoughts
             
         } catch {
@@ -178,4 +187,14 @@ struct SearchView: View {
 
 #Preview {
     SearchView()
+}
+
+// Foundation Models session return type
+@Generable
+struct QueryResponse {
+    @Guide(description: "The category selected from the category list")
+    var category: String
+    
+    @Guide(description: "List of the most relevant keywords, each one word exactly with no white space, that are relevant to the query")
+    var keywords: [String]
 }
