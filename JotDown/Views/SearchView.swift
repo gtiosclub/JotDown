@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import FoundationModels
 
 enum SearchMode: String, CaseIterable, Identifiable {
     case regexContains = "Regex/Contains"
@@ -18,6 +19,10 @@ struct SearchView: View {
     @State private var results: [Thought] = []
     @State private var isSearching: Bool = false
     @State private var hasSearched: Bool = false
+    // Only searches after .5 seconds of stopped typing
+    @State private var searchDebounceWorkItem: DispatchWorkItem?
+    private let delayToSearch = 0.5
+
 
     var body: some View {
         List(results) { thought in
@@ -51,9 +56,20 @@ struct SearchView: View {
             }
         }
         .onChange(of: searchText) { _, _ in
-            if !searchText.isEmpty {
+            // Cancel any existing pending search
+            searchDebounceWorkItem?.cancel()
+            
+            // If the search text is empty, don’t schedule a new search
+            guard !searchText.isEmpty else { return }
+            
+            let workItem = DispatchWorkItem {
                 performSearch()
             }
+            // Store it so we can cancel if needed
+            searchDebounceWorkItem = workItem
+            
+            // Schedule it to run after 0.5 seconds
+            DispatchQueue.main.asyncAfter(deadline: .now() + delayToSearch, execute: workItem)
         }
         .toolbar {
             ToolbarItem(placement: .principal) {
@@ -83,7 +99,7 @@ struct SearchView: View {
         case .foundationModels:
             isSearching = true
             Task {
-                let r = await searchFoundationModels(query: query, in: thoughts)
+                let r = await FoundationModelSearchService.getRelevantThoughts(query: query, in: thoughts)
                 await MainActor.run {
                     results = r
                     isSearching = false
@@ -104,20 +120,16 @@ struct SearchView: View {
     // MARK: - Search Implementations
 
     private func searchRegexContains(query: String, in thoughts: [Thought]) -> [Thought] {
-        do{
+        do {
             let regex = try NSRegularExpression(pattern: query, options: [.caseInsensitive])
             return thoughts.filter { thought in
-                        let range = NSRange(location: 0, length: thought.content.utf16.count)
-                        return regex.firstMatch(in: thought.content, options: [], range: range) != nil
-                    }
-                } catch {
-                    print("Invalid regex: \(error.localizedDescription)")
-                    return []
-                }
+                let range = NSRange(location: 0, length: thought.content.utf16.count)
+                return regex.firstMatch(in: thought.content, options: [], range: range) != nil
+            }
+        } catch {
+            print("Invalid regex: \(error.localizedDescription)")
+            return []
         }
-
-    private func searchFoundationModels(query: String, in thoughts: [Thought]) async -> [Thought] {
-        thoughts.first.map { [$0] } ?? []
     }
 
     private func searchRAG(query: String, in thoughts: [Thought]) async -> [Thought] {
