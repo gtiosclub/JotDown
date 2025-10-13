@@ -8,7 +8,7 @@ import FoundationModels
 import Foundation
 
 class FoundationModelSearchService {
-    public static func getRelevantThoughts(query: String, in thoughts: [Thought]) async -> [Thought] {
+    static func getRelevantThoughts(query: String, in thoughts: [Thought]) async -> [Thought] {
         let session = FoundationModels.LanguageModelSession()
         
         //1. First try to identify the category of the query
@@ -63,4 +63,14 @@ class FoundationModelSearchService {
             return []
         }
     }
+}
+
+// Foundation Models session return type
+@Generable
+struct QueryResponse {
+    @Guide(description: "The category selected from the category list")
+    var category: String
+    
+    @Guide(description: "List of the most relevant keywords, each one word exactly with no white space, that are relevant to the query")
+    var keywords: [String]
 }

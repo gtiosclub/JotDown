@@ -132,13 +132,3 @@ struct SearchView: View {
 #Preview {
     SearchView()
 }
-
-// Foundation Models session return type
-@Generable
-struct QueryResponse {
-    @Guide(description: "The category selected from the category list")
-    var category: String
-    
-    @Guide(description: "List of the most relevant keywords, each one word exactly with no white space, that are relevant to the query")
-    var keywords: [String]
-}
