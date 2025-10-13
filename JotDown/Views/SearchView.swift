@@ -1,6 +1,5 @@
 import SwiftUI
 import SwiftData
-import NaturalLanguage
 
 enum SearchMode: String, CaseIterable, Identifiable {
     case regexContains = "Regex/Contains"
@@ -123,13 +122,8 @@ struct SearchView: View {
 
     private func searchRAG(query: String, in thoughts: [Thought]) async -> [Thought] {
         let ragSystem = RAGSystem()
-        let queryEmbedding = ragSystem.getEmbedding(for: query)
-        print(queryEmbedding)
-        let results = thoughts.sorted {
-            ragSystem.cosineSimilarity($0.vectorEmbedding, queryEmbedding) > ragSystem.cosineSimilarity($1.vectorEmbedding, queryEmbedding)
-        }.prefix(4)
-        
-        return Array(results)
+        let results = ragSystem.sortThoughts(thoughts: thoughts, query: query, limit: 5)
+        return results
     }
 }
 

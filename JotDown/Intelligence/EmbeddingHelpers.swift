@@ -16,13 +16,13 @@ public class RAGSystem {
         }
         self.embeddingModel = model
     }
-    public func getEmbedding(for text: String) -> [Double] {
+    func getEmbedding(for text: String) -> [Double] {
         let words = text.lowercased().components(separatedBy: .whitespacesAndNewlines)
         let embeddings = words.compactMap { embeddingModel.vector(for: $0) }
         return average(embeddings)
     }
     
-    public func cosineSimilarity(_ v1: [Double], _ v2: [Double]) -> Double {
+    private func cosineSimilarity(_ v1: [Double], _ v2: [Double]) -> Double {
         guard v1.count == v2.count else { return 0 }
         let dotProduct = zip(v1, v2).map(*).reduce(0, +)
         let magnitude1 = sqrt(v1.map { $0 * $0 }.reduce(0, +))
@@ -37,6 +37,13 @@ public class RAGSystem {
             }
         }
         return sum.map { $0 / Double(vectors.count) }
+    }
+    func sortThoughts(thoughts: [Thought], query: String, limit: Int = 5) -> [Thought] {
+        let queryEmbedding = getEmbedding(for: query)
+        let sortedThoughts =  thoughts.sorted {
+            cosineSimilarity($0.vectorEmbedding, queryEmbedding) > cosineSimilarity($1.vectorEmbedding, queryEmbedding)
+        }.prefix(limit)
+        return Array(sortedThoughts)
     }
     
 }
