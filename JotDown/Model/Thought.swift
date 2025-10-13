@@ -20,12 +20,6 @@ class Thought {
         self.dateCreated = Date()
         self.content = content
         self.category = Category(name: "Dummy")
-        guard let model = NLEmbedding.wordEmbedding(for: .english) else {
-                    fatalError("Unable to load embedding model")
-        }
-        let words = content.components(separatedBy: .whitespacesAndNewlines)
-        let embeddings = words.compactMap { model.vector(for: $0) }
-        let averageEmbedding = average(embeddings)
-        self.vectorEmbedding = averageEmbedding
+        self.vectorEmbedding = RAGSystem().getEmbedding(for: content)
     }
 }

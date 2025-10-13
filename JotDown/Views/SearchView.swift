@@ -122,16 +122,13 @@ struct SearchView: View {
     }
 
     private func searchRAG(query: String, in thoughts: [Thought]) async -> [Thought] {
-        guard let model = NLEmbedding.wordEmbedding(for: .english) else {
-            print("Unable to load embeddings model")
-            return thoughts
-        }
-        let words = query.lowercased().components(separatedBy: .whitespacesAndNewlines)
-        let embeddings = words.compactMap { model.vector(for: $0) }
-        let queryEmbedding = average(embeddings)
+        let ragSystem = RAGSystem()
+        let queryEmbedding = ragSystem.getEmbedding(for: query)
+        print(queryEmbedding)
         let results = thoughts.sorted {
-            cosineSimilarity($0.vectorEmbedding, queryEmbedding) > cosineSimilarity($1.vectorEmbedding, queryEmbedding)
+            ragSystem.cosineSimilarity($0.vectorEmbedding, queryEmbedding) > ragSystem.cosineSimilarity($1.vectorEmbedding, queryEmbedding)
         }.prefix(4)
+        
         return Array(results)
     }
 }
