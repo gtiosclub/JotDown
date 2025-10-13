@@ -13,10 +13,12 @@ class Thought {
     var dateCreated: Date
     var content: String
     var category: Category
+    var vectorEmbedding: [Double]
         
     init(content: String) {
         self.dateCreated = Date()
         self.content = content
         self.category = Category(name: "Dummy")
+        self.vectorEmbedding = RAGSystem().getEmbedding(for: content)
     }
 }

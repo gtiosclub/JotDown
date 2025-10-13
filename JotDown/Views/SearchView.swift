@@ -133,7 +133,9 @@ struct SearchView: View {
     }
 
     private func searchRAG(query: String, in thoughts: [Thought]) async -> [Thought] {
-        thoughts.first.map { [$0] } ?? []
+        let ragSystem = RAGSystem()
+        let results = ragSystem.sortThoughts(thoughts: thoughts, query: query, limit: 5)
+        return results
     }
 }
 
