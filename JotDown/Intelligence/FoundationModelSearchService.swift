@@ -76,8 +76,13 @@ class FoundationModelSearchService {
                 }
                 let queryResponsePrompt = """
                 Given the search query "\(query)" and these are the available relevant thoughts ["\(relevantThoughtsContent.joined(separator: ", "))"]
-                Find the thought that answers the query and form an answer from the thought's content and return the response to the query.
+                Infer the information in the thoughts to respond to the query. Try not to use the exact text from the toughts unless necessary.
                 Summarize in one short sentence.
+
+                Eg:
+                Relevant thoughts: Dogs are cool, Cats are mid, Mouse are bad
+                Query: Which animal is the best?
+                Response: Dogs are the best animal.
                 """
                 let queryResponse = try await session.respond(to: queryResponsePrompt, generating: GeneratedResponse.self)
                 return queryResponse.content.response
@@ -93,7 +98,7 @@ class FoundationModelSearchService {
 //Generated Response Type
 @Generable
 struct GeneratedResponse {
-    @Guide(description: "Clear, concise one sentence summary response to the query")
+    @Guide(description: "Clear, concise one sentence answer to the query, without any text related to how you found the answer.")
     var response: String
 }
 

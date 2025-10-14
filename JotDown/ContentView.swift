@@ -53,6 +53,13 @@ struct ContentView: View {
             .tabItem {
                 Label("Search", systemImage: "magnifyingglass")
             }
+            NavigationStack {
+                CombinedSearchView()
+                    .navigationTitle("Smart search")
+            }
+            .tabItem {
+                Label("Smart search", systemImage: "sparkle.magnifyingglass")
+            }
         }
     }
 }

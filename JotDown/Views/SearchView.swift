@@ -25,17 +25,23 @@ struct SearchView: View {
 
 
     var body: some View {
-        List(results) { thought in
-            VStack(alignment: .leading) {
-                HStack {
-                    Text(thought.dateCreated, style: .date)
-                    Spacer()
-                    Text(thought.category.name)
+        List {
+//            NavigationLink(destination: CombinedSearchView()) {
+//                Text("Combined search")
+//            }
+            
+            ForEach(results) { thought in
+                VStack(alignment: .leading) {
+                    HStack {
+                        Text(thought.dateCreated, style: .date)
+                        Spacer()
+                        Text(thought.category.name)
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    
+                    Text(thought.content)
                 }
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                
-                Text(thought.content)
             }
         }
         .listStyle(.plain)
@@ -45,7 +51,7 @@ struct SearchView: View {
             prompt: "Search thoughts"
         )
         .overlay {
-            if searchText.isEmpty {
+            if searchText.isEmpty && !isSearching{
                 ContentUnavailableView(
                     "Search",
                     systemImage: "magnifyingglass",
@@ -107,13 +113,8 @@ struct SearchView: View {
             }
         case .rag:
             isSearching = true
-            Task {
-                let r = await searchRAG(query: query, in: thoughts)
-                await MainActor.run {
-                    results = r
-                    isSearching = false
-                }
-            }
+            results = searchRAG(query: query, in: thoughts)
+            isSearching = false
         }
     }
     
@@ -131,7 +132,7 @@ struct SearchView: View {
         }
     }
     
-    private func searchRAG(query: String, in thoughts: [Thought]) async -> [Thought] {
+    private func searchRAG(query: String, in thoughts: [Thought]) -> [Thought] {
         let ragSystem = RAGSystem()
         let results = ragSystem.sortThoughts(thoughts: thoughts, query: query, limit: 5)
         return results
