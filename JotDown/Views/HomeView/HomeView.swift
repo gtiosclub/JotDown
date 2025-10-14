@@ -25,20 +25,25 @@ struct HomeView: View {
     }()
     
     var body: some View {
-        List {
-            ForEach(thoughts) { thought in
-                HStack {
-                    Text(thought.content)
-                    Spacer()
-                    VStack {
-                        Text(HomeView.dateFormatter.string(from: thought.dateCreated)).font(.caption)
-                        Text(HomeView.timeFormatter.string(from: thought.dateCreated)).font(.caption)
-                        Text(thought.category.name)
-                    }
-                }
-            }.onDelete(perform: deleteNote)
+        VStack {
+            HeaderHomeView()
+            ThoughtCardsList()
+            FooterHomeView()
         }
-        .navigationTitle("Thoughts")
+        
+//        List {
+//            ForEach(thoughts) { thought in
+//                HStack {
+//                    Text(thought.content)
+//                    Spacer()
+//                    VStack {
+//                        Text(HomeView.dateFormatter.string(from: thought.dateCreated)).font(.caption)
+//                        Text(HomeView.timeFormatter.string(from: thought.dateCreated)).font(.caption)
+//                        Text(thought.category.name)
+//                    }
+//                }
+//            }.onDelete(perform: deleteNote)
+//        }
     }
     
     private func deleteNote(at offsets: IndexSet) {

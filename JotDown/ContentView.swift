@@ -18,18 +18,6 @@ struct ContentView: View {
         TabView {
             NavigationStack {
                 HomeView()
-                    .toolbar {
-                        ToolbarItem(placement: .cancellationAction) {
-                            Button("Profile", systemImage: "gear") {
-                                isShowingProfileView = true
-                            }
-                        }
-                        ToolbarItem() {
-                            Button("Add Thought", systemImage: "plus") {
-                                isShowingThoughtEntry = true
-                            }
-                        }
-                    }
             }
             .sheet(isPresented: $isShowingProfileView) {
                 ProfileView()
