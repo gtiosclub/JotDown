@@ -18,5 +18,14 @@ struct JotDownShortcuts: AppShortcutsProvider {
             shortTitle: "New Thought",
             systemImageName: "square.and.pencil"
         )
+        AppShortcut(
+            intent: ReadThoughtsByCategoryShortcut(),
+            phrases: [
+                "Read thoughts from \(.applicationName)",
+                "Read thoughts in \(.applicationName)"
+            ],
+            shortTitle: "Read Thoughts by Category",
+            systemImageName: "book.pages"
+        )
     }
 }

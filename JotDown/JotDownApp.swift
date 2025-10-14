@@ -14,16 +14,20 @@ struct JotDownApp: App {
     let container: ModelContainer
 
     init() {
-        let modelContainer = try! ModelContainer(
-            for: User.self,
-            Thought.self,
-            Category.self,
-            configurations: .init()
-        )
+        let configuration = ModelConfiguration(groupContainer: .identifier("group.com.gtiosclub.JotDown"))
+        
+        do {
+            let modelContainer = try ModelContainer(
+                for: User.self, Thought.self, Category.self,
+                configurations: configuration
+            )
 
-        AppDependencyManager.shared.add(dependency: modelContainer)
-
-        self.container = modelContainer
+            AppDependencyManager.shared.add(dependency: modelContainer)
+            self.container = modelContainer
+            
+        } catch {
+            fatalError("Failed to initialize model container: \(error)")
+        }
     }
 
     var body: some Scene {

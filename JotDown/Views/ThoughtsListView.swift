@@ -48,3 +48,7 @@ struct ThoughtsListView: View {
         }
     }
 }
+
+#Preview {
+    ThoughtsListView()
+}
