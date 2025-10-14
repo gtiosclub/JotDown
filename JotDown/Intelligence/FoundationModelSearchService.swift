@@ -63,6 +63,38 @@ class FoundationModelSearchService {
             return []
         }
     }
+    
+    static func queryResponseGenerator(query: String, in relevantThoughts: [Thought]) async -> String {
+            let session = LanguageModelSession()
+            var relevantThoughtsContent: [String] = []
+            var i: Int = 1
+            do  {
+                for thought in relevantThoughts{
+                    let contents = "Thought \(i):\(thought.content)"
+                    i+=1
+                    relevantThoughtsContent.append(contents)
+                }
+                let queryResponsePrompt = """
+                Given the search query "\(query)" and these are the available relevant thoughts ["\(relevantThoughtsContent.joined(separator: ", "))"]
+                Find the thought that answers the query and form an answer from the thought's content and return the response to the query.
+                Summarize in one short sentence.
+                """
+                let queryResponse = try await session.respond(to: queryResponsePrompt, generating: GeneratedResponse.self)
+                return queryResponse.content.response
+            } catch {
+                print("Error in Foundation Models search: \(error)")
+                return ""
+            }
+        }
+}
+
+
+
+//Generated Response Type
+@Generable
+struct GeneratedResponse {
+    @Guide(description: "Clear, concise one sentence summary response to the query")
+    var response: String
 }
 
 // Foundation Models session return type
