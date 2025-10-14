@@ -18,12 +18,16 @@ struct ProfileView: View {
     @State private var isShowingAddCategoriesSheet: Bool = false
     @State private var newCategoryName: String = ""
     private var activeCategories: [Category] {
-        categories.filter{$0.isActive}
-        //        Category.dummyCategories.filter{$0.isActive}
+        categories
+            .filter{$0.isActive}
+            .sorted { lhs, rhs in
+                if lhs.name == "Other" {return false}
+                if rhs.name == "Other" {return true}
+                return lhs.name < rhs.name
+            }
     }
     private var inactiveCategories: [Category] {
         categories.filter{!$0.isActive}
-        //        Category.dummyCategories.filter{!$0.isActive}
     }
     
     var body: some View {
@@ -48,18 +52,21 @@ struct ProfileView: View {
                 Section {
                     ForEach(activeCategories) { category in
                         Text(category.name)
-                            .swipeActions(allowsFullSwipe: true) {
-                                Button(role: .destructive, action: {
-                                    withAnimation {
-                                        category.isActive.toggle()
-                                    }
-                                }) {
-                                    Text("Archive")
-                                }
+                            .foregroundColor(category.name == "Other" ? .gray : .primary)
+                            .swipeActions (allowsFullSwipe: true){
+                                 if category.name != "Other" {
+                                     Button(role: .destructive) {
+                                         withAnimation {
+                                             category.isActive.toggle()
+                                         }
+                                     } label: {
+                                         Label("Archive", systemImage: "archivebox.fill")
+                                     }
+                                 }
                             }
                     }
                     NavigationLink(destination: ArchivedCategoriesView(cateogries: inactiveCategories)) {
-                        Text("\(inactiveCategories.count) inactive \(String(inactiveCategories.count).last == "1" ? "category" : "categories")")
+                        Text("^[\(inactiveCategories.count) inactive category](inflect=true)")
                     }
                     .disabled(inactiveCategories.count == 0)
                 } header: {
@@ -83,10 +90,18 @@ struct ProfileView: View {
                                 if let user = user {
                                     let generator = CategoryGenerator()
                                     let newCategories = try await generator.generateCategories(using: user.bio)
+                                    
                                     for category in categories {
-                                        category.isActive = false
+                                        if category.name != "Other" {
+                                            category.isActive = false
+                                        }
                                     }
+                                    
+                                    let hasOther = categories.contains {$0.name == "Other"}
                                     for newCategory in newCategories {
+                                        if (newCategory.name == "Other" && hasOther){
+                                            continue
+                                        }
                                         context.insert(newCategory)
                                     }
                                     
@@ -99,9 +114,6 @@ struct ProfileView: View {
                         }
                     }
                 }
-                
-                
-                
             }
             
             .navigationTitle("Profile")
