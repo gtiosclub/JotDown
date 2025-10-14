@@ -23,11 +23,9 @@ struct ProfileView: View {
                 if rhs.name == "Other" {return true}
                 return lhs.name < rhs.name
             }
-        //        Category.dummyCategories.filter{$0.isActive}
     }
     private var inactiveCategories: [Category] {
         categories.filter{!$0.isActive}
-        //        Category.dummyCategories.filter{!$0.isActive}
     }
     
     var body: some View {
@@ -51,24 +49,22 @@ struct ProfileView: View {
                 
                 Section {
                     ForEach(activeCategories) { category in
-                        if category.name == "Other" {
-                            Text(category.name)
-                                .foregroundColor(.gray)
-                        } else {
-                            Text(category.name)
-                                .swipeActions(allowsFullSwipe: true) {
-                                    Button(role: .destructive) {
-                                        withAnimation {
-                                            category.isActive.toggle()
-                                        }
-                                    } label: {
-                                        Text("Archive")
-                                    }
-                                }
-                        }
+                        Text(category.name)
+                            .foregroundColor(category.name == "Other" ? .gray : .primary)
+                            .swipeActions (allowsFullSwipe: true){
+                                 if category.name != "Other" {
+                                     Button(role: .destructive) {
+                                         withAnimation {
+                                             category.isActive.toggle()
+                                         }
+                                     } label: {
+                                         Label("Archive", systemImage: "archivebox.fill")
+                                     }
+                                 }
+                            }
                     }
                     NavigationLink(destination: ArchivedCategoriesView(cateogries: inactiveCategories)) {
-                        Text("\(inactiveCategories.count) inactive \(inactiveCategories.count == 1 ? "category" : "categories")")
+                        Text("^[\(inactiveCategories.count) inactive category](inflect=true)")
                     }
                     .disabled(inactiveCategories.count == 0)
                 } header: {
@@ -110,9 +106,6 @@ struct ProfileView: View {
                         }
                     }
                 }
-                
-                
-                
             }
             
             .navigationTitle("Profile")
