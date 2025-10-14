@@ -61,7 +61,6 @@ struct ThoughtsEntryView: View {
 
                         if isSubmitting {
                             ProgressView()
-                                .progressViewStyle(CircularProgressViewStyle())
                         }
                     }
 
