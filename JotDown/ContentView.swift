@@ -17,7 +17,7 @@ struct ContentView: View {
     var body: some View {
         TabView {
             NavigationStack {
-                ThoughtsListView()
+                HomeView()
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
                             Button("Profile", systemImage: "gear") {
@@ -46,13 +46,6 @@ struct ContentView: View {
                 Label("Thoughts", systemImage: "list.bullet")
             }
 
-            NavigationStack {
-                SearchView()
-                    .navigationTitle("Search")
-            }
-            .tabItem {
-                Label("Search", systemImage: "magnifyingglass")
-            }
             NavigationStack {
                 SearchView()
                     .navigationTitle("Search")

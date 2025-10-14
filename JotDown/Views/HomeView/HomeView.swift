@@ -1,5 +1,5 @@
 //
-//  ThoughtsListView.swift
+//  HomeView.swift
 //  JotDown
 //
 //  Created by Sankaet Cheemalamarri on 9/22/25.
@@ -8,7 +8,7 @@
 import SwiftData
 import SwiftUI
 
-struct ThoughtsListView: View {
+struct HomeView: View {
     @Query(sort: \Thought.dateCreated, order: .reverse) var thoughts: [Thought]
     @Environment(\.modelContext) private var context
 
@@ -31,8 +31,8 @@ struct ThoughtsListView: View {
                     Text(thought.content)
                     Spacer()
                     VStack {
-                        Text(ThoughtsListView.dateFormatter.string(from: thought.dateCreated)).font(.caption)
-                        Text(ThoughtsListView.timeFormatter.string(from: thought.dateCreated)).font(.caption)
+                        Text(HomeView.dateFormatter.string(from: thought.dateCreated)).font(.caption)
+                        Text(HomeView.timeFormatter.string(from: thought.dateCreated)).font(.caption)
                         Text(thought.category.name)
                     }
                 }
