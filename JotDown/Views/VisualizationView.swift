@@ -12,22 +12,28 @@ struct VisualizationView: View {
     // Define the zoom limits
     let minZoom: CGFloat = 0.5
     let maxZoom: CGFloat = 3.0
-    let categories = ["Foo", "Baz", "Bar"]
-
+    
+    //Mark data
+    let categories = ["Foo", "Baz", "Bar", "Notes", "Ideas"]
+    
     var body: some View {
         ScrollView([.horizontal, .vertical]) {
             ZStack {
                 GridBackground()
-                Circle()
-                    .stroke(Color.green, lineWidth: 1) // outline color + width
-                    .frame(width: 400, height: 400)
-                
-                Text("\(categories[0])")
-                    .padding()
-                    .background(Color.yellow)
-                    .cornerRadius(8)
-                    .shadow(radius: 5)
-                    .position(x: 2500, y: 2500)
+                GeometryReader { geo in
+                    let width = geo.safeAreaInsets.leading + geo.size.width + geo.safeAreaInsets.trailing
+                    let height = geo.safeAreaInsets.top + geo.size.height + geo.safeAreaInsets.bottom
+                    let radius = min(width, height) * 0.5
+                    let center = CGPoint(x: width / 2, y: height / 2)
+                    
+                    Circle()
+                        .stroke(Color.green, lineWidth: 1) // outlinecolor + width
+                        .frame(width: radius * 2, height: radius * 2)
+                        .position(center)
+                    
+                    drawSectors(notes: categories, center: center,radius: radius)
+                }
+                .frame(width: 400, height: 400)
             }
             // 2. APPLY THE ZOOM
             .scaleEffect(zoomLevel) // This modifier scales the entire ZStack
@@ -65,6 +71,75 @@ struct VisualizationView: View {
     }
 }
 
+func drawSectors(notes: [String], center: CGPoint, radius: CGFloat) -> some View {
+    let n = notes.count
+    
+    return ForEach(0..<n, id: \.self) { k in
+        let (start, end, mid) = anglesForSector(index: k, total: n)
+        
+        // 1️⃣ Radial line at start of sector
+        Path { path in
+            path.move(to: center)
+            path.addLine(to: point(on: center, radius: radius, angle: start))
+        }
+        .stroke(Color.green.opacity(0.8), lineWidth: 1)
+        
+        // 2️⃣ Radial line at end of sector
+        Path { path in
+            path.move(to: center)
+            path.addLine(to: point(on: center, radius: radius, angle: end))
+        }
+        .stroke(Color.green.opacity(0.8), lineWidth: 1)
+        
+        // 3️⃣ Optional: fill sector with transparent color (makes it easier to see the slice)
+        Path { path in
+            path.move(to: center)
+            path.addArc(center: center,
+                        radius: radius,
+                        startAngle: Angle(radians: start),
+                        endAngle: Angle(radians: end),
+                        clockwise: false)
+            path.closeSubpath()
+        }
+        .fill(Color.green.opacity(0.05))
+        
+        // 4️⃣ Label in the center of sector
+        // Place it at 50% radius along the mid-angle for better centering
+        let labelPoint = point(on: center, radius: radius * 0.5, angle: mid)
+        Text(notes[k])
+            .font(.caption)
+            .padding(6)
+            .background(Color.yellow.opacity(0.85))
+            .cornerRadius(6)
+            .shadow(radius: 2)
+            .position(labelPoint)
+    }
+}
+
+
+// Returns (start, end, mid) angles in radians for sector `index`
+func anglesForSector(index: Int, total: Int) -> (Double,Double, Double) {
+    let step = 2 * .pi / Double(total)
+    let start = -Double.pi / 2 + Double(index) * step //start at top
+    let end = start + step
+    let mid = (start + end) / 2
+    return (start, end, mid)
+}
+
+// Converts polar coordinates to a CGPoint
+func point(on center: CGPoint, radius: CGFloat, angle:Double) -> CGPoint {
+    CGPoint(
+        x: center.x + radius * CGFloat(cos(angle)),
+        y: center.y + radius * CGFloat(sin(angle))
+    )
+}
+
+// Keeps label text upright
+func labelRotation(_ midAngle: Double) -> Double {
+    var deg = midAngle * 180 / .pi
+    if deg > 90 && deg < 270 { deg += 180 }
+    return deg
+}
 
 struct GridBackground: View {
     // Define the properties for our grid
