@@ -13,6 +13,7 @@ struct ContentView: View {
     @State private var isShowingThoughtEntry = true
     @Environment(\.modelContext) private var context
     @Query var users: [User]
+    @Query var categories: [Category]
     
     var body: some View {
         TabView {
@@ -46,13 +47,11 @@ struct ContentView: View {
                 Label("Thoughts", systemImage: "list.bullet")
             }
 
-            NavigationStack {
-                SearchView()
-                    .navigationTitle("Search")
-            }
-            .tabItem {
-                Label("Search", systemImage: "magnifyingglass")
-            }
+            DashboardView()
+                .tabItem {
+                    Label("Dashboard", systemImage: "square.grid.2x2.fill")
+                }
+            
             NavigationStack {
                 SearchView()
                     .navigationTitle("Search")
