@@ -12,13 +12,17 @@ struct VisualizationView: View {
     // Define the zoom limits
     let minZoom: CGFloat = 0.5
     let maxZoom: CGFloat = 3.0
+    let categories = ["Foo", "Baz", "Bar"]
 
     var body: some View {
         ScrollView([.horizontal, .vertical]) {
             ZStack {
                 GridBackground()
+                Circle()
+                    .stroke(Color.green, lineWidth: 1) // outline color + width
+                    .frame(width: 400, height: 400)
                 
-                Text("My Note")
+                Text("\(categories[0])")
                     .padding()
                     .background(Color.yellow)
                     .cornerRadius(8)
@@ -93,14 +97,6 @@ struct GridBackground: View {
         .frame(width: size, height: size)
     }
 }
-
-struct Circle: View {
-    
-    var body: some View {
-        
-    }
-}
-
 
 #Preview {
     VisualizationView()
