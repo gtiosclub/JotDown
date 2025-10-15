@@ -6,25 +6,44 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct NoteCategoryView: View {
-    var categoryName: String
-    var emoji: String
-    var numberOfNotes: Int
-    var noteSnippets: [String]
+    let category: Category
+    @Query var thoughts: [Thought]
+
+    // initializer to set up the filter for the @Query
+    init(category: Category) {
+        self.category = category
+        let categoryName = category.name
+        // filter for category name
+        let predicate = #Predicate<Thought> { thought in
+            thought.category.name == categoryName
+        }
+        // descriptor sorts thoughts by date - newest first since only display newest 3 thoughts
+        let sortDescriptor = SortDescriptor(\Thought.dateCreated, order: .reverse)
+
+        // initialize the @Query with the filter and sort order
+        self._thoughts = Query(filter: predicate, sort: [sortDescriptor], transaction: Transaction(animation: .default))
+    }
+
+    // get the content of the 3 newest thoughts
+    private var noteSnippets: [String] {
+        // take first 3 thoughts from the query result
+        let recentThoughts = Array(thoughts.prefix(3))
+        return recentThoughts.map { $0.content }
+    }
 
     @ViewBuilder
     private func noteCard(text: String) -> some View {
         ZStack {
-            // The solid grey background of the card.
+            //background
             RoundedRectangle(cornerRadius: 15)
                 .fill(Color(.systemGray6))
-
-            // The white border, drawn on top of the background.
+            // border
             RoundedRectangle(cornerRadius: 15)
                 .stroke(Color.white, lineWidth: 10)
-
-            // The text is overlaid on top of the card.
+            // text
             Text(text)
                 .font(.system(size: 12, weight: .medium))
                 .padding(15)
@@ -36,11 +55,11 @@ struct NoteCategoryView: View {
 
     var body: some View {
         VStack(alignment: .center, spacing: 12) {
-            // MARK: - Stack of Notes
             ZStack {
-                // Back Card (Right)
-                if noteSnippets.count > 2 {
-                    noteCard(text: noteSnippets[2])
+                // TO DO: Figure out if we want to only show x cards if x < 3 or just have blank cards
+                // Back Card (Right) - 3rd newest note
+                if thoughts.count > 2 {
+                    noteCard(text: thoughts[2].content)
                         .rotationEffect(.degrees(10))
                         .offset(x: 50, y: -50)
                 } else {
@@ -49,9 +68,9 @@ struct NoteCategoryView: View {
                         .offset(x: 50, y: -50)
                 }
 
-                // Middle Card (Left)
-                if noteSnippets.count > 1 {
-                    noteCard(text: noteSnippets[1])
+                // Middle Card (Left) - 2nd newest note
+                if thoughts.count > 1 {
+                    noteCard(text: thoughts[1].content)
                         .rotationEffect(.degrees(-10))
                         .offset(x: -50, y: -75)
                 } else {
@@ -59,12 +78,12 @@ struct NoteCategoryView: View {
                         .rotationEffect(.degrees(-10))
                         .offset(x: -50, y: -75)
                 }
-                
-                // Front Card (Center)
-                if !noteSnippets.isEmpty {
-                    noteCard(text: noteSnippets[0])
+            
+                // Front Card (Center) - Newest note
+                if let newestThought = thoughts.first {
+                    noteCard(text: newestThought.content)
                 } else {
-                    noteCard(text: "...")
+                    noteCard(text: "")
                 }
             }
             .scaleEffect(0.8)
@@ -72,14 +91,15 @@ struct NoteCategoryView: View {
             .shadow(color: .black.opacity(0.1), radius: 5, y: 4)
             .frame(height: 150)
 
-            // MARK: - Category Info
             HStack(spacing: 4) {
-                Text(categoryName)
+                Text(category.name)
                     .font(.headline)
-                Text(emoji)
+                // Text(category.emoji)
+                // TO DO: have foundation models create an emoji for the category
             }
 
-            Text("\(numberOfNotes) notes")
+            // Display the total number of thoughts in this category
+            Text("\(thoughts.count) notes")
                 .font(.caption)
                 .fontWeight(.medium)
                 .foregroundStyle(.secondary)
@@ -88,22 +108,5 @@ struct NoteCategoryView: View {
                 .background(Color.gray.opacity(0.15))
                 .clipShape(Capsule())
         }
-    }
-}
-
-struct NoteCategoryView_Previews: PreviewProvider {
-    static var previews: some View {
-        NoteCategoryView(
-            categoryName: "Recipes",
-            emoji: "🥗",
-            numberOfNotes: 10,
-            noteSnippets: [
-                "i just realized i could make ice cream mochi but with mango sticky rice inside!!!",
-                "remember to toast the rice flour first",
-                "try coconut milk powder for firmer texture"
-            ]
-        )
-        .padding()
-        .previewLayout(.sizeThatFits)
     }
 }
