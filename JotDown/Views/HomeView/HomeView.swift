@@ -12,6 +12,7 @@ struct HomeView: View {
     @Query(sort: \Thought.dateCreated, order: .reverse) var thoughts: [Thought]
     @Environment(\.modelContext) private var context
     @State var text: String = ""
+    @State private var selectedIndex: Int? = 0
     @Binding var selectedTab: Int
     
     var body: some View {
@@ -19,9 +20,9 @@ struct HomeView: View {
             
             Spacer()
             
-            HeaderHomeView()
-            ThoughtCardsList(thoughts: thoughts, text: $text)
-            FooterHomeView()
+            HeaderHomeView(thoughtInput: $text)
+            ThoughtCardsList(thoughts: thoughts, text: $text, selectedIndex: $selectedIndex)
+            FooterHomeView(noteCount: thoughts.count, date: selectedIndex != nil && selectedIndex != 0 ? thoughts[selectedIndex! - 1].dateCreated : Date())
             
             Spacer()
             

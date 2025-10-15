@@ -23,10 +23,7 @@ struct ContentView: View {
                     HomeView(selectedTab: $selectedTab)
                 }
                 .sheet(isPresented: $isShowingProfileView) {
-                    ProfileView()
-                }
-                .sheet(isPresented: $isShowingThoughtEntry) {
-                    ThoughtsEntryView()
+                    ProfileView(selectedTab: $selectedTab)
                 }
                 .onAppear {
                     if users.isEmpty {
@@ -36,12 +33,12 @@ struct ContentView: View {
                 }
             case 1:
                 NavigationStack {
-                    SearchView()
+                    SearchView(selectedTab: $selectedTab)
                         .navigationTitle("Search")
                 }
             case 2:
                 NavigationStack {
-                    ProfileView()
+                    ProfileView(selectedTab: $selectedTab)
                 }
             default:
                 NavigationStack {

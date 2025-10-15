@@ -6,8 +6,15 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct HeaderHomeView: View {
+    @Query private var categories: [Category]
+    @Binding var thoughtInput: String
+    @State private var isSubmitting: Bool = false
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
+    
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: -12) {
@@ -46,16 +53,35 @@ struct HeaderHomeView: View {
                     .padding(.vertical, 7)
                     .padding(.trailing, 13)
                     
-                    Button {
-                        //Implement functionality
-                    } label: {
-                        Image(systemName: "plus")
-                            .fontWeight(.light)
-                            .font(.system(size: 30))
-                            .foregroundStyle(Color(red: 109/255, green: 134/255, blue: 166/255))
-                            .padding(.vertical, 10)
+                    if isSubmitting {
+                        ProgressView()
                     }
+                    else {
+                        Button {
+                            Task {
+                                await MainActor.run { isSubmitting = true }
+                                defer {
+                                    Task { await MainActor.run { isSubmitting = false } }
+                                }
 
+                                let thought = Thought(content: thoughtInput)
+
+                                try? await Categorizer()
+                                    .categorizeThought(thought, categories: categories)
+
+                                modelContext.insert(thought)
+                                dismiss()
+                                
+                                thoughtInput = ""
+                            }
+                        } label: {
+                            Image(systemName: "plus")
+                                .fontWeight(.light)
+                                .font(.system(size: 30))
+                                .foregroundStyle(Color(red: 109/255, green: 134/255, blue: 166/255))
+                                .padding(.vertical, 10)
+                        }
+                    }
                 }
             }
             

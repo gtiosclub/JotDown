@@ -10,12 +10,6 @@ struct ThoughtCard: View {
     var thought: Thought
     @Environment(\.modelContext) private var context
     
-    private static let dateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "M/dd/yyyy"
-        return formatter
-    }()
-    
     private static let timeFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "h:mm a"
@@ -27,6 +21,7 @@ struct ThoughtCard: View {
            RoundedRectangle(cornerRadius: 30)
                .fill(Color.white.opacity(0.61))
                .frame(width: 251, height: 436)
+//               .glassEffect()
                .shadow(color: Color.black.opacity(0.05), radius: 7.7, x: 0, y: 2)
            
            VStack(alignment: .leading) {

@@ -8,11 +8,20 @@
 import SwiftUI
 
 struct FooterHomeView: View {
+    var noteCount: Int
+    var date: Date
+    
+    private static let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEE, MMM d"
+        return formatter
+    }()
+    
     var body: some View {
         HStack(alignment: .bottom) {
           
             VStack(spacing: 0) {
-                Text("31")
+                Text("\(noteCount)")
                   .font(Font.custom("SF Pro", size: 36))
                   .multilineTextAlignment(.center)
                   .foregroundColor(.white)
@@ -25,7 +34,7 @@ struct FooterHomeView: View {
             Spacer()
             
             VStack {
-                Text("Sun, Oct 12")
+                Text(Calendar.current.isDateInToday(date) ? "Today" : FooterHomeView.dateFormatter.string(from: date))
                   .font(Font.custom("SF Pro", size: 36))
                   .multilineTextAlignment(.center)
                   .foregroundColor(.white)
