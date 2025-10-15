@@ -26,6 +26,8 @@ struct ThoughtCard: View {
         ZStack(alignment: .top) {
            RoundedRectangle(cornerRadius: 30)
                .fill(Color.white.opacity(0.61))
+               .frame(width: 251, height: 436)
+               .shadow(color: Color.black.opacity(0.05), radius: 7.7, x: 0, y: 2)
            
            VStack(alignment: .leading) {
                Text(thought.content)
@@ -66,8 +68,8 @@ struct ThoughtCard: View {
                }
            }
            .padding(EdgeInsets(top: 23, leading: 14, bottom: 23, trailing: 14))
-           .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+           .frame(width: 251, height: 436)
        }
-       .frame(width: 251, height: 436)
+       .frame(width: 251, height: 472)
     }
 }

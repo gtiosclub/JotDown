@@ -7,12 +7,14 @@
 import SwiftUI
 
 struct WritableThoughtCard: View {
-    @State var text: String = ""
+    @Binding var text: String
     
     var body: some View {
         ZStack(alignment: .top) {
            RoundedRectangle(cornerRadius: 30)
                .fill(Color.white.opacity(0.61))
+               .frame(width: 337, height: 436)
+               .shadow(color: Color.black.opacity(0.05), radius: 7.7, x: 0, y: 2)
            
            VStack(alignment: .leading) {
                ZStack(alignment: .topLeading) {
@@ -27,9 +29,9 @@ struct WritableThoughtCard: View {
                }
            }
            .padding(EdgeInsets(top: 28, leading: 33, bottom: 28, trailing: 33))
-           .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+           .frame(width: 337, height: 436)
        }
-       .frame(width: 337, height: 436)
+       .frame(width: 337, height: 472)
        .padding(EdgeInsets(top: 0, leading: 30, bottom: 0, trailing: 0))
     }
 }

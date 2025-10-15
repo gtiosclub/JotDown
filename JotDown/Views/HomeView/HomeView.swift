@@ -11,11 +11,12 @@ import SwiftUI
 struct HomeView: View {
     @Query(sort: \Thought.dateCreated, order: .reverse) var thoughts: [Thought]
     @Environment(\.modelContext) private var context
+    @State var text: String = ""
     
     var body: some View {
         VStack {
             HeaderHomeView()
-            ThoughtCardsList(thoughts: thoughts)
+            ThoughtCardsList(thoughts: thoughts, text: $text)
             FooterHomeView()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
