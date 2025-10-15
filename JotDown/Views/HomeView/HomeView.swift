@@ -11,45 +11,14 @@ import SwiftUI
 struct HomeView: View {
     @Query(sort: \Thought.dateCreated, order: .reverse) var thoughts: [Thought]
     @Environment(\.modelContext) private var context
-
-    private static let dateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "M/dd/yyyy"
-        return formatter
-    }()
-    
-    private static let timeFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "h:mm a"
-        return formatter
-    }()
     
     var body: some View {
         VStack {
             HeaderHomeView()
-            ThoughtCardsList()
+            ThoughtCardsList(thoughts: thoughts)
             FooterHomeView()
         }
-        
-//        List {
-//            ForEach(thoughts) { thought in
-//                HStack {
-//                    Text(thought.content)
-//                    Spacer()
-//                    VStack {
-//                        Text(HomeView.dateFormatter.string(from: thought.dateCreated)).font(.caption)
-//                        Text(HomeView.timeFormatter.string(from: thought.dateCreated)).font(.caption)
-//                        Text(thought.category.name)
-//                    }
-//                }
-//            }.onDelete(perform: deleteNote)
-//        }
-    }
-    
-    private func deleteNote(at offsets: IndexSet) {
-        for offset in offsets {
-            let itemToDelete = thoughts[offset]
-            context.delete(itemToDelete)
-        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.blue.opacity(0.3))
     }
 }
