@@ -18,18 +18,7 @@ struct HeaderHomeView: View {
     
     var body: some View {
         HStack {
-            VStack(alignment: .leading, spacing: -12) {
-                Text("jot")
-                    .font(
-                        Font.custom("SF Pro", size: 48)
-                    )
-                Text("down")
-                  .font(
-                    Font.custom("SF Pro", size: 48)
-                  )
-            }
-            .shadow(color: .black.opacity(0.04), radius: 4.8, x: 0, y: 4)
-            .foregroundStyle(.white.opacity(0.82))
+            JotDownLogo()
             
             Spacer()
             
@@ -42,57 +31,30 @@ struct HeaderHomeView: View {
                         Text("edit")
                             .font(Font.custom("SF Pro", size: 15))
                             .foregroundColor(Color(red: 0.42, green: 0.56, blue: 0.75))
-                            .padding(.horizontal, 17)
-                            .padding(.vertical, 8)
-                            .background {
-                                RoundedRectangle(cornerRadius: 15)
-                                    
-                                    .glassEffect()
-                                    .foregroundStyle(Color.white.opacity(0.39))
-                            }
+                            .padding(.horizontal, 4)
                     }
+                    .buttonBorderShape(.capsule)
+                    .buttonStyle(.glass)
                     .padding(.vertical, 7)
                     .padding(.trailing, 13)
                     
                     if isSubmitting {
                         ProgressView()
-                    }
-                    else {
-                        if selectedIndex != nil && selectedIndex != 0 {
-                            Button {
+                    } else {
+                        Button {
+                            if selectedIndex != nil && selectedIndex != 0 {
                                 selectedIndex = 0;
-                            } label: {
-                                Image(systemName: "plus")
-                                    .fontWeight(.light)
-                                    .font(.system(size: 30))
-                                    .foregroundStyle(Color(red: 109/255, green: 134/255, blue: 166/255))
-                                    .padding(.vertical, 10)
-                            }
-                        } else {
-                            Button {
+                            } else {
                                 Task {
-                                    await MainActor.run { isSubmitting = true }
-                                    defer {
-                                        Task { await MainActor.run { isSubmitting = false } }
-                                    }
-
-                                    let thought = Thought(content: thoughtInput)
-
-                                    try? await Categorizer()
-                                        .categorizeThought(thought, categories: categories)
-
-                                    modelContext.insert(thought)
-                                    dismiss()
-                                    
-                                    thoughtInput = ""
+                                    try await addThought()
                                 }
-                            } label: {
-                                Image(systemName: "checkmark")
-                                    .fontWeight(.light)
-                                    .font(.system(size: 30))
-                                    .foregroundStyle(Color(red: 109/255, green: 134/255, blue: 166/255))
-                                    .padding(.vertical, 10)
                             }
+                        } label: {
+                            Image(systemName: selectedIndex != 0 ? "plus" : "checkmark")
+                                .fontWeight(.light)
+                                .font(.system(size: 30))
+                                .foregroundStyle(Color(red: 109/255, green: 134/255, blue: 166/255))
+                                .padding(.vertical, 10)
                         }
                     }
                 }
@@ -103,5 +65,22 @@ struct HeaderHomeView: View {
         .padding(.horizontal, 30)
         .padding(.vertical, 0)
         .frame(height: 100)
+    }
+    
+    private func addThought() async throws -> Void {
+        await MainActor.run { isSubmitting = true }
+        defer {
+            Task { await MainActor.run { isSubmitting = false } }
+        }
+
+        let thought = Thought(content: thoughtInput)
+
+        try? await Categorizer()
+            .categorizeThought(thought, categories: categories)
+
+        modelContext.insert(thought)
+        dismiss()
+        
+        thoughtInput = ""
     }
 }

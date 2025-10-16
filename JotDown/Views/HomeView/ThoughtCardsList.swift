@@ -28,13 +28,11 @@ struct ThoughtCardsList: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(alignment: .center, spacing: 16) {
                         WritableThoughtCard(text: $text)
-                            .scrollTargetLayout()
                             .id(0)
                         
                         ForEach(thoughts.indices, id: \.self) { index in
                             let id = index + 1
                             ThoughtCard(thought: thoughts[index])
-                                .scrollTargetLayout()
                                 .id(id)
                         }
                         .onDelete(perform: deleteNote)
