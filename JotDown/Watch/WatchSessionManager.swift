@@ -52,14 +52,12 @@ class WatchSessionManager: NSObject, WCSessionDelegate {
                 replyHandler(["ok": false, "error": "Save failed: \(error.localizedDescription)"])
             }
             return
-            
         }
         
         if message["request"] as? String == "thoughts" {
             // TODO: Fetch thoughts from SwiftData and send them to Apple Watch
             //sending the Thought as JSON format
             //fetch from swiftData and send to the watchUI
-            
             
             let limit = (message["limit"] as? Int) ?? 50
             let sinceISO = message["since"] as? String
@@ -91,7 +89,8 @@ class WatchSessionManager: NSObject, WCSessionDelegate {
                         [
                             "content": $0.content,
                             "dateCreated": iso.string(from: $0.dateCreated),
-                            "Category":Category(name: "Dummy")
+                            "category": $0.category.name,
+                            "categoryActive": $0.category.isActive
                         ]
                     }
                     
@@ -104,15 +103,7 @@ class WatchSessionManager: NSObject, WCSessionDelegate {
         }
         
         replyHandler(["ok": false, "error": "Unknown message"])
-        
-        
-        
-        
-        
-        
     }
-    
-    
     
     // Required stubs
     func sessionDidBecomeInactive(_ session: WCSession) {}
