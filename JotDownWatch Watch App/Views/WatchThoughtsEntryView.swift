@@ -13,6 +13,7 @@ struct WatchThoughtsEntryView: View {
     @State private var thoughtInput: String = ""
     @State private var characterLimit: Int = 250
     @ObservedObject private var session = WatchSessionManager.shared
+    @Environment(\.dismiss) private var dismiss
     
     func calculateColor() -> Color {
         if thoughtInput.count > characterLimit {
@@ -42,6 +43,7 @@ struct WatchThoughtsEntryView: View {
                     
                     Button("Add") {
                         session.sendThought(thoughtInput)
+                        dismiss()
                     }
                     .buttonStyle(.borderedProminent)
                     .disabled(thoughtInput.count > characterLimit)

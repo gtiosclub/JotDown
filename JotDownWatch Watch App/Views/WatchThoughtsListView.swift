@@ -9,20 +9,36 @@ import SwiftData
 import SwiftUI
 
 struct WatchThoughtsListView: View {
-
-    let thoughts: [String] = ["Thought 1", "Thought 2", "Thought 3"]
+    
+    @ObservedObject private var watchSession = WatchSessionManager.shared
     
     var body: some View {
         // TODO: Add functionality to display thoughts from iOS app
         List {
-            ForEach(thoughts, id: \.self) { thought in
-                HStack {
-                    Text(thought)
+            if watchSession.thoughts.isEmpty {
+                Text("No thoughts yet")
+                    .foregroundStyle(.secondary)
+            } else {
+                ForEach(Array(watchSession.thoughts.enumerated()), id: \.offset) { _, item in
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(item["content"] as? String ?? "Unknown Thought")
+                            .font(.body)
+                            .truncationMode(.tail)
+                        
+//                        if let dateStr = item["dateCreated"] as? String {
+//                            Text(Self.formatDate(dateStr))
+//                                .font(.caption2)
+//                                .foregroundStyle(.gray)
+//                        }
+                    }
+                    .padding(.vertical, 2)
                 }
             }
-//            .onDelete(perform: deleteNote)
         }
         .navigationTitle("Thoughts")
+        .onAppear {
+            watchSession.requestThoughts()
+        }
     }
 }
 

@@ -26,6 +26,7 @@ class WatchSessionManager: NSObject, ObservableObject, WCSessionDelegate {
     
     func requestThoughts() {
         guard WCSession.default.isReachable else {
+            print("ERROR: Unable to reach phone")
             return
         }
         
