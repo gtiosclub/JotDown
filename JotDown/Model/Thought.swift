@@ -15,7 +15,7 @@ class Thought {
     var category: Category
     var vectorEmbedding: [Double]
         
-    init(content: String, category: Category? = nil) {
+    init(content: String) {
         self.dateCreated = Date()
         self.content = content
         self.category = Category(name: "Dummy")
