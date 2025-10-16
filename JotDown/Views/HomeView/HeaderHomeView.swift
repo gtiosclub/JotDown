@@ -11,6 +11,7 @@ import SwiftData
 struct HeaderHomeView: View {
     @Query private var categories: [Category]
     @Binding var thoughtInput: String
+    @Binding var selectedIndex: Int?
     @State private var isSubmitting: Bool = false
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
@@ -57,29 +58,41 @@ struct HeaderHomeView: View {
                         ProgressView()
                     }
                     else {
-                        Button {
-                            Task {
-                                await MainActor.run { isSubmitting = true }
-                                defer {
-                                    Task { await MainActor.run { isSubmitting = false } }
-                                }
-
-                                let thought = Thought(content: thoughtInput)
-
-                                try? await Categorizer()
-                                    .categorizeThought(thought, categories: categories)
-
-                                modelContext.insert(thought)
-                                dismiss()
-                                
-                                thoughtInput = ""
+                        if selectedIndex != nil && selectedIndex != 0 {
+                            Button {
+                                selectedIndex = 0;
+                            } label: {
+                                Image(systemName: "plus")
+                                    .fontWeight(.light)
+                                    .font(.system(size: 30))
+                                    .foregroundStyle(Color(red: 109/255, green: 134/255, blue: 166/255))
+                                    .padding(.vertical, 10)
                             }
-                        } label: {
-                            Image(systemName: "plus")
-                                .fontWeight(.light)
-                                .font(.system(size: 30))
-                                .foregroundStyle(Color(red: 109/255, green: 134/255, blue: 166/255))
-                                .padding(.vertical, 10)
+                        } else {
+                            Button {
+                                Task {
+                                    await MainActor.run { isSubmitting = true }
+                                    defer {
+                                        Task { await MainActor.run { isSubmitting = false } }
+                                    }
+
+                                    let thought = Thought(content: thoughtInput)
+
+                                    try? await Categorizer()
+                                        .categorizeThought(thought, categories: categories)
+
+                                    modelContext.insert(thought)
+                                    dismiss()
+                                    
+                                    thoughtInput = ""
+                                }
+                            } label: {
+                                Image(systemName: "checkmark")
+                                    .fontWeight(.light)
+                                    .font(.system(size: 30))
+                                    .foregroundStyle(Color(red: 109/255, green: 134/255, blue: 166/255))
+                                    .padding(.vertical, 10)
+                            }
                         }
                     }
                 }

@@ -20,7 +20,7 @@ struct HomeView: View {
             
             Spacer()
             
-            HeaderHomeView(thoughtInput: $text)
+            HeaderHomeView(thoughtInput: $text, selectedIndex: $selectedIndex)
             ThoughtCardsList(thoughts: thoughts, text: $text, selectedIndex: $selectedIndex)
             FooterHomeView(noteCount: thoughts.count, date: selectedIndex != nil && selectedIndex != 0 ? thoughts[selectedIndex! - 1].dateCreated : Date())
             
