@@ -57,11 +57,18 @@ struct CategoryDashboardView: View {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: -6) {
                     Text("jot")
-                        .font(.system(size: 36, weight: .semibold))
-                        .foregroundColor(.black)
+                        .font(.custom("SF Pro", size: 48))
+                        .fontWeight(.medium)
+                        .lineSpacing(48 * 0.5)
+                        .tracking(-48 * 0.011)
+                        .foregroundColor(Color(red: 55/255, green: 55/255, blue: 55/255));
+                    
                     Text("down")
-                        .font(.system(size: 36, weight: .regular))
-                        .foregroundColor(.gray)
+                           .font(.custom("SF Pro", size: 48))
+                           .fontWeight(.medium)
+                           .tracking(-48 * 0.011)
+                           .lineSpacing(48 * 0.5)
+                           .foregroundColor(Color(red: 197/255, green: 197/255, blue: 197/255));
                 }
                 
                 Spacer()
@@ -106,69 +113,39 @@ struct CategoryDashboardView: View {
                 .foregroundColor(.black)
                 .padding(.top, 12)
                 .frame(maxWidth: .infinity, alignment: .center)
-            
         }
     }
 }
 
-
-
-//#Preview {
-//    let config = ModelConfiguration(isStoredInMemoryOnly: true)
-//    let container = try! ModelContainer(for: Thought.self, configurations: config)
-//    DashboardView()
-//}
-
-// Setup preview container
-let previewContainer: ModelContainer = {
+#Preview {
+    // Make SwiftData container to test visualization
     let container = try! ModelContainer(
-        for: Thought.self,
-             Category.self,
+        for: Thought.self, Category.self,
         configurations: ModelConfiguration(isStoredInMemoryOnly: true)
     )
-
-    // Create and insert a category into the managed context
-    let managedCategory = Category(name: "Recipes")
-    container.mainContext.insert(managedCategory)
-
-    // Create thoughts and assign the relationship after init
-    let seedContents = [
+    
+    // Create a fake category
+    let category = Category(name: "Recipes")
+    container.mainContext.insert(category)
+    
+    // Add sample thoughts, and assign them to the fake category
+    let thoughts = [
         "Try mango sticky rice mochi",
         "Test a chocolate chip cookie recipe",
-        "Finish ISyE homework"
-    ]
-
-    for content in seedContents {
-        let t = Thought(content: content)
-        t.category = managedCategory
-        container.mainContext.insert(t)
+        "Finish ISyE homework",
+        "Play some video games"
+    ].map { content -> Thought in
+        let thought = Thought(content: content)
+        thought.category = category
+        container.mainContext.insert(thought)
+        return thought
     }
-
+    
     try? container.mainContext.save()
-
-    return container
-}()
-
-// Fetch the managed category for preview
-private func fetchPreviewCategory(from container: ModelContainer) -> Category {
-    let context = container.mainContext
-    let descriptor = FetchDescriptor<Category>()
-    if let found = try? context.fetch(descriptor).first {
-        return found
-    } else {
-        // Fallback: create one if fetch fails
-        let fallback = Category(name: "Recipes")
-        context.insert(fallback)
-        try? context.save()
-        return fallback
-    }
-}
-
-// Preview block
-#Preview {
-    let category = fetchPreviewCategory(from: previewContainer)
+    
+    // Return the preview view
     return NavigationStack {
         CategoryDashboardView(category: category)
     }
-    .modelContainer(previewContainer)
+    .modelContainer(container)
 }
