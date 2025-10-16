@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct HeaderHomeView: View {
-    @Query private var categories: [Category]
+    @Query(filter: #Predicate<Category> { $0.isActive }) private var categories: [Category]
     @Binding var thoughtInput: String
     @Binding var selectedIndex: Int?
     @State private var isSubmitting: Bool = false
