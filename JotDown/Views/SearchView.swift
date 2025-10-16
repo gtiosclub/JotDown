@@ -13,7 +13,7 @@ enum SearchMode: String, CaseIterable, Identifiable {
 struct SearchView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Thought.dateCreated, order: .reverse) private var thoughts: [Thought]
-
+    
     @State private var searchText: String = ""
     @State private var mode: SearchMode = .regexContains
     @State private var results: [Thought] = []
@@ -34,7 +34,7 @@ struct SearchView: View {
                 }
                 .font(.caption)
                 .foregroundStyle(.secondary)
-
+                
                 Text(thought.content)
             }
         }
@@ -83,7 +83,7 @@ struct SearchView: View {
         }
         .navigationTitle("Search")
     }
-
+    
     private func performSearch() {
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !query.isEmpty else {
@@ -92,7 +92,7 @@ struct SearchView: View {
             return
         }
         hasSearched = true
-
+        
         switch mode {
         case .regexContains:
             results = searchRegexContains(query: query, in: thoughts)
@@ -116,9 +116,8 @@ struct SearchView: View {
             }
         }
     }
-
+    
     // MARK: - Search Implementations
-
     private func searchRegexContains(query: String, in thoughts: [Thought]) -> [Thought] {
         do {
             let regex = try NSRegularExpression(pattern: query, options: [.caseInsensitive])
@@ -131,14 +130,13 @@ struct SearchView: View {
             return []
         }
     }
-
+    
     private func searchRAG(query: String, in thoughts: [Thought]) async -> [Thought] {
         let ragSystem = RAGSystem()
         let results = ragSystem.sortThoughts(thoughts: thoughts, query: query, limit: 5)
         return results
     }
 }
-
 #Preview {
     SearchView()
 }
