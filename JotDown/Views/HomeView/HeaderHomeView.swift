@@ -13,6 +13,7 @@ struct HeaderHomeView: View {
     @Binding var thoughtInput: String
     @Binding var selectedIndex: Int?
     @State private var isSubmitting: Bool = false
+    @FocusState var isFocused: Bool
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     
@@ -27,6 +28,7 @@ struct HeaderHomeView: View {
                 HStack(spacing: 0) {
                     Button {
                         //Implement funcitonality
+                        isFocused = false
                     } label: {
                         Text("edit")
                             .font(Font.custom("SF Pro", size: 15))
@@ -42,6 +44,7 @@ struct HeaderHomeView: View {
                         ProgressView()
                     } else {
                         Button {
+                            isFocused = false
                             if selectedIndex != nil && selectedIndex != 0 {
                                 selectedIndex = 0;
                             } else {

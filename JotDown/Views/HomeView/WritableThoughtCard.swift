@@ -8,6 +8,7 @@ import SwiftUI
 
 struct WritableThoughtCard: View {
     @Binding var text: String
+    @FocusState var isFocused: Bool
     
     var body: some View {
         ZStack(alignment: .top) {
@@ -27,6 +28,7 @@ struct WritableThoughtCard: View {
                    }
                    
                    ClearTextEditor(text: $text)
+                       .focused($isFocused)
                }
            }
            .padding(EdgeInsets(top: 28, leading: 33, bottom: 28, trailing: 33))
@@ -62,6 +64,14 @@ struct ClearTextEditor: UIViewRepresentable {
         ]
         
         textView.text = text
+        
+        let toolbar = UIToolbar()
+        toolbar.sizeToFit()
+        let flexSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+        let doneButton = UIBarButtonItem(title: "Done", style: .prominent, target: textView, action: #selector(textView.resignFirstResponder))
+        toolbar.items = [flexSpace, doneButton]
+        textView.inputAccessoryView = toolbar
+        
         return textView
     }
 
