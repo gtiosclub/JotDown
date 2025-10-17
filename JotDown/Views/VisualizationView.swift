@@ -14,12 +14,13 @@ struct VisualizationView: View {
     let maxZoom: CGFloat = 3.0
     
     //Mark data
-    let categories = ["Foo", "Baz", "Bar", "Notes", "Ideas"]
+    let categories = ["Foo", "Baz", "Bar", "Blud"]
     
     var body: some View {
         ScrollView([.horizontal, .vertical]) {
             ZStack {
                 GridBackground()
+                    .opacity(0)
                 GeometryReader { geo in
                     let width = geo.safeAreaInsets.leading + geo.size.width + geo.safeAreaInsets.trailing
                     let height = geo.safeAreaInsets.top + geo.size.height + geo.safeAreaInsets.bottom
@@ -30,6 +31,7 @@ struct VisualizationView: View {
                         .stroke(Color.green, lineWidth: 1) // outlinecolor + width
                         .frame(width: radius * 2, height: radius * 2)
                         .position(center)
+                        .opacity(0)
                     
                     drawSectors(notes: categories, center: center,radius: radius)
                 }
@@ -77,21 +79,21 @@ func drawSectors(notes: [String], center: CGPoint, radius: CGFloat) -> some View
     return ForEach(0..<n, id: \.self) { k in
         let (start, end, mid) = anglesForSector(index: k, total: n)
         
-        // 1️⃣ Radial line at start of sector
+        // Radial line at start of sector
         Path { path in
             path.move(to: center)
             path.addLine(to: point(on: center, radius: radius, angle: start))
         }
-        .stroke(Color.green.opacity(0.8), lineWidth: 1)
+        .stroke(Color.clear, lineWidth: 1)
         
-        // 2️⃣ Radial line at end of sector
+        // Radial line at end of sector
         Path { path in
             path.move(to: center)
             path.addLine(to: point(on: center, radius: radius, angle: end))
         }
-        .stroke(Color.green.opacity(0.8), lineWidth: 1)
+        .stroke(Color.clear, lineWidth: 1)
         
-        // 3️⃣ Optional: fill sector with transparent color (makes it easier to see the slice)
+        // Optional: fill sector with angular gradient (makes it easier to see the slice)
         Path { path in
             path.move(to: center)
             path.addArc(center: center,
@@ -101,9 +103,10 @@ func drawSectors(notes: [String], center: CGPoint, radius: CGFloat) -> some View
                         clockwise: false)
             path.closeSubpath()
         }
-        .fill(Color.green.opacity(0.05))
+        .fill(sectorGradient(index: k, total: n, center: center, startAngle: start, endAngle: end))
+        .opacity(0.6)
         
-        // 4️⃣ Label in the center of sector
+        // Label in the center of sector
         // Place it at 50% radius along the mid-angle for better centering
         let labelPoint = point(on: center, radius: radius * 0.5, angle: mid)
         Text(notes[k])
@@ -139,6 +142,38 @@ func labelRotation(_ midAngle: Double) -> Double {
     var deg = midAngle * 180 / .pi
     if deg > 90 && deg < 270 { deg += 180 }
     return deg
+}
+
+// Returns a per-item angular gradient oriented around the circle
+func sectorGradient(index: Int, total: Int, center: CGPoint, startAngle: Double, endAngle: Double) -> AngularGradient {
+    // A high-contrast, well-separated palette
+    let palette: [Color] = [
+        .red, // red
+        .green, // green
+        .blue, // blue
+        .purple, // purple
+        .yellow, // yellow
+        .orange, // orange
+        .teal, // teal
+        Color(red: 0.55, green: 0.76, blue: 0.29), // lime
+        Color(red: 0.86, green: 0.11, blue: 0.35), // magenta
+        Color(red: 0.36, green: 0.42, blue: 0.46)  // slate
+    ]
+
+    let base = palette[index % palette.count]
+
+    // Derive a darker variant for subtle depth
+    let darker = base.opacity(0.95)
+
+    let start = Angle(radians: startAngle)
+    let end = Angle(radians: endAngle)
+
+    return AngularGradient(
+        gradient: Gradient(colors: [base.opacity(0.80), darker.opacity(0.80)]),
+        center: .init(x: center.x, y: center.y),
+        startAngle: start,
+        endAngle: end
+    )
 }
 
 struct GridBackground: View {
