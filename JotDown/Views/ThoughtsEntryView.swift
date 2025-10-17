@@ -9,7 +9,7 @@ import SwiftData
 import SwiftUI
 
 struct ThoughtsEntryView: View {
-    @Query var categories: [Category]
+    @Query(filter: #Predicate<Category> { $0.isActive }) var categories: [Category]
 
     @State private var thoughtInput: String = ""
     @State private var characterLimit: Int = 250

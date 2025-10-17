@@ -17,6 +17,8 @@ struct ProfileView: View {
     @State private var showArchivedCategories: Bool = false
     @State private var isShowingAddCategoriesSheet: Bool = false
     @State private var newCategoryName: String = ""
+    @Binding var selectedTab: Int
+    
     private var activeCategories: [Category] {
         categories
             .filter{$0.isActive}
@@ -32,104 +34,111 @@ struct ProfileView: View {
     
     var body: some View {
         NavigationStack {
-            Form {
-                if let user = user {
-                    @Bindable var bindableUser = user
-                    
-                    Section("Name") {
-                        TextField("What is your name?", text: $bindableUser.name)
-                            .lineLimit(1)
-                    }
-                    Section("Bio") {
-                        TextField("Describe yourself...",
-                                  text: $bindableUser.bio,
-                                  axis: .vertical)
+            VStack {
+                Form {
+                    if let user = user {
+                        @Bindable var bindableUser = user
+                        
+                        Section("Name") {
+                            TextField("What is your name?", text: $bindableUser.name)
+                                .lineLimit(1)
+                        }
+                        Section("Bio") {
+                            TextField("Describe yourself...",
+                                      text: $bindableUser.bio,
+                                      axis: .vertical)
                             .lineLimit(5...10)
                             .multilineTextAlignment(.leading)
+                        }
                     }
-                }
-                
-                Section {
-                    ForEach(activeCategories) { category in
-                        Text(category.name)
-                            .foregroundColor(category.name == "Other" ? .gray : .primary)
-                            .swipeActions (allowsFullSwipe: true){
-                                 if category.name != "Other" {
-                                     Button(role: .destructive) {
-                                         withAnimation {
-                                             category.isActive.toggle()
-                                         }
-                                     } label: {
-                                         Label("Archive", systemImage: "archivebox.fill")
-                                     }
-                                 }
-                            }
-                    }
-                    NavigationLink(destination: ArchivedCategoriesView(cateogries: inactiveCategories)) {
-                        Text("^[\(inactiveCategories.count) inactive category](inflect=true)")
-                    }
-                    .disabled(inactiveCategories.count == 0)
-                } header: {
-                    Text("Active Categories")
-                        .foregroundColor(.gray)
-                } footer: {
-                    Text("Swipe left to archive a category.")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                }
-                Section {
-                    //Sets the sheet to true to open the screen to add category
-                    Button ("Add Custom Category") {
-                        isShowingAddCategoriesSheet = true
-                    }
-                }
-                Section {
-                    Button("Generate Categories"){
-                        Task{
-                            do {
-                                if let user = user {
-                                    let generator = CategoryGenerator()
-                                    let newCategories = try await generator.generateCategories(using: user.bio)
-                                    
-                                    for category in categories {
-                                        if category.name != "Other" {
-                                            category.isActive = false
+                    
+                    Section {
+                        ForEach(activeCategories) { category in
+                            Text(category.name)
+                                .foregroundColor(category.name == "Other" ? .gray : .primary)
+                                .swipeActions (allowsFullSwipe: true){
+                                    if category.name != "Other" {
+                                        Button(role: .destructive) {
+                                            withAnimation {
+                                                category.isActive.toggle()
+                                            }
+                                        } label: {
+                                            Label("Archive", systemImage: "archivebox.fill")
                                         }
                                     }
-                                    
-                                    let hasOther = categories.contains {$0.name == "Other"}
-                                    for newCategory in newCategories {
-                                        if (newCategory.name == "Other" && hasOther){
-                                            continue
-                                        }
-                                        context.insert(newCategory)
-                                    }
-                                    
-                                } else {
-                                    print("Failed to generate categories, no user found")
                                 }
-                            } catch {
-                                print("Failed to generate categories: \(error)")
+                        }
+                        NavigationLink(destination: ArchivedCategoriesView(cateogries: inactiveCategories)) {
+                            Text("^[\(inactiveCategories.count) inactive category](inflect=true)")
+                        }
+                        .disabled(inactiveCategories.count == 0)
+                    } header: {
+                        Text("Active Categories")
+                            .foregroundColor(.gray)
+                    } footer: {
+                        Text("Swipe left to archive a category.")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
+                    Section {
+                        //Sets the sheet to true to open the screen to add category
+                        Button ("Add Custom Category") {
+                            isShowingAddCategoriesSheet = true
+                        }
+                    }
+                    Section {
+                        Button("Generate Categories"){
+                            Task{
+                                do {
+                                    if let user = user {
+                                        let generator = CategoryGenerator()
+                                        let newCategories = try await generator.generateCategories(using: user.bio)
+                                        
+                                        for category in categories {
+                                            if category.name != "Other" {
+                                                category.isActive = false
+                                            }
+                                        }
+                                        
+                                        let hasOther = categories.contains {$0.name == "Other"}
+                                        for newCategory in newCategories {
+                                            if (newCategory.name == "Other" && hasOther){
+                                                continue
+                                            }
+                                            context.insert(newCategory)
+                                        }
+                                        
+                                    } else {
+                                        print("Failed to generate categories, no user found")
+                                    }
+                                } catch {
+                                    print("Failed to generate categories: \(error)")
+                                }
                             }
                         }
                     }
                 }
-            }
-            
-            .navigationTitle("Profile")
-            .toolbar {
-                Button(role: .close) {
-                    dismiss()
+                
+                .navigationTitle("Profile")
+                .toolbar {
+                    Button(role: .close) {
+                        dismiss()
+                    }
                 }
-            }
-            //Presents the sheet to the user allowing them to add their custom categories
-            .sheet(isPresented: $isShowingAddCategoriesSheet) {
-                AddCategorySheet(
-                    newCategoryName: $newCategoryName,
-                    isPresented: $isShowingAddCategoriesSheet,
-                    activeCategories: activeCategories,
-                    inactiveCategories: inactiveCategories
-                )
+                //Presents the sheet to the user allowing them to add their custom categories
+                .sheet(isPresented: $isShowingAddCategoriesSheet) {
+                    AddCategorySheet(
+                        newCategoryName: $newCategoryName,
+                        isPresented: $isShowingAddCategoriesSheet,
+                        activeCategories: activeCategories,
+                        inactiveCategories: inactiveCategories
+                    )
+                }
+                
+                Spacer()
+                
+                //Tab Bar
+                CustomTabBar(selectedTab: $selectedTab)
             }
         }
     }
@@ -169,7 +178,7 @@ private struct AddCategorySheet: View {
                     Button("Save") {
                         let trimmed = newCategoryName.trimmingCharacters(in: .whitespacesAndNewlines)
                         guard !trimmed.isEmpty else { return }
-
+                        
                         // If the category exists in inactive, activate it
                         if let matching = inactiveCategories.first(where: { category in
                             category.name.compare(trimmed, options: .caseInsensitive) == .orderedSame
@@ -183,7 +192,7 @@ private struct AddCategorySheet: View {
                             let category = Category(name: trimmed, isActive: true)
                             context.insert(category)
                         }
-
+                        
                         newCategoryName = ""
                         isPresented = false
                     }
@@ -202,7 +211,7 @@ private struct AddCategorySheet: View {
         let previewUser = User(name: "Preview User", bio: "Loves iOS dev")
         context.insert(previewUser)
 
-        return ProfileView()
+        return ProfileView(selectedTab: .constant(2))
             .modelContainer(container)
 }
 
