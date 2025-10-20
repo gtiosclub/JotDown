@@ -1,45 +1,75 @@
 import SwiftUI
 
+// MARK: - VisualizationView
+
 struct VisualizationView: View {
     
-    // 1. STATE VARIABLES FOR ZOOMING
-    // Tracks the live zoom level during a pinch gesture
+    // ... State Variables
     @State private var zoomLevel: CGFloat = 1.0
-    
-    // Stores the committed zoom level after a gesture ends
     @State private var finalZoomLevel: CGFloat = 1.0
     
-    // Define the zoom limits
     let minZoom: CGFloat = 0.5
     let maxZoom: CGFloat = 3.0
     
-    //Mark data
+    // Mark data
     let categories = ["Foo", "Baz", "Bar", "Blud"]
+    
+    // High-Contrast Palette
+    let sectorColors: [Color] = [
+        .red,
+        .orange,
+        .green,
+        .blue,
+        .purple,
+        .pink,
+        .gray,
+        .yellow,
+        .teal
+    ]
+    
+    // Store the unique, randomized color sequence in a @State property.
+        @State private var assignedColors: [Color] = {
+            // Shuffle the master list of colors and take only the required number (4 in this case)
+            let neededColors = 4
+            let baseColors: [Color] = [
+                .red,
+                .orange,
+                .green,
+                .blue,
+                .purple,
+                .pink,
+                .gray,
+                .yellow,
+                .teal
+            ]
+            return Array(baseColors.shuffled().prefix(neededColors))
+        }()
+    
+    // Defines the proportion dedicated to blending (e.g., 20% for blending = 80% solid)
+    let blendProportion: Double = 0.55
     
     var body: some View {
         ScrollView([.horizontal, .vertical]) {
             ZStack {
                 GridBackground()
-                    .opacity(0)
+                    .opacity(0.5)
+                
                 GeometryReader { geo in
-                    let width = geo.safeAreaInsets.leading + geo.size.width + geo.safeAreaInsets.trailing
-                    let height = geo.safeAreaInsets.top + geo.size.height + geo.safeAreaInsets.bottom
-                    let radius = min(width, height) * 0.5
+                    let width = geo.size.width
+                    let height = geo.size.height
+                    let radius = min(width, height) * 0.4
                     let center = CGPoint(x: width / 2, y: height / 2)
                     
                     Circle()
-                        .stroke(Color.green, lineWidth: 1) // outlinecolor + width
+                        .fill(continuousAngularGradient(colors: assignedColors, center: center))
                         .frame(width: radius * 2, height: radius * 2)
                         .position(center)
-                        .opacity(0)
                     
-                    drawSectors(notes: categories, center: center,radius: radius)
+                    drawLabels(notes: categories, center: center, radius: radius)
                 }
                 .frame(width: 400, height: 400)
             }
-            // 2. APPLY THE ZOOM
-            .scaleEffect(zoomLevel) // This modifier scales the entire ZStack
-            // 3. ATTACH THE GESTURE
+            .scaleEffect(zoomLevel)
             .gesture(magnificationGesture)
         }
         .defaultScrollAnchor(.center)
@@ -47,16 +77,13 @@ struct VisualizationView: View {
         .ignoresSafeArea()
     }
     
-    // Helper property to define the gesture
+    // ... Magnification Gesture
     var magnificationGesture: some Gesture {
         MagnificationGesture()
             .onChanged { value in
-                // Combine the gesture's change with the last known zoom level
-                // The 'value' is the magnification factor of the current pinch
                 self.zoomLevel = self.finalZoomLevel * value
             }
             .onEnded { value in
-                // Save the final zoom level and clamp it within our limits
                 self.finalZoomLevel = self.zoomLevel
                 
                 if self.finalZoomLevel < minZoom {
@@ -65,71 +92,101 @@ struct VisualizationView: View {
                     self.finalZoomLevel = maxZoom
                 }
                 
-                // Animate the bounce-back if zoom goes out of bounds
                 withAnimation {
                     self.zoomLevel = self.finalZoomLevel
                 }
             }
     }
+    
+    // Properly places stops to define the blend on both sides of the core.
+    func continuousAngularGradient(colors: [Color], center: CGPoint) -> AngularGradient {
+        let n = categories.count
+        let sectorStep = 2 * .pi / Double(n)
+        
+        var gradientStops: [Gradient.Stop] = []
+        let fullPalette = colors + colors
+        
+        // The angle dedicated to the blend on ONE side (e.g., 10% of the sector)
+        let blendAngle = sectorStep * (blendProportion / 2.0)
+        
+        for index in 0..<n {
+            // Get angles based on the 3 o'clock start (0 radians)
+            let rawStart = Double(index) * sectorStep
+            let sectorColor = fullPalette[index]
+            
+            // 1. Blend Start Stop (Transition FROM previous color)
+            // This color is placed at the start angle + the blend zone size.
+            let coreStartAngle = rawStart + blendAngle
+            let coreStartLocation = Angle(radians: coreStartAngle).normalizedDegrees / 360.0
+            
+            // 2. Blend End Stop (Transition INTO next color)
+            // This color is placed at the end angle - the blend zone size.
+            let coreEndAngle = rawStart + sectorStep - blendAngle
+            let coreEndLocation = Angle(radians: coreEndAngle).normalizedDegrees / 360.0
+            
+            // Add stops for the solid core color
+            gradientStops.append(Gradient.Stop(color: sectorColor, location: coreStartLocation.clamped(to: 0...1)))
+            gradientStops.append(Gradient.Stop(color: sectorColor, location: coreEndLocation.clamped(to: 0...1)))
+            
+            // The blend occurs naturally in the space between the coreEndLocation (1)
+            // and the coreStartLocation of the next sector (2).
+        }
+        
+        // Sorting is crucial as locations wrap around 0/360
+        gradientStops.sort { $0.location < $1.location }
+        
+        // Add a final stop to ensure the smooth wrap-around to the first color
+        let firstColor = fullPalette[0]
+        let finalStop = Gradient.Stop(color: firstColor, location: 1.0)
+        
+        // We use the stops and a 0-360 range for the AngularGradient
+        let finalStops = gradientStops + [finalStop]
+        
+        return AngularGradient(
+            gradient: Gradient(stops: finalStops),
+            center: .center,
+            startAngle: Angle(degrees: 0),
+            endAngle: Angle(degrees: 360)
+        )
+    }
 }
 
-func drawSectors(notes: [String], center: CGPoint, radius: CGFloat) -> some View {
+// MARK: - Sector Labels
+
+func drawLabels(notes: [String], center: CGPoint, radius: CGFloat) -> some View {
     let n = notes.count
     
     return ForEach(0..<n, id: \.self) { k in
-        let (start, end, mid) = anglesForSector(index: k, total: n)
+        let (_, _, mid) = anglesForSector(index: k + 1, total: n)
         
-        // Radial line at start of sector
-        Path { path in
-            path.move(to: center)
-            path.addLine(to: point(on: center, radius: radius, angle: start))
-        }
-        .stroke(Color.clear, lineWidth: 1)
-        
-        // Radial line at end of sector
-        Path { path in
-            path.move(to: center)
-            path.addLine(to: point(on: center, radius: radius, angle: end))
-        }
-        .stroke(Color.clear, lineWidth: 1)
-        
-        // Optional: fill sector with angular gradient (makes it easier to see the slice)
-        Path { path in
-            path.move(to: center)
-            path.addArc(center: center,
-                        radius: radius,
-                        startAngle: Angle(radians: start),
-                        endAngle: Angle(radians: end),
-                        clockwise: false)
-            path.closeSubpath()
-        }
-        .fill(sectorGradient(index: k, total: n, center: center, startAngle: start, endAngle: end))
-        .opacity(0.6)
-        
-        // Label in the center of sector
-        // Place it at 50% radius along the mid-angle for better centering
         let labelPoint = point(on: center, radius: radius * 0.5, angle: mid)
         Text(notes[k])
-            .font(.caption)
-            .padding(6)
-            .background(Color.yellow.opacity(0.85))
-            .cornerRadius(6)
+            .font(.title3)
+            .bold()
+            .foregroundColor(.black)
             .shadow(radius: 2)
             .position(labelPoint)
     }
 }
 
+// MARK: - Helper Functions & Extensions
 
-// Returns (start, end, mid) angles in radians for sector `index`
+// This function keeps the visual layout aligned to 12 o'clock (top)
 func anglesForSector(index: Int, total: Int) -> (Double,Double, Double) {
     let step = 2 * .pi / Double(total)
-    let start = -Double.pi / 2 + Double(index) * step //start at top
-    let end = start + step
-    let mid = (start + end) / 2
+    let rawStart = Double(index - 1) * step
+    let rawEnd = rawStart + step
+    let rawMid = (rawStart + rawEnd) / 2
+    
+    let rotationOffset = -Double.pi / 2
+    
+    let start = rawStart + rotationOffset
+    let end = rawEnd + rotationOffset
+    let mid = rawMid + rotationOffset
+    
     return (start, end, mid)
 }
 
-// Converts polar coordinates to a CGPoint
 func point(on center: CGPoint, radius: CGFloat, angle:Double) -> CGPoint {
     CGPoint(
         x: center.x + radius * CGFloat(cos(angle)),
@@ -137,64 +194,39 @@ func point(on center: CGPoint, radius: CGFloat, angle:Double) -> CGPoint {
     )
 }
 
-// Keeps label text upright
-func labelRotation(_ midAngle: Double) -> Double {
-    var deg = midAngle * 180 / .pi
-    if deg > 90 && deg < 270 { deg += 180 }
-    return deg
+extension Comparable {
+    func clamped(to limits: ClosedRange<Self>) -> Self {
+        return min(max(self, limits.lowerBound), limits.upperBound)
+    }
 }
 
-// Returns a per-item angular gradient oriented around the circle
-func sectorGradient(index: Int, total: Int, center: CGPoint, startAngle: Double, endAngle: Double) -> AngularGradient {
-    // A high-contrast, well-separated palette
-    let palette: [Color] = [
-        .red, // red
-        .green, // green
-        .blue, // blue
-        .purple, // purple
-        .yellow, // yellow
-        .orange, // orange
-        .teal, // teal
-        Color(red: 0.55, green: 0.76, blue: 0.29), // lime
-        Color(red: 0.86, green: 0.11, blue: 0.35), // magenta
-        Color(red: 0.36, green: 0.42, blue: 0.46)  // slate
-    ]
-
-    let base = palette[index % palette.count]
-
-    // Derive a darker variant for subtle depth
-    let darker = base.opacity(0.95)
-
-    let start = Angle(radians: startAngle)
-    let end = Angle(radians: endAngle)
-
-    return AngularGradient(
-        gradient: Gradient(colors: [base.opacity(0.80), darker.opacity(0.80)]),
-        center: .init(x: center.x, y: center.y),
-        startAngle: start,
-        endAngle: end
-    )
+extension Angle {
+    var normalizedDegrees: Double {
+        var degrees = self.degrees.truncatingRemainder(dividingBy: 360)
+        if degrees < 0 {
+            degrees += 360
+        }
+        return degrees
+    }
 }
+
+// MARK: - GridBackground 
 
 struct GridBackground: View {
-    // Define the properties for our grid
-    let size: CGFloat = 5000 // The total width and height of the grid canvas
-    let spacing: CGFloat = 50  // The distance between each grid line
+    let size: CGFloat = 5000
+    let spacing: CGFloat = 50
     let lineColor = Color(.lightGray).opacity(0.7)
     let lineWidth: CGFloat = 1
-
+    
     var body: some View {
-        // Canvas is a high-performance view for custom 2D drawing.
         Canvas { context, size in
-            // Draw the vertical lines
             for x in stride(from: 0, to: size.width, by: spacing) {
                 var path = Path()
                 path.move(to: CGPoint(x: x, y: 0))
                 path.addLine(to: CGPoint(x: x, y: size.height))
                 context.stroke(path, with: .color(lineColor), lineWidth: lineWidth)
             }
-
-            // Draw the horizontal lines
+            
             for y in stride(from: 0, to: size.height, by: spacing) {
                 var path = Path()
                 path.move(to: CGPoint(x: 0, y: y))
@@ -202,8 +234,6 @@ struct GridBackground: View {
                 context.stroke(path, with: .color(lineColor), lineWidth: lineWidth)
             }
         }
-        // It's critical to give the Canvas a large, explicit frame.
-        // This is what the ScrollView uses to determine its scrollable area.
         .frame(width: size, height: size)
     }
 }
