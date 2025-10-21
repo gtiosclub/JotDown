@@ -11,6 +11,7 @@ import SwiftData
 struct DashboardView: View {
     @Query(sort: \Category.name) private var categories: [Category]
     @Query var thoughts: [Thought]
+    @Binding var selectedTab: Int
 
     // two-column grid layout.
     let columns: [GridItem] = [
@@ -100,5 +101,6 @@ struct DashboardView: View {
                 }
             }
         }
+        CustomTabBar(selectedTab: $selectedTab)
     }
 }

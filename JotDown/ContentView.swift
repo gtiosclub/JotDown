@@ -34,10 +34,14 @@ struct ContentView: View {
                 }
             case 1:
                 NavigationStack {
+                    DashboardView(selectedTab: $selectedTab)
+                }
+            case 2:
+                NavigationStack {
                     SearchView(selectedTab: $selectedTab)
                         .navigationTitle("Search")
                 }
-            case 2:
+            case 3:
                 NavigationStack {
                     ProfileView(selectedTab: $selectedTab)
                 }
@@ -66,8 +70,18 @@ struct CustomTabBar: View {
             
             Spacer()
             
-            // Search Tab
+            // Dashboard Tab
             Button(action: { selectedTab = 1 }) {
+                Image("User")
+                    .resizable()
+                    .frame(width: 24, height: 24)
+                    .foregroundColor(.black)
+            }
+            
+            Spacer()
+            
+            // Search Tab
+            Button(action: { selectedTab = 2 }) {
                 Image("Search")
                     .resizable()
                     .frame(width: 24, height: 24)
@@ -77,12 +91,13 @@ struct CustomTabBar: View {
             Spacer()
             
             // Profile Tab
-            Button(action: { selectedTab = 2 }) {
+            Button(action: { selectedTab = 3 }) {
                 Image("User")
                     .resizable()
                     .frame(width: 24, height: 24)
                     .foregroundColor(.black)
             }
+            
         }
         .padding(.horizontal, 53)
         .padding(.vertical, 10)
