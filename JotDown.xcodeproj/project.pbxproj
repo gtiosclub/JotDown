@@ -39,26 +39,6 @@
 		B7F375652E821797008F0846 /* JotDown.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JotDown.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		D2D0B8992EA7ED2A004BFD33 /* Exceptions for "JotDown" folder in "JotDown" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Views/VisualizationView.swift,
-			);
-			target = B7F375642E821797008F0846 /* JotDown */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
-/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-		D2D0B89A2EA7ED2A004BFD33 /* Exceptions for "JotDown" folder in "Copy Bundle Resources" phase from "JotDown" target */ = {
-			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
-			buildPhase = B7F375632E821797008F0846 /* Resources */;
-			membershipExceptions = (
-				Views/VisualizationView.swift,
-			);
-		};
-/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		91F461B52E8C8A5B00CF6134 /* JotDownWatch Watch App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
@@ -67,10 +47,6 @@
 		};
 		B7F375672E821797008F0846 /* JotDown */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				D2D0B8992EA7ED2A004BFD33 /* Exceptions for "JotDown" folder in "JotDown" target */,
-				D2D0B89A2EA7ED2A004BFD33 /* Exceptions for "JotDown" folder in "Copy Bundle Resources" phase from "JotDown" target */,
-			);
 			path = JotDown;
 			sourceTree = "<group>";
 		};
