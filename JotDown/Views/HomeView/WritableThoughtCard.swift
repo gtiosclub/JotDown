@@ -5,10 +5,13 @@
 //  Created by Drew Mendelow on 10/14/25.
 //
 import SwiftUI
+import SwiftData
 
 struct WritableThoughtCard: View {
     @Binding var text: String
     @FocusState var isFocused: Bool
+    @State private var placeholderText: String = "Start writing..."
+    @Query(sort: \Thought.dateCreated, order: .reverse) private var recentThoughts: [Thought]
     
     var body: some View {
         ZStack(alignment: .top) {
@@ -22,7 +25,7 @@ struct WritableThoughtCard: View {
                ZStack(alignment: .topLeading) {
                    if text.isEmpty {
                        // Placeholder text for the TextEditor since it doesn't have a placeholder property
-                       Text("Start writing...")
+                       Text(placeholderText)
                            .foregroundColor(Color(red: 0.49, green: 0.58, blue: 0.70))
                            .font(.system(size: 24, weight: .regular))
                    }
@@ -33,6 +36,10 @@ struct WritableThoughtCard: View {
            }
            .padding(EdgeInsets(top: 28, leading: 33, bottom: 28, trailing: 33))
            .frame(width: 337, height: 436)
+           .task(id: recentThoughts.count) {
+                let prompt = await MotivationGenerator.generatePrompt(from: recentThoughts)
+                await MainActor.run { placeholderText = prompt }
+            }
        }
        .frame(width: 337, height: 472)
     }
@@ -108,3 +115,4 @@ struct ClearTextEditor: UIViewRepresentable {
         }
     }
 }
+
