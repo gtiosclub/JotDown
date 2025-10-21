@@ -40,6 +40,10 @@ struct ContentView: View {
                 NavigationStack {
                     ProfileView(selectedTab: $selectedTab)
                 }
+            case 3:
+                NavigationStack {
+                    CombinedSearchView(selectedTab: $selectedTab)
+                }
             default:
                 NavigationStack {
                     HomeView(selectedTab: $selectedTab)
@@ -82,12 +86,15 @@ struct CustomTabBar: View {
                     .frame(width: 24, height: 24)
                     .foregroundColor(.black)
             }
-            NavigationStack {
-                CombinedSearchView()
-                    .navigationTitle("Smart search")
-            }
-            .tabItem {
-                Label("Smart search", systemImage: "sparkle.magnifyingglass")
+            
+            Spacer()
+            
+            // Smart search Tab
+            Button(action: { selectedTab = 3 }) {
+                Image(systemName: "sparkle.magnifyingglass")
+                    .resizable()
+                    .frame(width: 24, height: 24)
+                    .foregroundColor(.white)
             }
         }
         .padding(.horizontal, 53)

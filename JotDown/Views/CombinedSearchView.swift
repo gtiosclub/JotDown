@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import Orb
 
 struct CombinedSearchView: View {
     @Environment(\.modelContext) private var modelContext
@@ -19,27 +20,25 @@ struct CombinedSearchView: View {
     // Only searches after .5 seconds of stopped typing
     @State private var searchDebounceWorkItem: DispatchWorkItem?
     private let delayToSearch = 0.5
+    @Binding var selectedTab: Int
+    @Namespace private var namespace
     var body: some View {
-        VStack {
-            Text(result)
+        ZStack {
+            VStack {
+                Text("result")
+                
+                Spacer()
+                
+                CustomTabBar(selectedTab: $selectedTab)
+            }
+            OrbView()
+                .frame(width: 200, height: 200)
         }
-        .listStyle(.plain)
         .searchable(
             text: $searchText,
             placement: .automatic,
             prompt: "Search thoughts"
         )
-        .overlay {
-            if searchText.isEmpty && !isSearching{
-                ContentUnavailableView(
-                    "Search",
-                    systemImage: "magnifyingglass",
-                    description: Text("Enter a query to search your thoughts.")
-                )
-            } else if result == "" {
-                ContentUnavailableView.search(text: searchText)
-            }
-        }
         .onChange(of: searchText) { _, _ in
             // Cancel any existing pending search
             searchDebounceWorkItem?.cancel()
@@ -64,7 +63,7 @@ struct CombinedSearchView: View {
             // Schedule it to run after 0.5 seconds
             DispatchQueue.main.asyncAfter(deadline: .now() + delayToSearch, execute: workItem)
         }
-        .navigationTitle("Smart search")
+        
     }
     
     private func searchRagFoundationQuery(query: String, in thoughts: [Thought]) async -> String {
@@ -77,5 +76,5 @@ struct CombinedSearchView: View {
 }
 
 #Preview {
-    CombinedSearchView()
+    CombinedSearchView(selectedTab: .constant(3))
 }

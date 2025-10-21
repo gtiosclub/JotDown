@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		91F461BE2E8C8A5C00CF6134 /* JotDownWatch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 91F461B42E8C8A5B00CF6134 /* JotDownWatch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		DA113ED22EA84782002AACD2 /* Orb in Frameworks */ = {isa = PBXBuildFile; productRef = DA113ED12EA84782002AACD2 /* Orb */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -64,6 +65,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DA113ED22EA84782002AACD2 /* Orb in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -132,6 +134,7 @@
 			);
 			name = JotDown;
 			packageProductDependencies = (
+				DA113ED12EA84782002AACD2 /* Orb */,
 			);
 			productName = JotDown;
 			productReference = B7F375652E821797008F0846 /* JotDown.app */;
@@ -164,6 +167,9 @@
 			);
 			mainGroup = B7F3755C2E821797008F0846;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				DA113ED02EA84782002AACD2 /* XCRemoteSwiftPackageReference "Orb" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = B7F375662E821797008F0846 /* Products */;
 			projectDirPath = "";
@@ -500,6 +506,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		DA113ED02EA84782002AACD2 /* XCRemoteSwiftPackageReference "Orb" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/metasidd/Orb";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.2.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		DA113ED12EA84782002AACD2 /* Orb */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DA113ED02EA84782002AACD2 /* XCRemoteSwiftPackageReference "Orb" */;
+			productName = Orb;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = B7F3755D2E821797008F0846 /* Project object */;
 }
