@@ -8,7 +8,7 @@
 import FoundationModels
 
 class CategoryGenerator {
-    let session = LanguageModelSession(instructions: "Generate categories for a user depending on their interests in their bio.")
+    let session = LanguageModelSession(instructions: "Generate at minimum 8 categories for a user depending on their interests in their bio.")
     
     let instructionPrompt = "Generate an appropriate, general interest categories array based on the following bio text. The categories should be clear and general enough to group multiple notes, but still personalized to the user’s context. Crucially avoid repeating the same idea in multiple categories. Here is the bio:"
     
@@ -42,7 +42,7 @@ class CategoryGenerator {
     //guarantees formatting to be proper structure.
     @Generable
     struct GeneratedCategoryArray {
-        @Guide(description: "Array of categories that best represent the themes or topics from the input.")
+        @Guide(description: "Array of categories that best represent the themes or topics from the input.", .count(7...10))
         var categories: [GeneratedCategory]
     }
     

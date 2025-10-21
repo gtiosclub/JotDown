@@ -22,15 +22,12 @@ struct SearchView: View {
     // Only searches after .5 seconds of stopped typing
     @State private var searchDebounceWorkItem: DispatchWorkItem?
     private let delayToSearch = 0.5
+    @Binding var selectedTab: Int
 
 
     var body: some View {
-        List {
-//            NavigationLink(destination: CombinedSearchView()) {
-//                Text("Combined search")
-//            }
-            
-            ForEach(results) { thought in
+        VStack {
+            List(results) { thought in
                 VStack(alignment: .leading) {
                     HStack {
                         Text(thought.dateCreated, style: .date)
@@ -86,6 +83,12 @@ struct SearchView: View {
                 }
                 .pickerStyle(.menu)
             }
+            .navigationTitle("Search")
+            
+            Spacer()
+            
+            //Tab Bar
+            CustomTabBar(selectedTab: $selectedTab)
         }
         .navigationTitle("Search")
     }
@@ -139,5 +142,5 @@ struct SearchView: View {
     }
 }
 #Preview {
-    SearchView()
+    SearchView(selectedTab: .constant(1))
 }
