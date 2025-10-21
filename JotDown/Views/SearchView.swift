@@ -22,66 +22,74 @@ struct SearchView: View {
     // Only searches after .5 seconds of stopped typing
     @State private var searchDebounceWorkItem: DispatchWorkItem?
     private let delayToSearch = 0.5
+    @Binding var selectedTab: Int
 
 
     var body: some View {
-        List(results) { thought in
-            VStack(alignment: .leading) {
-                HStack {
-                    Text(thought.dateCreated, style: .date)
-                    Spacer()
-                    Text(thought.category.name)
+        VStack {
+            List(results) { thought in
+                VStack(alignment: .leading) {
+                    HStack {
+                        Text(thought.dateCreated, style: .date)
+                        Spacer()
+                        Text(thought.category.name)
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    
+                    Text(thought.content)
                 }
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            }
+            .listStyle(.plain)
+            .searchable(
+                text: $searchText,
+                placement: .automatic,
+                prompt: "Search thoughts"
+            )
+            .overlay {
+                if searchText.isEmpty {
+                    ContentUnavailableView(
+                        "Search",
+                        systemImage: "magnifyingglass",
+                        description: Text("Enter a query to search your thoughts.")
+                    )
+                } else if results.isEmpty {
+                    ContentUnavailableView.search(text: searchText)
+                }
+            }
+            .onChange(of: searchText) { _, _ in
+                // Cancel any existing pending search
+                searchDebounceWorkItem?.cancel()
                 
-                Text(thought.content)
-            }
-        }
-        .listStyle(.plain)
-        .searchable(
-            text: $searchText,
-            placement: .automatic,
-            prompt: "Search thoughts"
-        )
-        .overlay {
-            if searchText.isEmpty {
-                ContentUnavailableView(
-                    "Search",
-                    systemImage: "magnifyingglass",
-                    description: Text("Enter a query to search your thoughts.")
-                )
-            } else if results.isEmpty {
-                ContentUnavailableView.search(text: searchText)
-            }
-        }
-        .onChange(of: searchText) { _, _ in
-            // Cancel any existing pending search
-            searchDebounceWorkItem?.cancel()
-            
-            // If the search text is empty, don’t schedule a new search
-            guard !searchText.isEmpty else { return }
-            
-            let workItem = DispatchWorkItem {
-                performSearch()
-            }
-            // Store it so we can cancel if needed
-            searchDebounceWorkItem = workItem
-            
-            // Schedule it to run after 0.5 seconds
-            DispatchQueue.main.asyncAfter(deadline: .now() + delayToSearch, execute: workItem)
-        }
-        .toolbar {
-            ToolbarItem(placement: .principal) {
-                Picker("Mode", selection: $mode) {
-                    Text("Regex/Contains").tag(SearchMode.regexContains)
-                    Text("Foundation Models").tag(SearchMode.foundationModels)
-                    Text("RAG").tag(SearchMode.rag)
+                // If the search text is empty, don’t schedule a new search
+                guard !searchText.isEmpty else { return }
+                
+                let workItem = DispatchWorkItem {
+                    performSearch()
                 }
-                .pickerStyle(.menu)
+                // Store it so we can cancel if needed
+                searchDebounceWorkItem = workItem
+                
+                // Schedule it to run after 0.5 seconds
+                DispatchQueue.main.asyncAfter(deadline: .now() + delayToSearch, execute: workItem)
             }
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Picker("Mode", selection: $mode) {
+                        Text("Regex/Contains").tag(SearchMode.regexContains)
+                        Text("Foundation Models").tag(SearchMode.foundationModels)
+                        Text("RAG").tag(SearchMode.rag)
+                    }
+                    .pickerStyle(.menu)
+                }
+            }
+            .navigationTitle("Search")
+            
+            Spacer()
+            
+            //Tab Bar
+            CustomTabBar(selectedTab: $selectedTab)
         }
-        .navigationTitle("Search")
     }
     
     private func performSearch() {
@@ -138,5 +146,5 @@ struct SearchView: View {
     }
 }
 #Preview {
-    SearchView()
+    SearchView(selectedTab: .constant(1))
 }
