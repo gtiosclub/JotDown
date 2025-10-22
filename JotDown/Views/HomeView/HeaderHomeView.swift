@@ -9,13 +9,11 @@ import SwiftUI
 import SwiftData
 
 struct HeaderHomeView: View {
-    @Query private var categories: [Category]
     @Binding var thoughtInput: String
     @Binding var selectedIndex: Int?
-    @State private var isSubmitting: Bool = false
+    @Binding var isSubmitting: Bool
     @FocusState var isFocused: Bool
-    @Environment(\.dismiss) private var dismiss
-    @Environment(\.modelContext) private var modelContext
+    let addThought: () async throws -> Void
     
     var body: some View {
         HStack {
@@ -68,22 +66,5 @@ struct HeaderHomeView: View {
         .padding(.horizontal, 30)
         .padding(.vertical, 0)
         .frame(height: 100)
-    }
-    
-    private func addThought() async throws -> Void {
-        await MainActor.run { isSubmitting = true }
-        defer {
-            Task { await MainActor.run { isSubmitting = false } }
-        }
-
-        let thought = Thought(content: thoughtInput)
-
-        try? await Categorizer()
-            .categorizeThought(thought, categories: categories)
-
-        modelContext.insert(thought)
-        dismiss()
-        
-        thoughtInput = ""
     }
 }

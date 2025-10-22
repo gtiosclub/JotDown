@@ -9,6 +9,7 @@ import SwiftUI
 struct WritableThoughtCard: View {
     @Binding var text: String
     @FocusState var isFocused: Bool
+    let addThought: () async throws -> Void
     
     var body: some View {
         ZStack(alignment: .top) {
@@ -27,7 +28,12 @@ struct WritableThoughtCard: View {
                            .font(.system(size: 24, weight: .regular))
                    }
                    
-                   ClearTextEditor(text: $text)
+                   ClearTextEditor(text: $text, onSubmit: {
+                       Task {
+                           print("submitting")
+                           try await addThought()
+                       }
+                   })
                        .focused($isFocused)
                }
            }
@@ -41,6 +47,8 @@ struct WritableThoughtCard: View {
 // Custom Text Editor to get a clear background
 struct ClearTextEditor: UIViewRepresentable {
     @Binding var text: String
+    
+    var onSubmit: (() -> Void)? = nil
 
     func makeUIView(context: Context) -> UITextView {
         let textView = UITextView()
@@ -51,6 +59,7 @@ struct ClearTextEditor: UIViewRepresentable {
         textView.textContainer.lineFragmentPadding = 0
         textView.textContainerInset = .zero
         textView.delegate = context.coordinator
+        textView.returnKeyType = .done
         
         let font = UIFont.systemFont(ofSize: 24, weight: .regular)
         let paragraphStyle = NSMutableParagraphStyle()
@@ -64,13 +73,6 @@ struct ClearTextEditor: UIViewRepresentable {
         ]
         
         textView.text = text
-        
-        let toolbar = UIToolbar()
-        toolbar.sizeToFit()
-        let flexSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
-        let doneButton = UIBarButtonItem(title: "Done", style: .prominent, target: textView, action: #selector(textView.resignFirstResponder))
-        toolbar.items = [flexSpace, doneButton]
-        textView.inputAccessoryView = toolbar
         
         return textView
     }
@@ -105,6 +107,16 @@ struct ClearTextEditor: UIViewRepresentable {
 
         func textViewDidChange(_ textView: UITextView) {
             parent.text = textView.text
+        }
+        
+        func textView(_ textView: UITextView,
+                      shouldChangeTextIn range: NSRange,
+                      replacementText text: String) -> Bool {
+            if text == "\n" {
+                parent.onSubmit?()
+                return false // prevent newline
+            }
+            return true
         }
     }
 }

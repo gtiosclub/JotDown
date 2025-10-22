@@ -17,7 +17,6 @@ struct ProfileView: View {
     @State private var showArchivedCategories: Bool = false
     @State private var isShowingAddCategoriesSheet: Bool = false
     @State private var newCategoryName: String = ""
-    @Binding var selectedTab: Int
     
     private var activeCategories: [Category] {
         categories
@@ -136,9 +135,6 @@ struct ProfileView: View {
                 }
                 
                 Spacer()
-                
-                //Tab Bar
-                CustomTabBar(selectedTab: $selectedTab)
             }
         }
     }
@@ -211,7 +207,7 @@ private struct AddCategorySheet: View {
         let previewUser = User(name: "Preview User", bio: "Loves iOS dev")
         context.insert(previewUser)
 
-        return ProfileView(selectedTab: .constant(2))
+        return ProfileView()
             .modelContainer(container)
 }
 
