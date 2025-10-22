@@ -10,7 +10,7 @@ import SwiftData
 struct WritableThoughtCard: View {
     @Binding var text: String
     @FocusState var isFocused: Bool
-    @State private var placeholderText: String = "Start writing..."
+    @State private var placeholderText: String = "Start writing — one idea can change your day!"
     @Query(sort: \Thought.dateCreated, order: .reverse) private var recentThoughts: [Thought]
     
     var body: some View {
