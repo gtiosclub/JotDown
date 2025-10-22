@@ -11,61 +11,62 @@ import SwiftUI
 struct ContentView: View {
     @State private var isShowingProfileView = false
     @State private var isShowingThoughtEntry = true
+    @State private var selectedTab: Int = 0
     @Environment(\.modelContext) private var context
     @Query var users: [User]
     @State private var searchText: String = ""
     
     var body: some View {
-            TabView {
-                Tab {
-                    NavigationStack {
-                        HomeView()
-                            .toolbar {
-                                ToolbarItem(placement: .cancellationAction) {
-                                    Button("Profile", systemImage: "gear") {
-                                        isShowingProfileView = true
-                                    }
-                                }
-                                ToolbarItem() {
-                                    Button("Add Thought", systemImage: "plus") {
-                                        isShowingThoughtEntry = true
-                                    }
+        TabView {
+            Tab {
+                NavigationStack {
+                    HomeView()
+                        .toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                Button("Profile", systemImage: "gear") {
+                                    isShowingProfileView = true
                                 }
                             }
-                    }
-                    .onAppear {
-                        if users.isEmpty {
-                            let defaultUser = User(name: "", bio: "")
-                            context.insert(defaultUser)
+                            ToolbarItem() {
+                                Button("Add Thought", systemImage: "plus") {
+                                    isShowingThoughtEntry = true
+                                }
+                            }
                         }
-                    }
-                } label: {
-                    Image("Visualize")
-                        .renderingMode(.template)
                 }
-                
-                Tab {
-                    NavigationStack {
-                        ProfileView()
+                .onAppear {
+                    if users.isEmpty {
+                        let defaultUser = User(name: "", bio: "")
+                        context.insert(defaultUser)
                     }
-                } label: {
-                    Image("User")
-                        .renderingMode(.template)
                 }
-                
-                Tab(role: .search) {
-                    NavigationStack {
-                        SearchView(searchText: $searchText)
-                            .navigationTitle("Search")
-                    }
-                } label: {
-                    Image("Search")
-                        .renderingMode(.template)
-                }
+            } label: {
+                Image("Visualize")
+                    .renderingMode(.template)
             }
-            .searchable(text: $searchText)
-            // to change tab icon color onSelected add:
-            // .tint(.gray)
+
+            Tab {
+                NavigationStack {
+                    ProfileView()
+                }
+            } label: {
+                Image("User")
+                    .renderingMode(.template)
+            }
+
+            Tab(role: .search) {
+                NavigationStack {
+                    SearchView(searchText: $searchText)
+                        .searchable(text: $searchText)
+                        .navigationTitle("Search")
+                }
+            } label: {
+                Image("Search")
+                    .renderingMode(.template)
+            }
+        }
+        // to change tab icon color onSelected add:
+        // .tint(.gray)
     }
 }
 

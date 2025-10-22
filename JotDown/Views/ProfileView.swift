@@ -133,8 +133,6 @@ struct ProfileView: View {
                         inactiveCategories: inactiveCategories
                     )
                 }
-                
-                Spacer()
             }
         }
     }
@@ -207,7 +205,7 @@ private struct AddCategorySheet: View {
         let previewUser = User(name: "Preview User", bio: "Loves iOS dev")
         context.insert(previewUser)
 
-        return ProfileView()
+        return ProfileView(selectedTab: .constant(2))
             .modelContainer(container)
 }
 

@@ -5,22 +5,34 @@
 //  Created by Joseph Masson on 9/30/25.
 //
 
+import SwiftData
 import SwiftUI
 
 struct ContentView: View {
+
     var body: some View {
-        
-        // TODO: Implement Watch App UI. Include WC logic to send thought to the phone upon entry
-        
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        NavigationStack {
+            VStack {
+                Text("JotDown")
+                    .font(Font.title.bold())
+                Spacer(minLength: 20)
+                NavigationLink() {
+                    WatchThoughtsEntryView()
+                } label: {
+                    Label("Add Thought", systemImage: "plus.circle.fill")
+                }.foregroundStyle(Color(.blue))
+                
+                NavigationLink() {
+                    WatchThoughtsListView()
+                } label: {
+                    Label("View Thoughts", systemImage: "list.bullet")
+                }
+            }.padding()
         }
-        .padding()
     }
 }
+
+
 
 #Preview {
     ContentView()
