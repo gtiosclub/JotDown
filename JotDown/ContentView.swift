@@ -20,18 +20,6 @@ struct ContentView: View {
             Tab {
                 NavigationStack {
                     HomeView()
-                        .toolbar {
-                            ToolbarItem(placement: .cancellationAction) {
-                                Button("Profile", systemImage: "gear") {
-                                    isShowingProfileView = true
-                                }
-                            }
-                            ToolbarItem() {
-                                Button("Add Thought", systemImage: "plus") {
-                                    isShowingThoughtEntry = true
-                                }
-                            }
-                        }
                 }
                 .onAppear {
                     if users.isEmpty {

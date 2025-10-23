@@ -119,11 +119,6 @@ struct ProfileView: View {
                 }
                 
                 .navigationTitle("Profile")
-                .toolbar {
-                    Button(role: .close) {
-                        dismiss()
-                    }
-                }
                 //Presents the sheet to the user allowing them to add their custom categories
                 .sheet(isPresented: $isShowingAddCategoriesSheet) {
                     AddCategorySheet(
