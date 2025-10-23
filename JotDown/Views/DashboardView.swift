@@ -11,7 +11,6 @@ import SwiftData
 struct DashboardView: View {
     @Query(filter: #Predicate<Category> { $0.isActive == true }) private var categories: [Category]
     @Query var thoughts: [Thought]
-    @Binding var selectedTab: Int
 
     // two-column grid layout.
     let columns: [GridItem] = [
@@ -111,7 +110,6 @@ struct DashboardView: View {
             }
             .padding(.top, 40)
         }
-        CustomTabBar(selectedTab: $selectedTab)
     }
 }
 

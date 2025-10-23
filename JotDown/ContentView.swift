@@ -13,7 +13,6 @@ struct ContentView: View {
     @State private var isShowingThoughtEntry = true
     @Environment(\.modelContext) private var context
     @Query var users: [User]
-    @Query var categories: [Category]
     @State private var searchText: String = ""
     
     var body: some View {
@@ -30,6 +29,13 @@ struct ContentView: View {
                 }
             } label: {
                 Image("Visualize")
+                    .renderingMode(.template)
+            }
+            
+            Tab {
+                DashboardView()
+            } label: {
+                Image("Dashboard")
                     .renderingMode(.template)
             }
             
