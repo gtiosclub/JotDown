@@ -17,6 +17,7 @@ struct ProfileView: View {
     @State private var showArchivedCategories: Bool = false
     @State private var isShowingAddCategoriesSheet: Bool = false
     @State private var newCategoryName: String = ""
+    @State private var newCategoryDescription: String = ""
     @Binding var selectedTab: Int
     
     private var activeCategories: [Category] {
@@ -129,6 +130,7 @@ struct ProfileView: View {
                 .sheet(isPresented: $isShowingAddCategoriesSheet) {
                     AddCategorySheet(
                         newCategoryName: $newCategoryName,
+                        newCategoryDescription: $newCategoryDescription,
                         isPresented: $isShowingAddCategoriesSheet,
                         activeCategories: activeCategories,
                         inactiveCategories: inactiveCategories
@@ -149,6 +151,7 @@ private struct AddCategorySheet: View {
     @Environment(\.modelContext) private var context
 
     @Binding var newCategoryName: String
+    @Binding var newCategoryDescription: String
     @Binding var isPresented: Bool
 
     // These are passed in from ProfileView so the logic can mirror existing behavior
@@ -164,36 +167,46 @@ private struct AddCategorySheet: View {
                         .lineLimit(1...3)
                         .multilineTextAlignment(.leading)
                 }
+                Section("Category Description") {
+                    TextField("i.e. Sports activities, events, and fitness tasks.", text: $newCategoryDescription, axis: .vertical)
+                        .submitLabel(.done)
+                        .lineLimit(1...3)
+                        .multilineTextAlignment(.leading)
+                }
             }
             .navigationTitle("New Category")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
                         newCategoryName = ""
+                        newCategoryDescription = ""
                         isPresented = false
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     let isSaveDisabled = newCategoryName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                     Button("Save") {
-                        let trimmed = newCategoryName.trimmingCharacters(in: .whitespacesAndNewlines)
-                        guard !trimmed.isEmpty else { return }
+                        let trimmedName = newCategoryName.trimmingCharacters(in: .whitespacesAndNewlines)
+                        let trimmedDescription = newCategoryDescription.trimmingCharacters(in: .whitespacesAndNewlines)
+                        guard !trimmedName.isEmpty else { return }
+                        guard !trimmedDescription.isEmpty else { return }
                         
                         // If the category exists in inactive, activate it
                         if let matching = inactiveCategories.first(where: { category in
-                            category.name.compare(trimmed, options: .caseInsensitive) == .orderedSame
+                            category.name.compare(trimmedName, options: .caseInsensitive) == .orderedSame
                         }) {
                             matching.isActive = true
                         }
                         // If it's a new unique category, insert it as active
                         else if !activeCategories.contains(where: { category in
-                            category.name.lowercased() == trimmed.lowercased()
+                            category.name.lowercased() == trimmedName.lowercased()
                         }) {
-                            let category = Category(name: trimmed, isActive: true)
+                            let category = Category(name: trimmedName, categoryDescription: trimmedDescription, isActive: true)
                             context.insert(category)
                         }
                         
                         newCategoryName = ""
+                        newCategoryDescription = ""
                         isPresented = false
                     }
                     .tint(isSaveDisabled ? .secondary : .blue)
