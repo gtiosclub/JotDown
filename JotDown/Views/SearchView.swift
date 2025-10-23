@@ -22,7 +22,6 @@ struct SearchView: View {
     // Only searches after .5 seconds of stopped typing
     @State private var searchDebounceWorkItem: DispatchWorkItem?
     private let delayToSearch = 0.5
-    @Binding var selectedTab: Int
 
 
     var body: some View {

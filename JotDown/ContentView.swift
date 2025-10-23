@@ -11,7 +11,6 @@ import SwiftUI
 struct ContentView: View {
     @State private var isShowingProfileView = false
     @State private var isShowingThoughtEntry = true
-    @State private var selectedTab: Int = 0
     @Environment(\.modelContext) private var context
     @Query var users: [User]
     @State private var searchText: String = ""
@@ -44,7 +43,7 @@ struct ContentView: View {
                 Image("Visualize")
                     .renderingMode(.template)
             }
-
+            
             Tab {
                 NavigationStack {
                     ProfileView()
@@ -53,7 +52,7 @@ struct ContentView: View {
                 Image("User")
                     .renderingMode(.template)
             }
-
+            
             Tab(role: .search) {
                 NavigationStack {
                     SearchView(searchText: $searchText)
@@ -64,8 +63,9 @@ struct ContentView: View {
                 Image("Search")
                     .renderingMode(.template)
             }
-            // to change tab icon color onSelected add:
-            // .tint(.gray)
+        }
+        // to change tab icon color onSelected add:
+        // .tint(.gray)
     }
 }
 
