@@ -133,8 +133,6 @@ struct ProfileView: View {
                         inactiveCategories: inactiveCategories
                     )
                 }
-                
-                Spacer()
             }
         }
     }

@@ -87,7 +87,7 @@ struct SearchView: View {
             }
             .navigationTitle("Search")
             
-            Spacer()
+//            Spacer()
         }
     }
     

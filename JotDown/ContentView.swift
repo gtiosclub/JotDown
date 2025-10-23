@@ -56,6 +56,7 @@ struct ContentView: View {
                 Tab(role: .search) {
                     NavigationStack {
                         SearchView(searchText: $searchText)
+                            .searchable(text: $searchText)
                             .navigationTitle("Search")
                     }
                 } label: {
@@ -63,7 +64,6 @@ struct ContentView: View {
                         .renderingMode(.template)
                 }
             }
-            .searchable(text: $searchText)
             // to change tab icon color onSelected add:
             // .tint(.gray)
     }
