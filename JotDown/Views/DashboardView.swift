@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct DashboardView: View {
-    @Query(sort: \Category.name) private var categories: [Category]
+    @Query(filter: #Predicate<Category> { $0.isActive == true }) private var categories: [Category]
     @Query var thoughts: [Thought]
     @Binding var selectedTab: Int
 
@@ -19,6 +19,15 @@ struct DashboardView: View {
         GridItem(.flexible(), spacing: 0)
     ]
     
+    // Categories sorted by number of notes (descending)
+    private var sortedCategories: [Category] {
+        categories.sorted { lhs, rhs in
+            let leftCount = thoughts.filter { $0.category == lhs }.count
+            let rightCount = thoughts.filter { $0.category == rhs }.count
+            return leftCount > rightCount
+        }
+    }
+
     // Formatter for the live date display
     private var formattedDate: String {
         let formatter = DateFormatter()
@@ -88,7 +97,7 @@ struct DashboardView: View {
                 // MARK: - Scrollable Grid
                 ScrollView {
                     LazyVGrid(columns: columns, spacing: 24) {
-                        ForEach(categories) { category in
+                        ForEach(sortedCategories) { category in
                             NavigationLink(destination: CategoryDashboardView(category: category)) {
                                 NoteCategoryView(category: category)
                                     .scaleEffect(0.8)
@@ -100,7 +109,9 @@ struct DashboardView: View {
                     .padding(.top, 40)
                 }
             }
+            .padding(.top, 40)
         }
         CustomTabBar(selectedTab: $selectedTab)
     }
 }
+

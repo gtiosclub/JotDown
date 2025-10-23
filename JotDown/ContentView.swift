@@ -33,9 +33,7 @@ struct ContentView: View {
                     }
                 }
             case 1:
-                NavigationStack {
-                    DashboardView(selectedTab: $selectedTab)
-                }
+                DashboardView(selectedTab: $selectedTab)
             case 2:
                 NavigationStack {
                     SearchView(selectedTab: $selectedTab)
