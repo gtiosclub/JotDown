@@ -10,25 +10,24 @@ import SwiftUI
 
 struct HomeView: View {
     @Query(sort: \Thought.dateCreated, order: .reverse) var thoughts: [Thought]
+    @Query private var categories: [Category]
     @Environment(\.modelContext) private var context
-    @State var text: String = ""
+    @Environment(\.dismiss) private var dismiss
+    @State var thoughtInput: String = ""
     @State private var selectedIndex: Int? = 0
-    @Binding var selectedTab: Int
     @FocusState private var isFocused: Bool
+    @State var isSubmitting = false
     
     var body: some View {
         VStack(spacing: 0) {
             
             Spacer()
             
-            HeaderHomeView(thoughtInput: $text, selectedIndex: $selectedIndex, isFocused: _isFocused)
-            ThoughtCardsList(thoughts: thoughts, text: $text, selectedIndex: $selectedIndex, isFocused: _isFocused)
+            HeaderHomeView(thoughtInput: $thoughtInput, selectedIndex: $selectedIndex, isSubmitting: $isSubmitting, isFocused: _isFocused, addThought: addThought)
+            ThoughtCardsList(thoughts: thoughts, text: $thoughtInput, selectedIndex: $selectedIndex, isFocused: _isFocused, addThought: addThought)
             FooterHomeView(noteCount: thoughts.count, date: selectedIndex != nil && selectedIndex != 0 ? thoughts[selectedIndex! - 1].dateCreated : Date())
             
             Spacer()
-            
-            //Tab Bar
-            CustomTabBar(selectedTab: $selectedTab)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background {
@@ -45,5 +44,23 @@ struct HomeView: View {
         .onTapGesture {
             isFocused = false
         }
+    }
+    
+    func addThought() async throws -> Void {
+        isFocused = false
+        await MainActor.run { isSubmitting = true }
+        defer {
+            Task { await MainActor.run { isSubmitting = false } }
+        }
+
+        let thought = Thought(content: thoughtInput)
+
+        try? await Categorizer()
+            .categorizeThought(thought, categories: categories)
+
+        context.insert(thought)
+        dismiss()
+        
+        thoughtInput = ""
     }
 }
