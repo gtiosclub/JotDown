@@ -25,6 +25,9 @@ struct ContentView: View {
                 .sheet(isPresented: $isShowingProfileView) {
                     ProfileView(selectedTab: $selectedTab)
                 }
+                .sheet(isPresented: $isShowingThoughtEntry) {
+                        ThoughtsEntryView()
+                    }
                 .onAppear {
                     if users.isEmpty {
                         let defaultUser = User(name: "", bio: "")
@@ -45,6 +48,20 @@ struct ContentView: View {
                     HomeView(selectedTab: $selectedTab)
                 }
                 
+            }
+        }
+        .onOpenURL { url in
+            print("📱 Received URL: \(url)")
+            guard url.scheme?.lowercased() == "jotdown" else {
+                return
+            }
+            
+            if url.host?.lowercased() == "new" {
+                print("Opening new thought entry")
+                selectedTab = 0
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    isShowingThoughtEntry = true
+                }
             }
         }
     }
