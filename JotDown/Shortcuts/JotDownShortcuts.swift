@@ -9,14 +9,25 @@ import AppIntents
 
 struct JotDownShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
-        AppShortcut(
-            intent: NewThoughtShortcut(),
-            phrases: [
-                "New thought in \(.applicationName)",
-                "\(.applicationName) New thought"
-            ],
-            shortTitle: "New Thought",
-            systemImageName: "square.and.pencil"
-        )
+        return [
+            AppShortcut(
+                intent: NewThoughtShortcut(),
+                phrases: [
+                    "New thought in \(.applicationName)",
+                    "\(.applicationName) New thought"
+                ],
+                shortTitle: "New Thought",
+                systemImageName: "square.and.pencil"
+            ),
+            AppShortcut(
+                intent: ReadNotesInCategoryShortcut(),
+                phrases: [
+                    "Read thoughts from \(.applicationName)",
+                    "\(.applicationName) Read thoughts"
+                ],
+                shortTitle: "Read Thoughts",
+                systemImageName: "text.bubble"
+            )
+        ]
     }
 }
