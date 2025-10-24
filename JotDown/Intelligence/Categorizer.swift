@@ -14,7 +14,23 @@ class Categorizer {
     let session = FoundationModels.LanguageModelSession()
     
     func categorizeThought(_ thought: Thought, categories: [Category]) async throws {
-        let prompt = "Using this array of categories: [\(categories.enumerated().map { $0.element.name }.joined(separator: ", "))], which category do you think the thought '\(thought.content)' fits best in? If unsure of which category it fits in, please return 'Other'. Return only the name of the best category of fit and nothing else."
+        let prompt = """
+            You are an expert classifier whose task is to assign a given “thought” to exactly one category from a provided list.
+
+            Categories:
+            \(categories.map { "- \($0.name): \($0.categoryDescription)" }.joined(separator: "\n"))
+
+            Thought: "\(thought.content)"
+
+            Task:
+            - Choose the single most relevant category that best fits the meaning or intent of the thought.
+            - Base your choice only on the meaning and context of the thought.
+
+            Output rule:
+            Respond only with the exact name of the chosen category — no explanations or extra text.
+            """
+        
+        print(prompt)
         
         let categoryName = try await session.respond(to: prompt)
         var categoryIndex: Int?
