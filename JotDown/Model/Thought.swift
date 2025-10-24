@@ -18,7 +18,7 @@ class Thought {
     init(content: String) {
         self.dateCreated = Date()
         self.content = content
-        self.category = Category(name: "Dummy")
+        self.category = Category(name: "Dummy", categoryDescription: "Dummy Description")
         self.vectorEmbedding = RAGSystem().getEmbedding(for: content)
     }
 }
