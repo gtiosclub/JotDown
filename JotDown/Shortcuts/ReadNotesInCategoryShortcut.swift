@@ -29,13 +29,17 @@ struct ReadNotesInCategoryShortcut: AppIntent {
         )
 
         do {
-            let thoughts = try context.fetch(thoughtDescriptor)
+            var thoughts = try context.fetch(thoughtDescriptor)
             let noteContents = thoughts.map(\.content)
 
             guard !noteContents.isEmpty else {
                 return .result(
                     dialog: IntentDialog("There are no notes in \(category).")
                 )
+            }
+            
+            if thoughts.count > 5 {
+                thoughts = Array(thoughts.prefix(5))
             }
 
             let combined = noteContents.joined(separator: ", ")
