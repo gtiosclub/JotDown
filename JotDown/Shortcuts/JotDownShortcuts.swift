@@ -27,6 +27,16 @@ struct JotDownShortcuts: AppShortcutsProvider {
                 ],
                 shortTitle: "Read Thoughts",
                 systemImageName: "text.bubble"
+            ),
+            AppShortcut(
+                intent: ReadLatestThoughtShortcut(),
+                phrases: [
+                    "Read my latest thought in \(.applicationName)",
+                    "\(.applicationName) Read recent thought",
+                    "Read my recent thought in \(.applicationName)"
+                ],
+                shortTitle: "Read Latest Thought",
+                systemImageName: "clock"
             )
         ]
     }
