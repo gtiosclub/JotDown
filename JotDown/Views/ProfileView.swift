@@ -18,7 +18,6 @@ struct ProfileView: View {
     @State private var isShowingAddCategoriesSheet: Bool = false
     @State private var newCategoryName: String = ""
     @State private var newCategoryDescription: String = ""
-    @Binding var selectedTab: Int
     
     private var activeCategories: [Category] {
         categories
@@ -121,11 +120,6 @@ struct ProfileView: View {
                 }
                 
                 .navigationTitle("Profile")
-                .toolbar {
-                    Button(role: .close) {
-                        dismiss()
-                    }
-                }
                 //Presents the sheet to the user allowing them to add their custom categories
                 .sheet(isPresented: $isShowingAddCategoriesSheet) {
                     AddCategorySheet(
@@ -136,11 +130,6 @@ struct ProfileView: View {
                         inactiveCategories: inactiveCategories
                     )
                 }
-                
-                Spacer()
-                
-                //Tab Bar
-                CustomTabBar(selectedTab: $selectedTab)
             }
         }
     }
@@ -224,7 +213,7 @@ private struct AddCategorySheet: View {
         let previewUser = User(name: "Preview User", bio: "Loves iOS dev")
         context.insert(previewUser)
 
-        return ProfileView(selectedTab: .constant(2))
+        return ProfileView()
             .modelContainer(container)
 }
 
