@@ -14,11 +14,13 @@ class Categorizer {
     let session = FoundationModels.LanguageModelSession()
     
     func categorizeThought(_ thought: Thought, categories: [Category]) async throws {
+        let filteredCategories = categories.filter{ $0.isActive }
+        
         let prompt = """
             You are an expert classifier whose task is to assign a given “thought” to exactly one category from a provided list.
 
             Categories:
-            \(categories.map { "- \($0.name): \($0.categoryDescription)" }.joined(separator: "\n"))
+            \(filteredCategories.map { "- \($0.name): \($0.categoryDescription)" }.joined(separator: "\n"))
 
             Thought: "\(thought.content)"
 
@@ -34,7 +36,7 @@ class Categorizer {
         
         let categoryName = try await session.respond(to: prompt)
         var categoryIndex: Int?
-        for (index, category) in categories.enumerated() where category.name.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) == categoryName.content.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) {
+        for (index, category) in filteredCategories.enumerated() where category.name.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) == categoryName.content.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) {
             categoryIndex = index
         }
         guard let index = categoryIndex else {
