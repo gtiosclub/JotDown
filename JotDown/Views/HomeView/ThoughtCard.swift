@@ -9,6 +9,7 @@ import SwiftUI
 struct ThoughtCard: View {
     var thought: Thought
     @Environment(\.modelContext) private var context
+    @Namespace private var namespace
     
     private static let timeFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -45,7 +46,7 @@ struct ThoughtCard: View {
                    Spacer()
                    
                    if (thought.category.isActive) {
-                       NavigationLink(destination: CategoryDashboardView(category: thought.category)) {
+                       NavigationLink(destination: CategoryDashboardView(category: thought.category, namespace: namespace)) {
                            HStack(spacing: 2) {
                                Text(thought.category.name)
                                    .font(.system(size: 16, weight: .regular))
@@ -77,3 +78,4 @@ struct ThoughtCard: View {
        .frame(width: 251, height: 472)
     }
 }
+

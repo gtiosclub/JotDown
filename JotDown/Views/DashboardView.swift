@@ -12,6 +12,9 @@ struct DashboardView: View {
     @Query(filter: #Predicate<Category> { $0.isActive == true }) private var categories: [Category]
     @Query var thoughts: [Thought]
 
+    @State private var selectedCategory: Category?
+    @Namespace private var dashboardNamespace
+    
     // two-column grid layout.
     let columns: [GridItem] = [
         GridItem(.flexible(), spacing: 0),
@@ -35,81 +38,106 @@ struct DashboardView: View {
     }
 
     var body: some View {
-        NavigationView {
-            VStack(alignment: .leading, spacing: 24) {
-                // MARK: - Header Content
-                HStack {
-                    VStack(alignment: .leading) {
-                        Text("jot")
-                            .font(.system(size: 40, weight: .bold))
-                            .foregroundColor(.black.opacity(0.9))
-                        Text("down")
-                            .font(.system(size: 40, weight: .regular))
-                            .foregroundColor(.gray)
+        ZStack {
+            // Main dashboard content when no category is selected
+            if selectedCategory == nil {
+                VStack(alignment: .leading, spacing: 24) {
+                    // MARK: - Header Content
+                    HStack {
+                        VStack(alignment: .leading) {
+                            Text("jot")
+                                .font(.system(size: 40, weight: .bold))
+                                .foregroundColor(.black.opacity(0.9))
+                            Text("down")
+                                .font(.system(size: 40, weight: .regular))
+                                .foregroundColor(.gray)
+                        }
+                        .matchedGeometryEffect(id: "logo", in: dashboardNamespace) // <-- Tag logo
+                        Spacer()
+                        Button("edit") { }
+                            .font(.system(size: 12, weight: .regular))
+                            .foregroundColor(.black.opacity(0.7))
+                            .font(.body.weight(.medium))
+                            .padding(.horizontal, 15)
+                            .padding(.vertical, 8)
+                            .background(Color.gray.opacity(0.15))
+                            .clipShape(Capsule())
+                            .alignmentGuide(.bottom) { d in d[.bottom] }
                     }
-                    Spacer()
-                    Button("edit") { }
-                        .font(.system(size: 12, weight: .regular))
-                        .foregroundColor(.black.opacity(0.7))
-                        .font(.body.weight(.medium))
-                        .padding(.horizontal, 15)
-                        .padding(.vertical, 8)
-                        .background(Color.gray.opacity(0.15))
-                        .clipShape(Capsule())
-                        .alignmentGuide(.bottom) {d in d[.bottom] }
-                }
-                .padding(.horizontal)
+                    .padding(.horizontal)
 
-                // MARK: - Stats Content
-                HStack {
-                    VStack(alignment: .leading) {
-                        Text("\(thoughts.count)")
-                            .font(.title)
-                            .fontWeight(.bold)
-                        Text("notes")
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
+                    // MARK: - Stats Content
+                    HStack {
+                        VStack(alignment: .leading) {
+                            Text("\(thoughts.count)")
+                                .font(.title)
+                                .fontWeight(.bold)
+                            Text("notes")
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                        }
+                        .matchedGeometryEffect(id: "notes-stat", in: dashboardNamespace)
+                        Spacer()
+                        VStack(alignment: .leading) {
+                            Text("\(categories.count)")
+                                .font(.title)
+                                .fontWeight(.bold)
+                            Text("categories")
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                        }
+                        .matchedGeometryEffect(id: "categories-stat", in: dashboardNamespace)
+                        Spacer()
+                        Spacer()
+                        Spacer()
+                        VStack(alignment: .trailing) {
+                            Text(formattedDate)
+                                .font(.subheadline)
+                                .fontWeight(.bold)
+                            Text("date")
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                        }
+                        .matchedGeometryEffect(id: "date-stat", in: dashboardNamespace)
                     }
-                    Spacer()
-                    VStack(alignment: .leading) {
-                        Text("\(categories.count)")
-                            .font(.title)
-                            .fontWeight(.bold)
-                        Text("categories")
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
-                    }
-                    Spacer()
-                    Spacer()
-                    Spacer()
-                    VStack(alignment: .trailing) {
-                        Text(formattedDate)
-                            .font(.subheadline)
-                            .fontWeight(.bold)
-                        Text("date")
-                            .font(.caption)
-                            .foregroundColor(.gray)
-                    }
-                }
-                .padding(.horizontal)
+                    .padding(.horizontal)
 
-                // MARK: - Scrollable Grid
-                ScrollView {
-                    LazyVGrid(columns: columns, spacing: 24) {
-                        ForEach(sortedCategories) { category in
-                            NavigationLink(destination: CategoryDashboardView(category: category)) {
-                                NoteCategoryView(category: category)
+                    // MARK: - Scrollable Grid
+                    ScrollView {
+                        LazyVGrid(columns: columns, spacing: 24) {
+                            ForEach(sortedCategories) { category in
+                                NoteCategoryView(category: category, namespace: dashboardNamespace)
                                     .scaleEffect(0.8)
+                                    .onTapGesture {
+                                        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                                            selectedCategory = category
+                                        }
+                                    }
                             }
-                            .buttonStyle(PlainButtonStyle())
+                            .padding(.top, 25)
                         }
                     }
                     .padding(.horizontal)
                     .padding(.top, 40)
                 }
+                .padding(.top, 40)
+                .transition(.opacity)
             }
-            .padding(.top, 40)
+
+            // Selected category overlay
+            if let selectedCategory {
+                CategoryDashboardView(
+                    category: selectedCategory,
+                    namespace: dashboardNamespace,
+                    onDismiss: {
+                        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                            self.selectedCategory = nil
+                        }
+                    }
+                )
+                .transition(.identity)
+            }
         }
+        .animation(.spring(response: 0.45, dampingFraction: 0.8), value: selectedCategory)
     }
 }
-

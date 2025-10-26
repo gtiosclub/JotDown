@@ -8,16 +8,17 @@
 import SwiftUI
 import SwiftData
 
-// TO DO: IMPLEMENT THE CATEGORY DASHBOARD SCREEN HERE
-
 struct CategoryDashboardView: View {
-    
     let category: Category
+    let namespace: Namespace.ID
+    var onDismiss: () -> Void
     
     @Query private var thoughts: [Thought]
     
-    init(category: Category) {
+    init(category: Category, namespace: Namespace.ID, onDismiss: @escaping () -> Void = {}) {
         self.category = category
+        self.namespace = namespace
+        self.onDismiss = onDismiss
         let categoryName = category.name
         self._thoughts = Query(filter: #Predicate<Thought> { thought in
             thought.category.name == categoryName
@@ -27,6 +28,17 @@ struct CategoryDashboardView: View {
     private let columns: [GridItem] = [ GridItem(.flexible(), spacing: 16),
         GridItem(.flexible(), spacing: 16)
     ]
+    
+    private static var dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM, E d" // Match DashboardView's format
+        return formatter
+    }()
+    
+    private var sortedThoughts: [Thought] {
+            thoughts.sorted { $0.dateCreated > $1.dateCreated }
+    }
+    
     var body: some View {
         ZStack {
             LinearGradient(
@@ -40,11 +52,18 @@ struct CategoryDashboardView: View {
                 headerView
                     .padding(.horizontal, 24)
                     .padding(.top, 40)
+                Text(category.name)
+                    .font(.system(size: 48, weight: .semibold))
+                    .foregroundColor(.black)
+                    .padding(.top, 12)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .matchedGeometryEffect(id: "\(category.id)-title", in: namespace)
                 ScrollView {
                     LazyVGrid(columns: columns, spacing: 16){
-                        ForEach(thoughts) { thought in
+                        ForEach(sortedThoughts) { thought in
                             CategoryItemView(thought: thought)
                                 .aspectRatio(1.0, contentMode: .fit)
+                                .matchedGeometryEffect(id: thought.id, in: namespace)
                         }
                     }
                     .padding()
@@ -52,69 +71,78 @@ struct CategoryDashboardView: View {
             }
         }
     }
+    
     private var headerView: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: -6) {
-                    Text("jot")
-                        .font(.custom("SF Pro", size: 48))
-                        .fontWeight(.medium)
-                        .lineSpacing(48 * 0.5)
-                        .tracking(-48 * 0.011)
-                        .foregroundColor(Color(red: 55/255, green: 55/255, blue: 55/255));
-                    
-                    Text("down")
-                           .font(.custom("SF Pro", size: 48))
-                           .fontWeight(.medium)
-                           .tracking(-48 * 0.011)
-                           .lineSpacing(48 * 0.5)
-                           .foregroundColor(Color(red: 197/255, green: 197/255, blue: 197/255));
-                }
-                
-                Spacer()
-                
-                VStack(alignment: .trailing, spacing: 8) {
-                    Button("edit") {}
-                        .font(.system(size: 12, weight: .regular))
-                        .foregroundColor(.black)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 6)
-                        .background(Color.white)
-                        .clipShape(Capsule())
-                        .shadow(color: .black.opacity(0.1), radius: 2, y: 1)
-                        .alignmentGuide(.bottom) {d in d[.bottom] }
-                }
-            }
+        VStack(spacing: 24) {
+            // --- Header Content (Logo & Button) ---
             HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("\(thoughts.count)")
-                        .font(.system(size: 18, weight: .medium))
-                        .foregroundColor(.black)
-                    Text("notes")
-                        .font(.system(size: 12, weight: .regular))
+                VStack(alignment: .leading) {
+                    Text("jot")
+                        .font(.system(size: 40, weight: .bold))
+                        .foregroundColor(.black.opacity(0.9))
+                    Text("down")
+                        .font(.system(size: 40, weight: .regular))
                         .foregroundColor(.gray)
                 }
+                .matchedGeometryEffect(id: "logo", in: namespace)
+
                 Spacer()
-                
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text(Date.now.formatted(
-                        Date.FormatStyle()
-                            .month(.abbreviated)
-                            .weekday(.abbreviated)
-                            .day()
-                    ))
-                    .font(.system(size: 18, weight: .medium))
-                    .foregroundColor(.gray)
-                }
+
+                Button("back") { onDismiss() }
+                    .font(.system(size: 12, weight: .regular))
+                    .foregroundColor(.black.opacity(0.7))
+                    .font(.body.weight(.medium))
+                    .padding(.horizontal, 15)
+                    .padding(.vertical, 8)
+                    .background(Color.gray.opacity(0.15))
+                    .clipShape(Capsule())
+                    .alignmentGuide(.bottom) {d in d[.bottom] }
+                    .matchedGeometryEffect(id: "header-button", in: namespace)
             }
             
-            Text(category.name)
-                .font(.system(size: 48, weight: .semibold))
-                .foregroundColor(.black)
-                .padding(.top, 12)
-                .frame(maxWidth: .infinity, alignment: .center)
+            // --- Stats Content (Notes, Category, Date) ---
+            HStack {
+                VStack(alignment: .leading) {
+                    Text("\(thoughts.count)")
+                        .font(.title)
+                        .fontWeight(.bold)
+                    Text("notes")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                }
+                .matchedGeometryEffect(id: "notes-stat", in: namespace)
+
+                Spacer()
+
+                VStack {}
+                    .matchedGeometryEffect(id: "categories-stat", in: namespace)
+                    .opacity(0) // Make it invisible
+
+                Spacer()
+                Spacer()
+                Spacer()
+
+                VStack(alignment: .trailing) {
+                    Text(Date.now, formatter: Self.dateFormatter)
+                        .font(.subheadline)
+                        .fontWeight(.bold)
+                    Text("date")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                }
+                .matchedGeometryEffect(id: "date-stat", in: namespace)
+            }
         }
     }
+}
+
+struct NamespaceReader<Content: View>: View {
+    @Namespace private var ns
+    let content: (Namespace.ID) -> Content
+    init(@ViewBuilder content: @escaping (Namespace.ID) -> Content) {
+        self.content = content
+    }
+    var body: some View { content(ns) }
 }
 
 #Preview {
@@ -145,7 +173,10 @@ struct CategoryDashboardView: View {
     
     // Return the preview view
     return NavigationStack {
-        CategoryDashboardView(category: category)
+        NamespaceReader { ns in
+            CategoryDashboardView(category: category, namespace: ns)
+        }
     }
     .modelContainer(container)
 }
+

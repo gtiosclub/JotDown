@@ -10,11 +10,13 @@ import SwiftData
 
 struct NoteCategoryView: View {
     let category: Category
+    let namespace: Namespace.ID
     @Query var thoughts: [Thought]
 
     // initializer to set up the filter for the @Query
-    init(category: Category) {
+    init(category: Category, namespace: Namespace.ID) {
         self.category = category
+        self.namespace = namespace
         let categoryName = category.name
         // filter for category name
         let predicate = #Predicate<Thought> { thought in
@@ -55,11 +57,11 @@ struct NoteCategoryView: View {
 
     var body: some View {
         VStack(alignment: .center, spacing: 12) {
-            ZStack {
-                // TO DO: Figure out if we want to only show x cards if x < 3 or just have blank cards
+            ZStack(alignment: .bottom) {
                 // Back Card (Right) - 3rd newest note
                 if thoughts.count > 2 {
                     noteCard(text: thoughts[2].content)
+                        .matchedGeometryEffect(id: thoughts[2].id, in: namespace)
                         .rotationEffect(.degrees(10))
                         .offset(x: 50, y: -50)
                 } else {
@@ -71,6 +73,7 @@ struct NoteCategoryView: View {
                 // Middle Card (Left) - 2nd newest note
                 if thoughts.count > 1 {
                     noteCard(text: thoughts[1].content)
+                        .matchedGeometryEffect(id: thoughts[1].id, in: namespace)
                         .rotationEffect(.degrees(-10))
                         .offset(x: -50, y: -75)
                 } else {
@@ -82,6 +85,7 @@ struct NoteCategoryView: View {
                 // Front Card (Center) - Newest note
                 if let newestThought = thoughts.first {
                     noteCard(text: newestThought.content)
+                        .matchedGeometryEffect(id: newestThought.id, in: namespace)
                 } else {
                     noteCard(text: "")
                 }
@@ -89,11 +93,12 @@ struct NoteCategoryView: View {
             .scaleEffect(0.8)
             .compositingGroup()
             .shadow(color: .black.opacity(0.1), radius: 5, y: 4)
-            .frame(height: 150)
+            .frame(height: 150, alignment: .bottom)
 
             HStack(spacing: 4) {
                 Text(category.name)
                     .font(.headline)
+                    .matchedGeometryEffect(id: "\(category.id)-title", in: namespace)
                 // Text(category.emoji)
                 // TO DO: have foundation models create an emoji for the category
             }
@@ -107,6 +112,7 @@ struct NoteCategoryView: View {
                 .padding(.vertical, 5)
                 .background(Color.gray.opacity(0.15))
                 .clipShape(Capsule())
+                .matchedGeometryEffect(id: "\(category.id)-count", in: namespace)
         }
     }
 }
