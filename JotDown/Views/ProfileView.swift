@@ -16,8 +16,10 @@ struct ProfileView: View {
     @Query var categories: [Category]
     @State private var showArchivedCategories: Bool = false
     @State private var isShowingAddCategoriesSheet: Bool = false
+    @State private var isShowingEditCategoriesSheet: Bool = false
     @State private var newCategoryName: String = ""
     @State private var newCategoryDescription: String = ""
+    @State private var selectedCategory: Category? = nil
     
     private var activeCategories: [Category] {
         categories
@@ -56,6 +58,12 @@ struct ProfileView: View {
                         ForEach(activeCategories) { category in
                             Text(category.name)
                                 .foregroundColor(category.name == "Other" ? .gray : .primary)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    isShowingEditCategoriesSheet = true
+                                    selectedCategory = category
+                                }
                                 .swipeActions (allowsFullSwipe: true){
                                     if category.name != "Other" {
                                         Button(role: .destructive) {
@@ -129,6 +137,11 @@ struct ProfileView: View {
                         activeCategories: activeCategories,
                         inactiveCategories: inactiveCategories
                     )
+                }
+                .sheet(isPresented: $isShowingEditCategoriesSheet) {
+                    if let binding = Binding($selectedCategory) {
+                        EditCategorySheet(category: binding, isPresented: $isShowingEditCategoriesSheet)
+                    }
                 }
             }
         }
@@ -205,6 +218,57 @@ private struct AddCategorySheet: View {
         }
     }
 }
+
+// Struct to edit a category description
+private struct EditCategorySheet: View {
+    @Environment(\.modelContext) private var context
+    @Binding var category: Category
+    @Binding var isPresented: Bool
+    
+    @State private var newCategoryDescription: String
+
+        init(category: Binding<Category>, isPresented: Binding<Bool>) {
+            _category = category
+            _isPresented = isPresented
+            _newCategoryDescription = State(initialValue: category.wrappedValue.categoryDescription)
+        }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Edit Description") {
+                    TextField("i.e. Sports activities, events, and fitness tasks.", text: $newCategoryDescription, axis: .vertical)
+                        .submitLabel(.done)
+                        .lineLimit(1...3)
+                        .multilineTextAlignment(.leading)
+                }
+            }
+            .navigationTitle(category.name)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        newCategoryDescription = ""
+                        isPresented = false
+                    }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    let isSaveDisabled = newCategoryDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || newCategoryDescription.trimmingCharacters(in: .whitespacesAndNewlines) == category.categoryDescription.trimmingCharacters(in: .whitespacesAndNewlines)
+                    Button("Save") {
+                        guard !newCategoryDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+                        
+                        category.categoryDescription = newCategoryDescription.trimmingCharacters(in: .whitespacesAndNewlines)
+                        
+                        newCategoryDescription = ""
+                        isPresented = false
+                    }
+                    .tint(isSaveDisabled ? .secondary : .blue)
+                    .disabled(isSaveDisabled)
+                }
+            }
+        }
+    }
+}
+
 
 #Preview {
     let config = ModelConfiguration(isStoredInMemoryOnly: true)
