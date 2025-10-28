@@ -33,6 +33,13 @@ struct ContentView: View {
             }
             
             Tab {
+                DashboardView()
+            } label: {
+                Image("Dashboard")
+                    .renderingMode(.template)
+            }
+            
+            Tab {
                 NavigationStack {
                     ProfileView()
                 }
@@ -51,6 +58,7 @@ struct ContentView: View {
                 Image("Search")
                     .renderingMode(.template)
             }
+            
         }
         // to change tab icon color onSelected add:
         // .tint(.gray)
