@@ -29,11 +29,11 @@ class CategoryGenerator {
         
         
         for category in response.content.categories {
-            let newCategory = Category(name: category.name, isActive: true)
+            let newCategory = Category(name: category.name, categoryDescription: category.categoryDescription, isActive: true)
             categoryArray.append(newCategory)
         }
         
-        categoryArray.append(Category(name: "Other", isActive: true))
+        categoryArray.append(Category(name: "Other", categoryDescription: "Other Category", isActive: true))
         
         return categoryArray
     }
@@ -50,5 +50,7 @@ class CategoryGenerator {
     struct GeneratedCategory {
         @Guide(description: "Clear, concise one word category name")
         var name: String
+        @Guide(description: "Clear, concise description of the category")
+        var categoryDescription: String
     }
 }
