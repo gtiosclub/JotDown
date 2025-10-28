@@ -8,11 +8,12 @@ import SwiftUI
 import SwiftData
 
 struct ThoughtCardsList: View {
+    @Environment(\.modelContext) private var context
     var thoughts: [Thought]
     @Binding var text: String
     @Binding var selectedIndex: Int?
     @FocusState var isFocused: Bool
-    @Environment(\.modelContext) private var context
+    let addThought: () async throws -> Void
 
     
     var body: some View {
@@ -28,7 +29,7 @@ struct ThoughtCardsList: View {
             ScrollViewReader { scrollProxy in
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(alignment: .center, spacing: 16) {
-                        WritableThoughtCard(text: $text, isFocused: _isFocused)
+                        WritableThoughtCard(text: $text, isFocused: _isFocused, addThought: addThought)
                             .id(0)
                         
                         ForEach(thoughts.indices, id: \.self) { index in
