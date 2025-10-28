@@ -153,7 +153,7 @@ struct NamespaceReader<Content: View>: View {
     )
     
     // Create a fake category
-    let category = Category(name: "Recipes")
+    let category = Category.dummyCategories.first!
     container.mainContext.insert(category)
     
     // Add sample thoughts, and assign them to the fake category
