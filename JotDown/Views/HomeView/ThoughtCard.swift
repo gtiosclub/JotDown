@@ -9,6 +9,7 @@ import SwiftUI
 struct ThoughtCard: View {
     var thought: Thought
     @Environment(\.modelContext) private var context
+    @Namespace private var namespace
     
     private static let timeFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -43,22 +44,31 @@ struct ThoughtCard: View {
                        .lineLimit(1)
                        .truncationMode(.tail)
                    Spacer()
-                   Button(action: {
-                       //go to visualization page
-                       print("going to visualization page")
-                   })
-                   {
+                   
+                   if (thought.category.isActive) {
+                       NavigationLink(destination: CategoryDashboardView(category: thought.category, namespace: namespace)) {
+                           HStack(spacing: 2) {
+                               Text(thought.category.name)
+                                   .font(.system(size: 16, weight: .regular))
+                                   .italic()
+                                   .foregroundColor(Color(red: 0.49, green: 0.58, blue: 0.70))
+                                   .lineLimit(1)
+                                   .truncationMode(.tail)
+                               Text("→")
+                                   .font(.system(size: 16, weight: .regular))
+                                   .italic()
+                                   .foregroundColor(Color(red: 0.49, green: 0.58, blue: 0.70))
+                                   .padding(EdgeInsets(top: 0, leading: -2, bottom: 0, trailing: 0))
+                           }
+                       }
+                       .buttonStyle(PlainButtonStyle())
+                   } else {
                        Text(thought.category.name)
-                        .font(.system(size: 16, weight: .regular))
-                        .italic()
-                        .foregroundColor(Color(red: 0.49, green: 0.58, blue: 0.70))
-                        .lineLimit(1)
-                        .truncationMode(.tail)
-                       Text("→")
-                        .font(.system(size: 16, weight: .regular))
-                        .italic()
-                        .foregroundColor(Color(red: 0.49, green: 0.58, blue: 0.70))
-                        .padding(EdgeInsets(top: 0, leading: -2, bottom: 0, trailing: 0))
+                           .font(.system(size: 16, weight: .regular))
+                           .italic()
+                           .foregroundColor(.gray.opacity(0.6))
+                           .lineLimit(1)
+                           .truncationMode(.tail)
                    }
                }
            }
@@ -68,3 +78,4 @@ struct ThoughtCard: View {
        .frame(width: 251, height: 472)
     }
 }
+
