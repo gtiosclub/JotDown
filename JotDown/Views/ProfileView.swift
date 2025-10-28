@@ -142,7 +142,7 @@ struct ProfileView: View {
                 .sheet(isPresented: $isShowingEditCategoriesSheet) {
                     if let binding = Binding($selectedCategory) {
                         CategorySheet(
-                            isAddCategoryInit: false,
+                            isAddCategory: false,
                             category: binding,
                             isPresented: $isShowingEditCategoriesSheet)
                     }
@@ -169,11 +169,11 @@ private struct CategorySheet: View {
     @State private var editCategoryDescription: String
 
     init(
-        isAddCategoryInit: Bool,
+        isAddCategory: Bool,
         category: Binding<Category>,
         isPresented: Binding<Bool>
     ) {
-        self.isAddCategory = isAddCategoryInit
+        self.isAddCategory = isAddCategory
         self._category = category
         self._isPresented = isPresented
         
@@ -202,7 +202,7 @@ private struct CategorySheet: View {
         self.activeCategories = activeCategories
         self.inactiveCategories = inactiveCategories
         
-        // Default bindings for non-relevant properties
+        // These are unused in add mode
         self._category = .constant(Category(name: "", categoryDescription: ""))
         self._editCategoryDescription = State(initialValue: "")
     }
