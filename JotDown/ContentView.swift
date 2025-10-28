@@ -21,9 +21,6 @@ struct ContentView: View {
                 NavigationStack {
                     HomeView()
                 }
-                .sheet(isPresented: $isShowingThoughtEntry) {
-                        ThoughtsEntryView()
-                    }
                 .onAppear {
                     if users.isEmpty {
                         let defaultUser = User(name: "", bio: "")
