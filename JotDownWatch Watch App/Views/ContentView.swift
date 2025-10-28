@@ -9,10 +9,10 @@ import SwiftData
 import SwiftUI
 
 struct ContentView: View {
-
+    
     var body: some View {
         NavigationStack {
-            VStack {
+            VStack() {
                 Text("JotDown")
                     .font(Font.title.bold())
                 Spacer(minLength: 20)
@@ -22,11 +22,26 @@ struct ContentView: View {
                     Label("Add Thought", systemImage: "plus.circle.fill")
                 }.foregroundStyle(Color(.blue))
                 
-                NavigationLink() {
-                    WatchThoughtsListView()
-                } label: {
-                    Label("View Thoughts", systemImage: "list.bullet")
+                
+                HStack() {
+                    NavigationLink() {
+                        WatchThoughtsListView()
+                    } label: {
+                        Label("Thoughts", systemImage: "list.bullet")
+                    }
+                    .frame(maxWidth: .infinity)
+
+                    
+                    NavigationLink() {
+                        WatchSearchView()
+                    } label: {
+                        Image(systemName: "sparkle.magnifyingglass")
+                            .font(Font.title3)
+                    }.frame(width: 50)
+                        .foregroundStyle(Color(.yellow))
+                        .clipShape(Capsule())
                 }
+                
             }.padding()
         }
     }

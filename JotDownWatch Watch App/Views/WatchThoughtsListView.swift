@@ -11,11 +11,18 @@ import SwiftUI
 struct WatchThoughtsListView: View {
     
     @ObservedObject private var watchSession = WatchSessionManager.shared
+    var title: String = ""
+    var dataSource: [[String: Any]] {
+        if title == "Thoughts" {
+            return watchSession.thoughts
+        } else {
+            return watchSession.searchResults
+        }
+    }
     
     var body: some View {
-        // TODO: Add functionality to display thoughts from iOS app
         List {
-            if watchSession.thoughts.isEmpty {
+            if dataSource.isEmpty {
                 Text("No thoughts yet")
                     .foregroundStyle(.secondary)
             } else {
@@ -25,20 +32,26 @@ struct WatchThoughtsListView: View {
                             .font(.body)
                             .truncationMode(.tail)
                         
-//                        if let dateStr = item["dateCreated"] as? String {
-//                            Text(Self.formatDate(dateStr))
-//                                .font(.caption2)
-//                                .foregroundStyle(.gray)
-//                        }
+                        //                        if let dateStr = item["dateCreated"] as? String {
+                        //                            Text(Self.formatDate(dateStr))
+                        //                                .font(.caption2)
+                        //                                .foregroundStyle(.gray)
+                        //                        }
                     }
                     .padding(.vertical, 2)
                 }
             }
+            
         }
-        .navigationTitle("Thoughts")
+        .navigationTitle(title)
         .onAppear {
-            watchSession.requestThoughts()
+            if (title == "Thoughts") {
+                watchSession.requestThoughts()
+            } else if (title == "Search Results") {
+                watchSession.requestSearchResults()
+            }
         }
+        
     }
 }
 
