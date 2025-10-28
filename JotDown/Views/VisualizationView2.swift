@@ -12,13 +12,9 @@ struct VisualizationView2: View {
         ScrollView([.horizontal, .vertical]) {
             RadialLayout {
                 Text("test")
+                    .layoutValue(key: CategoryLayoutKey.self, value: "test")
                 Text("test")
-                Text("test")
-                Text("test")
-                Text("test")
-                Text("test")
-                Text("test")
-                Text("test")
+                    .layoutValue(key: CategoryLayoutKey.self, value: "test")
             } .frame(width: 1000, height: 1000)
         }
         .defaultScrollAnchor(.center)
