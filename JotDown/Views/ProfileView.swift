@@ -16,7 +16,10 @@ struct ProfileView: View {
     @Query var categories: [Category]
     @State private var showArchivedCategories: Bool = false
     @State private var isShowingAddCategoriesSheet: Bool = false
+    @State private var isShowingEditCategoriesSheet: Bool = false
     @State private var newCategoryName: String = ""
+    @State private var newCategoryDescription: String = ""
+    @State private var selectedCategory: Category? = nil
     
     private var activeCategories: [Category] {
         categories
@@ -55,6 +58,12 @@ struct ProfileView: View {
                         ForEach(activeCategories) { category in
                             Text(category.name)
                                 .foregroundColor(category.name == "Other" ? .gray : .primary)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    isShowingEditCategoriesSheet = true
+                                    selectedCategory = category
+                                }
                                 .swipeActions (allowsFullSwipe: true){
                                     if category.name != "Other" {
                                         Button(role: .destructive) {
@@ -121,12 +130,22 @@ struct ProfileView: View {
                 .navigationTitle("Profile")
                 //Presents the sheet to the user allowing them to add their custom categories
                 .sheet(isPresented: $isShowingAddCategoriesSheet) {
-                    AddCategorySheet(
+                    CategorySheet(
+                        isAddCategory: true,
                         newCategoryName: $newCategoryName,
+                        newCategoryDescription: $newCategoryDescription,
                         isPresented: $isShowingAddCategoriesSheet,
                         activeCategories: activeCategories,
                         inactiveCategories: inactiveCategories
                     )
+                }
+                .sheet(isPresented: $isShowingEditCategoriesSheet) {
+                    if let binding = Binding($selectedCategory) {
+                        CategorySheet(
+                            isAddCategory: false,
+                            category: binding,
+                            isPresented: $isShowingEditCategoriesSheet)
+                    }
                 }
             }
         }
@@ -134,55 +153,120 @@ struct ProfileView: View {
 }
 
 // Struct to present the add category sheet to users
-private struct AddCategorySheet: View {
+private struct CategorySheet: View {
     @Environment(\.modelContext) private var context
+    var isAddCategory: Bool
 
+    @Binding var category: Category
     @Binding var newCategoryName: String
+    @Binding var newCategoryDescription: String
     @Binding var isPresented: Bool
-
+    
     // These are passed in from ProfileView so the logic can mirror existing behavior
     var activeCategories: [Category]
     var inactiveCategories: [Category]
+    
+    @State private var editCategoryDescription: String
+
+    init(
+        isAddCategory: Bool,
+        category: Binding<Category>,
+        isPresented: Binding<Bool>
+    ) {
+        self.isAddCategory = isAddCategory
+        self._category = category
+        self._isPresented = isPresented
+        
+        // These are unused in edit mode
+        self._newCategoryName = .constant(category.wrappedValue.name)
+        self._newCategoryDescription = .constant(category.wrappedValue.categoryDescription)
+        self.activeCategories = []
+        self.inactiveCategories = []
+        
+        // Default state
+        self._editCategoryDescription = State(initialValue: category.wrappedValue.categoryDescription)
+    }
+    
+    init(
+        isAddCategory: Bool,
+        newCategoryName: Binding<String>,
+        newCategoryDescription: Binding<String>,
+        isPresented: Binding<Bool>,
+        activeCategories: [Category],
+        inactiveCategories: [Category]
+    ) {
+        self.isAddCategory = isAddCategory
+        self._newCategoryName = newCategoryName
+        self._newCategoryDescription = newCategoryDescription
+        self._isPresented = isPresented
+        self.activeCategories = activeCategories
+        self.inactiveCategories = inactiveCategories
+        
+        // These are unused in add mode
+        self._category = .constant(Category(name: "", categoryDescription: ""))
+        self._editCategoryDescription = State(initialValue: "")
+    }
 
     var body: some View {
         NavigationStack {
             Form {
-                Section("Category Name") {
-                    TextField("i.e. Sports", text: $newCategoryName, axis: .vertical)
+                if isAddCategory {
+                    Section("Category Name") {
+                        TextField("i.e. Sports", text: $newCategoryName, axis: .vertical)
+                            .submitLabel(.done)
+                            .lineLimit(1...3)
+                            .multilineTextAlignment(.leading)
+                    }
+                }
+                Section(isAddCategory ? "Category Description" : "Edit Description") {
+                    TextField("i.e. Sports activities, events, and fitness tasks.", text: isAddCategory ? $newCategoryDescription : $editCategoryDescription, axis: .vertical)
                         .submitLabel(.done)
                         .lineLimit(1...3)
                         .multilineTextAlignment(.leading)
                 }
             }
-            .navigationTitle("New Category")
+            .navigationTitle(isAddCategory ? "New Category" : category.name)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
                         newCategoryName = ""
+                        newCategoryDescription = ""
                         isPresented = false
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    let isSaveDisabled = newCategoryName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                    let isSaveDisabled = isAddCategory ? newCategoryName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty : editCategoryDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || editCategoryDescription.trimmingCharacters(in: .whitespacesAndNewlines) == category.categoryDescription.trimmingCharacters(in: .whitespacesAndNewlines)
                     Button("Save") {
-                        let trimmed = newCategoryName.trimmingCharacters(in: .whitespacesAndNewlines)
-                        guard !trimmed.isEmpty else { return }
-                        
-                        // If the category exists in inactive, activate it
-                        if let matching = inactiveCategories.first(where: { category in
-                            category.name.compare(trimmed, options: .caseInsensitive) == .orderedSame
-                        }) {
-                            matching.isActive = true
+                        if isAddCategory {
+                            let trimmedName = newCategoryName.trimmingCharacters(in: .whitespacesAndNewlines)
+                            let trimmedDescription = newCategoryDescription.trimmingCharacters(in: .whitespacesAndNewlines)
+                            guard !trimmedName.isEmpty else { return }
+                            guard !trimmedDescription.isEmpty else { return }
+                            
+                            // If the category exists in inactive, activate it
+                            if let matching = inactiveCategories.first(where: { category in
+                                category.name.compare(trimmedName, options: .caseInsensitive) == .orderedSame
+                            }) {
+                                matching.isActive = true
+                            }
+                            // If it's a new unique category, insert it as active
+                            else if !activeCategories.contains(where: { category in
+                                category.name.lowercased() == trimmedName.lowercased()
+                            }) {
+                                let category = Category(name: trimmedName, categoryDescription: trimmedDescription, isActive: true)
+                                context.insert(category)
+                            }
+                            
+                            newCategoryName = ""
+                            newCategoryDescription = ""
+                        } else {
+                            guard !editCategoryDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+                            
+                            category.categoryDescription = editCategoryDescription.trimmingCharacters(in: .whitespacesAndNewlines)
+                            
+                            editCategoryDescription = ""
                         }
-                        // If it's a new unique category, insert it as active
-                        else if !activeCategories.contains(where: { category in
-                            category.name.lowercased() == trimmed.lowercased()
-                        }) {
-                            let category = Category(name: trimmed, isActive: true)
-                            context.insert(category)
-                        }
                         
-                        newCategoryName = ""
                         isPresented = false
                     }
                     .tint(isSaveDisabled ? .secondary : .blue)
@@ -192,6 +276,7 @@ private struct AddCategorySheet: View {
         }
     }
 }
+
 
 #Preview {
     let config = ModelConfiguration(isStoredInMemoryOnly: true)
