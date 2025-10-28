@@ -25,7 +25,7 @@ struct ContentView: View {
                 
                 HStack() {
                     NavigationLink() {
-                        WatchThoughtsListView()
+                        WatchThoughtsListView(title: "Thoughts")
                     } label: {
                         Label("Thoughts", systemImage: "list.bullet")
                     }
