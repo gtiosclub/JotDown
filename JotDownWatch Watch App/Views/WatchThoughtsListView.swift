@@ -26,7 +26,7 @@ struct WatchThoughtsListView: View {
                 Text("No thoughts yet")
                     .foregroundStyle(.secondary)
             } else {
-                ForEach(Array(watchSession.thoughts.enumerated()), id: \.offset) { _, item in
+                ForEach(Array(dataSource.enumerated()), id: \.offset) { _, item in
                     VStack(alignment: .leading, spacing: 4) {
                         Text(item["content"] as? String ?? "Unknown Thought")
                             .font(.body)
