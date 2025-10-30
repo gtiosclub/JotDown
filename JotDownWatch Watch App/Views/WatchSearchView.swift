@@ -11,30 +11,32 @@ struct WatchSearchView: View {
     
     @ObservedObject private var session = WatchSessionManager.shared
     @State private var searchInput: String = ""
-    @State private var searchResults: [[String: Any]] = []
     @State private var showResults = false
     
     var body: some View {
-        TextField("Search Thoughts", text: $searchInput)
-            .padding()
+        
         NavigationStack {
-            HStack {
-                Button("Clear") {
-                    searchInput = ""
+            VStack {
+                TextField("Search Thoughts", text: $searchInput)
+                    .padding()
+                HStack {
+                    Button("Clear") {
+                        searchInput = ""
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.red)
+                    .disabled(searchInput.isEmpty)
+                    
+                    Button("Search") {
+                        session.sendSearch(searchInput)
+                        showResults = true
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.yellow)
+                    .foregroundColor(.black)
+                    .disabled(searchInput.isEmpty)
+                    
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(.red)
-                .disabled(searchInput.isEmpty)
-                
-                Button("Search") {
-                    session.sendSearch(searchInput)
-                    showResults = true
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(.yellow)
-                .foregroundColor(.black)
-                .disabled(searchInput.isEmpty)
-                
             }
         }
         .navigationDestination(isPresented: $showResults) {

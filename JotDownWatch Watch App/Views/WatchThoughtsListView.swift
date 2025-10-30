@@ -47,8 +47,6 @@ struct WatchThoughtsListView: View {
         .onAppear {
             if (title == "Thoughts") {
                 watchSession.requestThoughts()
-            } else if (title == "Search Results") {
-                watchSession.requestSearchResults()
             }
         }
         

@@ -22,7 +22,7 @@ class WatchSessionManager: NSObject, WCSessionDelegate {
         
         if WCSession.isSupported() {
             let session = WCSession.default
-            session.delegate = self
+            session.delegate = WatchSessionManager.shared
             session.activate()
         }
         
@@ -104,7 +104,7 @@ class WatchSessionManager: NSObject, WCSessionDelegate {
         }
         
         //Do the search request
-        if message["request"] as? String == "Search" {
+        if message["request"] as? String == "searchresults" {
             let query = (message["query"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
             let limit = (message["limit"] as? Int) ?? 50
             let sinceISO = message["since"] as? String
