@@ -15,50 +15,55 @@ struct ContentView: View {
     @Query var users: [User]
     @State private var searchText: String = ""
     
+    @State private var activeTab: Int = 0
+    @State private var thoughtToSelect: Thought? = nil
+    
     var body: some View {
-        TabView {
-            Tab {
-                NavigationStack {
-                    HomeView()
+        TabView(selection: $activeTab) {
+            NavigationStack {
+                HomeView(thoughtToSelect: $thoughtToSelect)
+            }
+            .onAppear {
+                if users.isEmpty {
+                    let defaultUser = User(name: "", bio: "")
+                    context.insert(defaultUser)
                 }
-                .onAppear {
-                    if users.isEmpty {
-                        let defaultUser = User(name: "", bio: "")
-                        context.insert(defaultUser)
-                    }
-                }
-            } label: {
+            }
+            .tabItem {
                 Image("Visualize")
                     .renderingMode(.template)
             }
+            .tag(0)
             
-            Tab {
-                DashboardView()
-            } label: {
+            DashboardView(onThoughtSelected: { thought in
+                thoughtToSelect = thought
+                activeTab = 0
+            })
+            .tabItem {
                 Image("Dashboard")
                     .renderingMode(.template)
             }
+            .tag(1)
             
-            Tab {
-                NavigationStack {
-                    ProfileView()
-                }
-            } label: {
+            NavigationStack {
+                ProfileView()
+            }
+            .tabItem {
                 Image("User")
                     .renderingMode(.template)
             }
+            .tag(2)
             
-            Tab(role: .search) {
-                NavigationStack {
-                    SearchView(searchText: $searchText)
-                        .searchable(text: $searchText)
-                        .navigationTitle("Search")
-                }
-            } label: {
+            NavigationStack {
+                SearchView(searchText: $searchText)
+                    .searchable(text: $searchText)
+                    .navigationTitle("Search")
+            }
+            .tabItem {
                 Image("Search")
                     .renderingMode(.template)
             }
-            
+            .tag(3)
         }
         // to change tab icon color onSelected add:
         // .tint(.gray)
@@ -69,4 +74,3 @@ struct ContentView: View {
     ContentView()
         .modelContainer(for: [Thought.self, Category.self], inMemory: false)
 }
-

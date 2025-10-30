@@ -11,13 +11,15 @@ import SwiftData
 struct CategoryDashboardView: View {
     let category: Category
     let namespace: Namespace.ID
+    var onThoughtTap: (Thought) -> Void
     var onDismiss: () -> Void
     
     @Query private var thoughts: [Thought]
     
-    init(category: Category, namespace: Namespace.ID, onDismiss: @escaping () -> Void = {}) {
+    init(category: Category, namespace: Namespace.ID, onThoughtTap: @escaping (Thought) -> Void = { _ in }, onDismiss: @escaping () -> Void = {}) {
         self.category = category
         self.namespace = namespace
+        self.onThoughtTap = onThoughtTap
         self.onDismiss = onDismiss
         let categoryName = category.name
         self._thoughts = Query(filter: #Predicate<Thought> { thought in
@@ -64,6 +66,9 @@ struct CategoryDashboardView: View {
                             CategoryItemView(thought: thought)
                                 .aspectRatio(1.0, contentMode: .fit)
                                 .matchedGeometryEffect(id: thought.id, in: namespace)
+                                .onTapGesture {
+                                    onThoughtTap(thought)
+                                }
                         }
                     }
                     .padding()

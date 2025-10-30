@@ -15,6 +15,8 @@ struct DashboardView: View {
     @State private var selectedCategory: Category?
     @Namespace private var dashboardNamespace
     
+    var onThoughtSelected: (Thought) -> Void = { _ in }
+    
     // two-column grid layout.
     let columns: [GridItem] = [
         GridItem(.flexible(), spacing: 0),
@@ -129,15 +131,19 @@ struct DashboardView: View {
                 CategoryDashboardView(
                     category: selectedCategory,
                     namespace: dashboardNamespace,
+                    onThoughtTap: { thought in
+                        onThoughtSelected(thought)
+                    },
                     onDismiss: {
                         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                             self.selectedCategory = nil
                         }
                     }
                 )
-                .transition(.identity)
+                .transition(.opacity)
             }
         }
         .animation(.spring(response: 0.45, dampingFraction: 0.8), value: selectedCategory)
     }
 }
+

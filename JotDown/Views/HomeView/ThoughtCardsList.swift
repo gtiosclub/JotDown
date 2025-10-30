@@ -23,6 +23,7 @@ struct ThoughtCardsList: View {
             
             let writablePadding = (proxy.size.width - writableWidth) / 2
             let thoughtPadding = (proxy.size.width - thoughtWidth) / 2
+            
             let leadingPadding = selectedIndex == 0 ? writablePadding : thoughtPadding
             let trailingPadding = thoughts.count > 0 ? thoughtPadding : 0
             
@@ -42,24 +43,22 @@ struct ThoughtCardsList: View {
                     .scrollTargetLayout()
                     .padding(.leading, leadingPadding)
                     .padding(.trailing, trailingPadding)
+                    .animation(.smooth, value: selectedIndex == 0)
                 }
                 .scrollTargetBehavior(.viewAligned)
                 .scrollPosition(id: $selectedIndex)
                 .scrollClipDisabled()
                 .animation(.smooth, value: selectedIndex)
                 .onChange(of: selectedIndex) { _, newIndex in
-                    // Only correct the snapping if there is one thought and we're on that card
-                        guard thoughts.count == 1 && newIndex == 1 else { return }
+                    guard thoughts.count == 1 && newIndex == 1 else { return }
 
-                        // Delay the correction slightly so SwiftUI finishes snapping first
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                            // Double-check that the user didn’t scroll back
-                            if selectedIndex == 1 {
-                                withAnimation(.smooth) {
-                                    scrollProxy.scrollTo(1, anchor: .center)
-                                }
+                        if selectedIndex == 1 {
+                            withAnimation(.smooth) {
+                                scrollProxy.scrollTo(1, anchor: .center)
                             }
                         }
+                    }
                 }
             }
         }
