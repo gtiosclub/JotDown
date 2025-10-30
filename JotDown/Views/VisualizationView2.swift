@@ -6,16 +6,20 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct VisualizationView2: View {
+    @Environment(\.modelContext) private var context
+    @Query var thoughts: [Thought]
+    
     var body: some View {
         ScrollView([.horizontal, .vertical]) {
             RadialLayout {
-                Text("test")
-                    .layoutValue(key: CategoryLayoutKey.self, value: "test")
-                Text("test")
-                    .layoutValue(key: CategoryLayoutKey.self, value: "test")
-            } .frame(width: 1000, height: 1000)
+                ForEach(thoughts.indices, id: \.self) { index in
+                    Text(thoughts[index].content)
+                        .layoutValue(key: CategoryLayoutKey.self, value: thoughts[index].category.name)
+                }
+            } .frame(width: 400, height: 400)
         }
         .defaultScrollAnchor(.center)
 
@@ -29,4 +33,7 @@ struct VisualizationView2: View {
 
 #Preview {
     VisualizationView2()
+        .modelContainer(for: [Thought.self, Category.self], inMemory: false)
+    
 }
+
