@@ -135,7 +135,7 @@ struct DashboardView: View {
                         }
                     }
                 )
-                .transition(.identity)
+                .transition(.opacity)
             }
         }
         .animation(.spring(response: 0.45, dampingFraction: 0.8), value: selectedCategory)
