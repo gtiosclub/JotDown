@@ -11,6 +11,7 @@ import SwiftUI
 
 class WatchSessionManager: NSObject, WCSessionDelegate {
     static let shared = WatchSessionManager()
+    let fm = FoundationModelSearchService()
     
     private var context: ModelContext?
     
@@ -21,7 +22,7 @@ class WatchSessionManager: NSObject, WCSessionDelegate {
         
         if WCSession.isSupported() {
             let session = WCSession.default
-            session.delegate = self
+            session.delegate = WatchSessionManager.shared
             session.activate()
         }
         
@@ -100,6 +101,67 @@ class WatchSessionManager: NSObject, WCSessionDelegate {
                 }
             }
             return
+        }
+        
+        //Do the search request
+        if message["request"] as? String == "searchresults" {
+            let query = (message["query"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            let limit = (message["limit"] as? Int) ?? 50
+            let sinceISO = message["since"] as? String
+            let sinceDate = sinceISO.flatMap { iso.date(from: $0) }
+
+            guard !query.isEmpty else {
+                replyHandler(["ok": false, "error": "Empty query"])
+                return
+            }
+            
+            Task { @MainActor in
+                    guard let context = self.context else {
+                        replyHandler(["ok": false, "error": "No SwiftData context"])
+                        return
+                    }
+
+                    var predicate: Predicate<Thought>? = nil
+                    if let sinceDate {
+                        predicate = #Predicate<Thought> { $0.dateCreated >= sinceDate }
+                    }
+
+                    var descriptor = FetchDescriptor<Thought>(
+                        predicate: predicate,
+                        sortBy: [SortDescriptor(\.dateCreated, order: .reverse)]
+                    )
+                    // should fetch more than the limit for filter further situation
+                    descriptor.fetchLimit = max(limit * 3, 60)
+
+                    do {
+                        let allRecentThoughts = try context.fetch(descriptor)
+
+                        //get the revelant list of thoughts
+                        let relevant = await FoundationModelSearchService.getRelevantThoughts(query: query, in: allRecentThoughts)
+                        
+                        // handle the paylod size
+                        let trimmed = Array(relevant.prefix(limit))
+                        let items: [[String: Any]] = trimmed.map { t in // the t is the same as $0 (for Jeet)
+                            // You can also truncate very long content to e.g. 500 chars
+                            let content = t.content.count > 500 ? String(t.content.prefix(500)) + "…" : t.content
+                            return [
+                                "content": content,
+                                "dateCreated": iso.string(from: t.dateCreated),
+                                "category": t.category.name,
+                                "categoryActive": t.category.isActive
+                            ]
+                        }
+
+                        replyHandler([
+                            "ok": true,
+                            "items": items
+                            
+                        ])
+                    } catch {
+                        replyHandler(["ok": false, "error": "Fetch failed: \(error.localizedDescription)"])
+                    }
+                }
+                return
         }
         
         replyHandler(["ok": false, "error": "Unknown message"])
