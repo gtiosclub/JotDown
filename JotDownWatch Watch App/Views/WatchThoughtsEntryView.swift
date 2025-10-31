@@ -43,6 +43,7 @@ struct WatchThoughtsEntryView: View {
                     
                     Button("Add") {
                         session.sendThought(thoughtInput)
+                        session.requestThoughts()
                         dismiss()
                     }
                     .buttonStyle(.borderedProminent)

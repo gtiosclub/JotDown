@@ -10,6 +10,8 @@ import SwiftUI
 
 struct ContentView: View {
     
+    @ObservedObject private var session = WatchSessionManager.shared
+    
     var body: some View {
         NavigationStack {
             VStack() {
@@ -43,6 +45,9 @@ struct ContentView: View {
                 }
                 
             }.padding()
+                
+        }.onAppear {
+            session.requestThoughts()
         }
     }
 }
