@@ -19,14 +19,32 @@ struct HomeView: View {
     @State var isSubmitting = false
     
     @Binding var thoughtToSelect: Thought?
+    @Binding var categoryToSelect: Category?
+    @Binding var activeTab: Int
     
     var body: some View {
         VStack(spacing: 0) {
             
             Spacer()
             
-            HeaderHomeView(thoughtInput: $thoughtInput, selectedIndex: $selectedIndex, isSubmitting: $isSubmitting, isFocused: _isFocused, addThought: addThought)
-            ThoughtCardsList(thoughts: thoughts, text: $thoughtInput, selectedIndex: $selectedIndex, isFocused: _isFocused, addThought: addThought)
+            // --- START FIX: Corrected this section ---
+            HeaderHomeView(
+                thoughtInput: $thoughtInput,
+                selectedIndex: $selectedIndex,
+                isSubmitting: $isSubmitting,
+                isFocused: _isFocused,
+                addThought: addThought
+            )
+            ThoughtCardsList(
+                thoughts: thoughts,
+                text: $thoughtInput,
+                selectedIndex: $selectedIndex,
+            // --- END FIX ---
+                isFocused: _isFocused,
+                addThought: addThought,
+                categoryToSelect: $categoryToSelect,
+                activeTab: $activeTab
+            )
             FooterHomeView(noteCount: thoughts.count, date: selectedIndex != nil && selectedIndex != 0 ? thoughts[selectedIndex! - 1].dateCreated : Date())
             
             Spacer()

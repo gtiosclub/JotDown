@@ -15,7 +15,15 @@ struct DashboardView: View {
     @State private var selectedCategory: Category?
     @Namespace private var dashboardNamespace
     
-    var onThoughtSelected: (Thought) -> Void = { _ in }
+    @Binding var categoryToSelect: Category? // <-- ADDED
+    var onThoughtSelected: (Thought) -> Void
+    
+    // <-- ADDED INIT -->
+    init(categoryToSelect: Binding<Category?>, onThoughtSelected: @escaping (Thought) -> Void = { _ in }) {
+        self._categoryToSelect = categoryToSelect
+        self.onThoughtSelected = onThoughtSelected
+    }
+    // <-- END ADDED INIT -->
     
     // two-column grid layout.
     let columns: [GridItem] = [
@@ -144,6 +152,21 @@ struct DashboardView: View {
             }
         }
         .animation(.spring(response: 0.45, dampingFraction: 0.8), value: selectedCategory)
+        // <-- ADDED MODIFIER -->
+        .onChange(of: categoryToSelect) { _, newCategory in
+            if let newCategory {
+                // Find the category instance from the query to ensure it's managed
+                if let matchingCategory = categories.first(where: { $0.id == newCategory.id }) {
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                        selectedCategory = matchingCategory
+                    }
+                }
+                // Reset the binding
+                DispatchQueue.main.async {
+                    categoryToSelect = nil
+                }
+            }
+        }
+        // <-- END ADDED MODIFIER -->
     }
 }
-

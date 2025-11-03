@@ -8,6 +8,9 @@ import SwiftUI
 
 struct ThoughtCard: View {
     var thought: Thought
+    @Binding var categoryToSelect: Category? // <-- ADDED
+    @Binding var activeTab: Int             // <-- ADDED
+    
     @Environment(\.modelContext) private var context
     @Namespace private var namespace
     
@@ -46,7 +49,11 @@ struct ThoughtCard: View {
                    Spacer()
                    
                    if (thought.category.isActive) {
-                       NavigationLink(destination: CategoryDashboardView(category: thought.category, namespace: namespace)) {
+                       // <-- MODIFIED: Was NavigationLink, now Button -->
+                       Button(action: {
+                           categoryToSelect = thought.category
+                           activeTab = 1
+                       }) {
                            HStack(spacing: 2) {
                                Text(thought.category.name)
                                    .font(.system(size: 16, weight: .regular))
@@ -62,6 +69,7 @@ struct ThoughtCard: View {
                            }
                        }
                        .buttonStyle(PlainButtonStyle())
+                       // <-- END MODIFICATION -->
                    } else {
                        Text(thought.category.name)
                            .font(.system(size: 16, weight: .regular))
@@ -78,4 +86,3 @@ struct ThoughtCard: View {
        .frame(width: 251, height: 472)
     }
 }
-

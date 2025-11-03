@@ -17,12 +17,15 @@ struct ContentView: View {
     
     @State private var activeTab: Int = 0
     @State private var thoughtToSelect: Thought? = nil
+    @State private var categoryToSelect: Category? = nil
     
     var body: some View {
         TabView(selection: $activeTab) {
-            NavigationStack {
-                HomeView(thoughtToSelect: $thoughtToSelect)
-            }
+            HomeView(
+                thoughtToSelect: $thoughtToSelect,
+                categoryToSelect: $categoryToSelect,
+                activeTab: $activeTab
+            )
             .onAppear {
                 if users.isEmpty {
                     let defaultUser = User(name: "", bio: "")
@@ -35,10 +38,13 @@ struct ContentView: View {
             }
             .tag(0)
             
-            DashboardView(onThoughtSelected: { thought in
-                thoughtToSelect = thought
-                activeTab = 0
-            })
+            DashboardView(
+                categoryToSelect: $categoryToSelect,
+                onThoughtSelected: { thought in
+                    thoughtToSelect = thought
+                    activeTab = 0
+                }
+            )
             .tabItem {
                 Image("Dashboard")
                     .renderingMode(.template)
@@ -56,7 +62,7 @@ struct ContentView: View {
             
             NavigationStack {
                 SearchView(searchText: $searchText)
-                    .searchable(text: $searchText)
+                    .searchable(text: $searchText, placement: .automatic, prompt: "Search thoughts") // This provides the search bar and animation
                     .navigationTitle("Search")
             }
             .tabItem {

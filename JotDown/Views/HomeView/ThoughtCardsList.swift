@@ -14,6 +14,8 @@ struct ThoughtCardsList: View {
     @Binding var selectedIndex: Int?
     @FocusState var isFocused: Bool
     let addThought: () async throws -> Void
+    @Binding var categoryToSelect: Category?
+    @Binding var activeTab: Int
 
     
     var body: some View {
@@ -35,7 +37,11 @@ struct ThoughtCardsList: View {
                         
                         ForEach(thoughts.indices, id: \.self) { index in
                             let id = index + 1
-                            ThoughtCard(thought: thoughts[index])
+                            ThoughtCard(
+                                thought: thoughts[index],
+                                categoryToSelect: $categoryToSelect,
+                                activeTab: $activeTab
+                            )
                                 .id(id)
                         }
                         .onDelete(perform: deleteNote)
@@ -71,4 +77,25 @@ struct ThoughtCardsList: View {
             context.delete(itemToDelete)
         }
     }
+}
+
+// <-- ADDED PREVIEW TO FIX ERROR -->
+#Preview {
+    // Create dummy data for the preview
+    let config = ModelConfiguration(isStoredInMemoryOnly: true)
+    let container = try! ModelContainer(for: Thought.self, Category.self, configurations: config)
+    
+    let category = Category(name: "Preview", categoryDescription: "")
+    let sampleThoughts = [Thought(content: "Test thought")]
+    sampleThoughts[0].category = category
+    
+    return ThoughtCardsList(
+        thoughts: sampleThoughts,
+        text: .constant(""),
+        selectedIndex: .constant(0),
+        addThought: { print("Add thought") },
+        categoryToSelect: .constant(nil), // <-- Fix 1
+        activeTab: .constant(0)           // <-- Fix 2
+    )
+    .modelContainer(container)
 }
