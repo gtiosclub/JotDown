@@ -12,7 +12,7 @@ import Orb
 struct CombinedSearchView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Thought.dateCreated, order: .reverse) private var thoughts: [Thought]
-    
+    @StateObject private var cloud = WordCloudController()
     @State private var searchText: String = ""
     @State var result: String = ""
     @State private var isSearching: Bool = false
@@ -25,26 +25,43 @@ struct CombinedSearchView: View {
     var body: some View {
         ZStack {
             VStack {
-                Text("result")
+//                Text("result")
                 
                 Spacer()
                 
                 CustomTabBar(selectedTab: $selectedTab)
             }
-            OrbView()
-                .frame(width: 200, height: 200)
+//            OrbView()
+//                .frame(width: 200, height: 200)
+            WordCloudAnswerView(controller: cloud)
+                                        .padding()
         }
         .searchable(
             text: $searchText,
             placement: .automatic,
             prompt: "Search thoughts"
         )
-        .onChange(of: searchText) { _, _ in
+        .onSubmit(of: .search) {
             // Cancel any existing pending search
             searchDebounceWorkItem?.cancel()
             
             // If the search text is empty, don’t schedule a new search
             guard !searchText.isEmpty else { return }
+            
+            let words = WordFinds(thoughts: thoughts) // stop-word filtered, unique
+            let q = searchText.lowercased()
+            
+            // Simple prioritization: words that contain the query first
+            let prioritized = words.sorted { a, b in
+                let ac = a.contains(q)
+                let bc = b.contains(q)
+                return ac && !bc ? true : (!ac && bc ? false : a.count > b.count)
+            }
+            let picked = Array(prioritized)
+            cloud.reset()
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: .startCloud, object: picked)
+            }
             
             let workItem = DispatchWorkItem {
                 isSearching = true
@@ -53,6 +70,7 @@ struct CombinedSearchView: View {
                     await MainActor.run {
                         result = r
                         isSearching = false
+                        NotificationCenter.default.post(name: .finishCloud, object: r)
                     }
                 }
                 
@@ -66,6 +84,27 @@ struct CombinedSearchView: View {
         
     }
     
+    private func WordFinds(thoughts: [Thought]) -> [String]{
+        let noUseWords = ["the","a","an","to","for"]
+        var retWords:[String] = []
+        let banned: Set<String> = Set(noUseWords.map {
+            $0.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
+        })
+        for thought in thoughts{
+            let words = thought.content
+                .lowercased()
+                .components(separatedBy: CharacterSet.alphanumerics.inverted)
+                .filter{!$0.isEmpty  && !banned.contains($0)}
+            retWords.append(contentsOf: words)
+        }
+        var seen = Set<String>(); var uniq: [String] = []
+        
+        for w in retWords where seen.insert(w).inserted {
+            uniq.append(w)
+        }
+        return uniq
+    }
+    
     private func searchRagFoundationQuery(query: String, in thoughts: [Thought]) async -> String {
         let ragSystem = RAGSystem()
         let results = ragSystem.sortThoughts(thoughts: thoughts, query: query, limit: 5)
@@ -73,6 +112,12 @@ struct CombinedSearchView: View {
         return queryResult
         
     }
+}
+
+
+extension Notification.Name {
+    static let startCloud = Notification.Name("startCloud")
+    static let finishCloud = Notification.Name("finishCloud")
 }
 
 #Preview {
