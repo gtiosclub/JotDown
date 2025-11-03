@@ -18,7 +18,7 @@ struct CategoriesExamplePage: View {
             Spacer()
             
             // Note Text
-            Text("Use can organize all your thoughts")
+            Text("Organize all your thoughts")
               .font(Font.custom("SF Pro", size: 22))
               .foregroundColor(Constants.TextLightText)
               .padding(.horizontal)
