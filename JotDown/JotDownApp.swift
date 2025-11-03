@@ -12,6 +12,8 @@ import WatchConnectivity
 
 @main
 struct JotDownApp: App {
+    
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
     let container: ModelContainer
 
     init() {
@@ -31,8 +33,12 @@ struct JotDownApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .modelContainer(container)
+            if hasCompletedOnboarding {
+                ContentView()
+                    .modelContainer(container)
+            } else {
+                OnboardingView()
+            }
         }
     }
 }

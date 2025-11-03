@@ -145,38 +145,38 @@ struct NamespaceReader<Content: View>: View {
     var body: some View { content(ns) }
 }
 
-#Preview {
-    // Make SwiftData container to test visualization
-    let container = try! ModelContainer(
-        for: Thought.self, Category.self,
-        configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-    )
-    
-    // Create a fake category
-    let category = Category(name: "Recipes")
-    container.mainContext.insert(category)
-    
-    // Add sample thoughts, and assign them to the fake category
-    let thoughts = [
-        "Try mango sticky rice mochi",
-        "Test a chocolate chip cookie recipe",
-        "Finish ISyE homework",
-        "Play some video games"
-    ].map { content -> Thought in
-        let thought = Thought(content: content)
-        thought.category = category
-        container.mainContext.insert(thought)
-        return thought
-    }
-    
-    try? container.mainContext.save()
-    
-    // Return the preview view
-    return NavigationStack {
-        NamespaceReader { ns in
-            CategoryDashboardView(category: category, namespace: ns)
-        }
-    }
-    .modelContainer(container)
-}
+//#Preview {
+//    // Make SwiftData container to test visualization
+//    let container = try! ModelContainer(
+//        for: Thought.self, Category.self,
+//        configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+//    )
+//    
+//    // Create a fake category
+//    let category = Category(name: "Recipes")
+//    container.mainContext.insert(category)
+//    
+//    // Add sample thoughts, and assign them to the fake category
+//    let thoughts = [
+//        "Try mango sticky rice mochi",
+//        "Test a chocolate chip cookie recipe",
+//        "Finish ISyE homework",
+//        "Play some video games"
+//    ].map { content -> Thought in
+//        let thought = Thought(content: content)
+//        thought.category = category
+//        container.mainContext.insert(thought)
+//        return thought
+//    }
+//    
+//    try? container.mainContext.save()
+//    
+//    // Return the preview view
+//    return NavigationStack {
+//        NamespaceReader { ns in
+//            CategoryDashboardView(category: category, namespace: ns)
+//        }
+//    }
+//    .modelContainer(container)
+//}
 
