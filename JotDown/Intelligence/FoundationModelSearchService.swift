@@ -68,7 +68,6 @@ class FoundationModelSearchService {
     static func queryResponseGenerator(query: String, in relevantThoughts: [Thought]) async -> String {
             let session = LanguageModelSession()
             var relevantThoughtsContent: [String] = []
-            var i: Int = 1
             do  {
                 for thought in relevantThoughts {
                     relevantThoughtsContent.append(thought.content)
@@ -76,7 +75,7 @@ class FoundationModelSearchService {
                 let queryResponsePrompt = """
                 Given the search query "\(query)" and these are the available relevant thoughts ["\(relevantThoughtsContent.joined(separator: ", "))"]
                 Infer the information in the thoughts to respond to the query. Try not to use the exact text from the toughts unless necessary. 
-                DO NOT include information from thoughts that is irrelevant to the query. 
+                DO NOT include information that is irrelevant to the query. 
                 DO NOT mention that you are responding to the 'user' 
                 DO NOT mention the 'thoughts'.
                 Summarize in one short sentence.

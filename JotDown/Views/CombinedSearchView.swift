@@ -13,12 +13,11 @@ struct CombinedSearchView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Thought.dateCreated, order: .reverse) private var thoughts: [Thought]
     
-    @State private var searchText: String = ""
+    @Binding var searchText: String
     @State private var result: String = ""
     @State private var isSearching: Bool = false
     @State private var searchDebounceWorkItem: DispatchWorkItem?
     private let delayToSearch = 0.5
-    @Binding var selectedTab: Int
     @Namespace private var namespace
     
     @State private var currentScreenWidth: CGFloat = 0
@@ -29,6 +28,15 @@ struct CombinedSearchView: View {
     @State private var showResponse: Bool = false
     @State private var typedResponse: String = ""
     @State private var isMerging: Bool = false
+    @State private var hasSearched = false
+    @State private var orbConfig: OrbConfiguration = OrbConfiguration(
+        backgroundColors: [.purple, .pink],
+        glowColor: .purple,
+        coreGlowIntensity: 1.2,
+        speed: 60
+    )
+    @State private var orbSize: CGSize = CGSize(width: 250, height: 250)
+    @State private var flashTimers: [Timer] = []
     
     var body: some View {
         ZStack {
@@ -47,8 +55,6 @@ struct CombinedSearchView: View {
                         }
                     
                     ZStack {
-                        OrbView()
-                            .frame(width: 200, height: 200, alignment: .center)
                         if !isMerging && !showResponse {
                             ForEach(displayedWords) { word in
                                 Text(word.text)
@@ -60,7 +66,7 @@ struct CombinedSearchView: View {
                             }
                         }
                         
-                        if isMerging && !showResponse {
+                        if isMerging && !showResponse && isSearching {
                             ForEach(displayedWords) { word in
                                 Text(word.text)
                                     .font(.system(size: word.size))
@@ -69,31 +75,43 @@ struct CombinedSearchView: View {
                                     .position(word.position)
                             }
                         }
-                        
-                        if showResponse {
-                            VStack(spacing: 20) {
-                                Text(typedResponse)
-                                    .font(.title2)
-                                    .fontWeight(.semibold)
-                                    .multilineTextAlignment(.center)
-                                    .padding(.horizontal, 40)
-                                    .transition(.scale.combined(with: .opacity))
-                            }
-                            .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
-                        }
+                        OrbView(configuration: orbConfig)
+                            .frame(width: orbSize.width, height: orbSize.height, alignment: .center)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
                 
                 Spacer()
                 
-                CustomTabBar(selectedTab: $selectedTab)
+                
             }
+            .sheet(isPresented: $showResponse) {
+                VStack(spacing: 20) {
+                    Text(typedResponse)
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 40)
+                        .transition(.scale.combined(with: .opacity))
+                }
+                .presentationDetents([.medium])
+            }
+            
+        }
+        .background {
+            EllipticalGradient(
+                stops: [
+                    Gradient.Stop(color: Color(red: 0.94, green: 0.87, blue: 0.94), location: 0.00),
+                    Gradient.Stop(color: Color(red: 0.78, green: 0.85, blue: 0.93), location: 1.00),
+                ],
+                center: UnitPoint(x: 0.67, y: 0.46)
+            )
+            .ignoresSafeArea()
         }
         .searchable(
             text: $searchText,
             placement: .automatic,
-            prompt: "Search thoughts"
+            prompt: "Ask the Orb"
         )
         .onSubmit(of: .search) {
             // Cancel any existing pending search
@@ -103,8 +121,11 @@ struct CombinedSearchView: View {
             displayedWords = []
             showResponse = false
             typedResponse = ""
-            isMerging = false
+            hasSearched = false
             result = ""
+            isMerging = false
+            flashTimers.forEach { $0.invalidate() }
+            flashTimers.removeAll()
             
             // If the search text is empty, don't schedule a new search
             guard !searchText.isEmpty else { return }
@@ -121,7 +142,7 @@ struct CombinedSearchView: View {
     private func startSearchAnimation(screenWidth: CGFloat, screenHeight: CGFloat) {
         isSearching = true
         
-
+        
         let selectedWords = wordFinds(thoughts: thoughts)
         
         displayedWords = selectedWords.enumerated().map { index, word in
@@ -135,7 +156,7 @@ struct CombinedSearchView: View {
         }
         
         for (index, _) in displayedWords.enumerated() {
-            DispatchQueue.main.asyncAfter(deadline: .now() + Double(index) * 0.1) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + Double(index) * 0.06) {
                 withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
                     displayedWords[index].opacity = 1.0
                 }
@@ -147,7 +168,7 @@ struct CombinedSearchView: View {
             let r = await searchRagFoundationQuery(query: searchText, in: thoughts)
             await MainActor.run {
                 result = r
-                isSearching = false
+                searchText = ""
                 DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                     startMergingAnimation(screenWidth: screenWidth, screenHeight: screenHeight)
                 }
@@ -156,17 +177,19 @@ struct CombinedSearchView: View {
     }
     
     private func startFlashingAnimation(for index: Int) {
-        Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { timer in
+        
+        let timer = Timer.scheduledTimer(withTimeInterval: 0.4, repeats: true) { timer in
             guard !isMerging && index < displayedWords.count else {
                 timer.invalidate()
                 return
             }
             
-            withAnimation(.easeInOut(duration: 0.5)) {
-                displayedWords[index].scale = displayedWords[index].scale == 1.0 ? 1.3 : 1.0
+            withAnimation(.easeInOut(duration: 0.4)) {
+                displayedWords[index].scale = displayedWords[index].scale <= 1.0 ? 1.3 : 0.85
                 displayedWords[index].opacity = displayedWords[index].opacity == 1.0 ? 0.5 : 1.0
             }
         }
+        flashTimers.append(timer)
     }
     
     private func startMergingAnimation(screenWidth: CGFloat, screenHeight: CGFloat) {
@@ -175,18 +198,34 @@ struct CombinedSearchView: View {
         let centerX = screenWidth / 2
         let centerY = screenHeight / 2
         
-        withAnimation(.linear) {
-            for index in displayedWords.indices {
-                displayedWords[index].position = CGPoint(x: centerX, y: centerY)
-                displayedWords[index].opacity = 0
-                displayedWords[index].scale = 0.5
+        let perWordDelay = 0.06
+        let totalDelay = Double(displayedWords.count) * perWordDelay
+        
+        for index in displayedWords.indices {
+            DispatchQueue.main.asyncAfter(deadline: .now() + Double(index) * perWordDelay) {
+                withAnimation(.spring) {
+                    displayedWords[index].position = CGPoint(x: centerX, y: centerY)
+                    displayedWords[index].opacity = 0
+                    displayedWords[index].scale = 0.5
+                }
             }
         }
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-            withAnimation {
-                showResponse = true
-            }
+        
+        withAnimation(.linear(duration: totalDelay)) {
+            orbConfig = OrbConfiguration(
+                backgroundColors: [.purple, .blue, .indigo, .red],
+                glowColor: .purple,
+                coreGlowIntensity: 1.2,
+                showParticles: true,
+                speed: 120
+            )
+            orbSize = CGSize(width: 400, height: 400)
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + totalDelay + 0.5) {
+            showResponse = true
+            isSearching = false
             startTypingAnimation()
         }
     }
@@ -200,6 +239,17 @@ struct CombinedSearchView: View {
                 typedResponse.append(character)
             }
         }
+        withAnimation(.linear(duration: 1)) {
+            orbSize = CGSize(width: 250, height: 250)
+        }
+        withAnimation(.linear(duration: 1)) {
+            orbConfig = OrbConfiguration(
+                backgroundColors: [.purple, .pink],
+                glowColor: .purple,
+                coreGlowIntensity: 1.2,
+                speed: 60
+            )
+        }
     }
     
     private func randomPosition(screenWidth: CGFloat, screenHeight: CGFloat) -> CGPoint {
@@ -208,8 +258,8 @@ struct CombinedSearchView: View {
         let centerY = screenHeight / 2
         var point: CGPoint
         repeat {
-            let x = CGFloat.random(in: 50...(screenWidth - 50))
-            let y = CGFloat.random(in: 100...(screenHeight - 200))
+            let x = CGFloat.random(in: 20...(screenWidth - 20))
+            let y = CGFloat.random(in: 100...(screenHeight - 100))
             point = CGPoint(x: x, y: y)
         } while hypot(point.x - centerX, point.y - centerY) < minDistanceFromCenter
         return point
@@ -250,6 +300,3 @@ struct AnimatedWord: Identifiable {
     var scale: CGFloat
 }
 
-#Preview {
-    CombinedSearchView(selectedTab: .constant(3))
-}
