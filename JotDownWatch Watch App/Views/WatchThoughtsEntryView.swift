@@ -50,7 +50,7 @@ struct WatchThoughtsEntryView: View {
                 }.padding()
 
             }.padding()
-        }
+        }.navigationTitle("Add Thought")
     }
 }
 

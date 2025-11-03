@@ -14,7 +14,7 @@ struct SearchView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Thought.dateCreated, order: .reverse) private var thoughts: [Thought]
     
-    @State private var searchText: String = ""
+    @Binding var searchText: String
     @State private var mode: SearchMode = .regexContains
     @State private var results: [Thought] = []
     @State private var isSearching: Bool = false
@@ -22,7 +22,6 @@ struct SearchView: View {
     // Only searches after .5 seconds of stopped typing
     @State private var searchDebounceWorkItem: DispatchWorkItem?
     private let delayToSearch = 0.5
-    @Binding var selectedTab: Int
 
 
     var body: some View {
@@ -61,8 +60,11 @@ struct SearchView: View {
                 // Cancel any existing pending search
                 searchDebounceWorkItem?.cancel()
                 
-                // If the search text is empty, don’t schedule a new search
-                guard !searchText.isEmpty else { return }
+                // If the search text is empty, don’t schedule a new search and clear results
+                guard !searchText.isEmpty else {
+                    results = []
+                    return
+                }
                 
                 let workItem = DispatchWorkItem {
                     performSearch()
@@ -84,11 +86,6 @@ struct SearchView: View {
                 }
             }
             .navigationTitle("Search")
-            
-            Spacer()
-            
-            //Tab Bar
-            CustomTabBar(selectedTab: $selectedTab)
         }
     }
     
@@ -142,5 +139,5 @@ struct SearchView: View {
     }
 }
 #Preview {
-    SearchView(selectedTab: .constant(1))
+    SearchView(searchText: .constant(""))
 }
