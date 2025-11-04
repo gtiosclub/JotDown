@@ -84,7 +84,7 @@ class FoundationModelSearchService {
                 Query: Which animal is the best?
                 Response: Dogs are the best animal.
                 """
-                let queryResponse = try await session.respond(to: queryResponsePrompt, generating: GeneratedResponse.self)
+                let queryResponse = try await session.respond(to: queryResponsePrompt, generating: GeneratedResponse.self )
                 return queryResponse.content.response
             } catch {
                 print("Error in Foundation Models search: \(error)")

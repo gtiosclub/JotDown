@@ -10,8 +10,7 @@ import Orb
 
 struct WordCloudAnswerView: View {
     @ObservedObject var controller: WordCloudController
-    @State private var showOrb = true
-    @State private var orbScale: CGFloat = 1.0
+    @State private var morphProgress: CGFloat = 0
     
     var body: some View {
         GeometryReader { geo in
@@ -32,65 +31,102 @@ struct WordCloudAnswerView: View {
                         .animation(.spring(response: 0.45, dampingFraction: 0.85), value: b.pos)
                 }
 
-                // streamed answer
-                if showOrb && controller.phase != .streaming {
+                // Orb (thinking / merging) - now scales with animation
+                if controller.phase == .thinking || controller.phase == .merging {
                      OrbView()
-                         .frame(width: min(geo.size.width, geo.size.height) * 0.35,
-                                height: min(geo.size.width, geo.size.height) * 0.35)
+                         .frame(
+                            width: min(geo.size.width, geo.size.height) * 0.35 * controller.orbScale,
+                            height: min(geo.size.width, geo.size.height) * 0.35 * controller.orbScale
+                         )
+                         .animation(.spring(response: 0.6, dampingFraction: 0.75), value: controller.orbScale)
                 }
+                
+                // Morphing phase - orb transforms to rectangle
+//                if controller.phase == .morphing {
+//                    let purpledark = Color(.sRGB, red: 107/255.0, green: 107/255.0, blue: 138/255.0)
+//                    let gradient = LinearGradient(
+//                        colors: [purpledark],
+//                        startPoint: .topLeading,
+//                        endPoint: .bottomTrailing
+//                    )
+//                    
+//                    MorphableShape(progress: morphProgress)
+//                        .fill(.ultraThinMaterial)
+//                        .overlay(
+//                            MorphableShape(progress: morphProgress)
+//                                .fill(gradient.opacity(0.23))
+//                        )
+//                        .overlay(
+//                            MorphableShape(progress: morphProgress)
+//                                .strokeBorder(Color.white.opacity(0.25), lineWidth: 0.5)
+//                        )
+//                        .shadow(color: .black.opacity(0.1), radius: 28, y: 12)
+//                        .frame(width: geo.size.width, height: geo.size.height)
+//                        .onAppear {
+//                            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+//                                morphProgress = 1.0
+//                            }
+//                        }
+//                }
 
-                // --- Streaming answer in a glass card ---
                 if controller.phase == .streaming {
-                    let purplelight = Color(.sRGB, red: 132/255.0, green: 133/255.0, blue: 177/255.0)
-                    let purpledark  = Color(.sRGB, red: 107/255.0, green: 107/255.0, blue: 138/255.0)
-                    let gradient  =  LinearGradient(
-                        colors: [ purpledark],           // aurora
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                    VStack {
+                    ZStack {
+                        let purpledark = Color(.sRGB, red: 107/255.0, green: 107/255.0, blue: 138/255.0)
+                        let gradient = LinearGradient(
+                            colors: [purpledark],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                        
+                        // Text on top
                         Text(controller.streamed)
                             .font(.system(size: 17, weight: .regular, design: .rounded))
+                            .foregroundColor(.primary)
                             .multilineTextAlignment(.leading)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(24)
+                            .opacity(min(morphProgress * 1.5, 1.0)) // Fade in with morph
+                            .frame(width: geo.size.width * morphProgress)
+                            .background(
+                                MorphableShape(progress: morphProgress)
+                                    .fill(.ultraThinMaterial)
+                                    .overlay(
+                                        MorphableShape(progress: morphProgress)
+                                            .fill(gradient.opacity(0.23))
+                                    )
+                                    .overlay(
+                                            MorphableShape(progress: morphProgress)
+                                            .strokeBorder(Color.white.opacity(0.25), lineWidth: 0.5)
+                                    )
+                                    .shadow(color: .black.opacity(0.1), radius: 28, y: 12)
+                                    .frame(width: geo.size.width, height: geo.size.height)
+                                    .onAppear {
+                                        withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                            morphProgress = 1.0
+                                        }
+                                    }
+                            )
                     }
-                    .padding(18)
-                    .background(
-                        RoundedRectangle(cornerRadius: 28, style: .continuous)
-                            .fill(.ultraThinMaterial)
-                            .fill(gradient)
-                            .opacity(0.23)
-                            //.glassEffect()
-                            .shadow(color: .black.opacity(0.1), radius: 28, y: 12)
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 28, style: .continuous)
-                            .strokeBorder(.white.opacity(0.25), lineWidth: 0.5)
-                    )
-                    .padding(.horizontal, 24)
-                    .transition(.asymmetric(insertion: .opacity.combined(with: .scale), removal: .opacity))
+                    .frame(width: geo.size.width, height: geo.size.height)
+                    .onAppear {
+                        withAnimation(.spring(response: 1.0, dampingFraction: 0.75)) {
+                            morphProgress = 1.0
+                        }
+                    }
                 }
             }
             .frame(width: geo.size.width, height: geo.size.height)
             .onReceive(NotificationCenter.default.publisher(for: .startCloud)) { note in
                 let words = (note.object as? [String]) ?? []
                 controller.startThinking(words: words, in: geo.size)
-                showOrb = true
-                orbScale = 1.0
+                morphProgress = 0
             }
             .onReceive(NotificationCenter.default.publisher(for: .finishCloud)) { note in
                 let answer = (note.object as? String) ?? ""
-                // shrink the orb first, then stream
-                withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
-                    orbScale = 0.01
-                }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                    showOrb = false
-                    controller.finishWith(answer: answer, size: geo.size)
-                }
+                controller.finishWith(answer: answer, size: geo.size)
             }
         }
         .ignoresSafeArea(.keyboard)
         .allowsHitTesting(false)
     }
 }
+
