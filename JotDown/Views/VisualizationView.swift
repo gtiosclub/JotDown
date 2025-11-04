@@ -1,83 +1,42 @@
-import SwiftUI
+//
+//  VisualizationView.swift
+//  JotDown
+//
+//  Created by Siddharth Palanivel on 10/23/25.
+//
 
-// MARK: - VisualizationView
+import SwiftUI
+import SwiftData
 
 struct VisualizationView: View {
+    @Environment(\.modelContext) private var context
+    @Query var thoughts: [Thought]
     
-    // ... State Variables
     @State private var zoomLevel: CGFloat = 1.0
     @State private var finalZoomLevel: CGFloat = 1.0
     
     let minZoom: CGFloat = 0.5
     let maxZoom: CGFloat = 3.0
     
-    // Mark data
-    let categories = ["Foo", "Baz", "Bar", "Blud"]
-    
-    // High-Contrast Palette
-    let sectorColors: [Color] = [
-        .red,
-        .orange,
-        .green,
-        .blue,
-        .purple,
-        .pink,
-        .gray,
-        .yellow,
-        .teal
-    ]
-    
-    // Store the unique, randomized color sequence in a @State property.
-        @State private var assignedColors: [Color] = {
-            // Shuffle the master list of colors and take only the required number (4 in this case)
-            let neededColors = 4
-            let baseColors: [Color] = [
-                .red,
-                .orange,
-                .green,
-                .blue,
-                .purple,
-                .pink,
-                .gray,
-                .yellow,
-                .teal
-            ]
-            return Array(baseColors.shuffled().prefix(neededColors))
-        }()
-    
-    // Defines the proportion dedicated to blending (e.g., 20% for blending = 80% solid)
-    let blendProportion: Double = 0.55
     
     var body: some View {
         ScrollView([.horizontal, .vertical]) {
             ZStack {
                 GridBackground()
-                    .opacity(0.5)
-                
-                GeometryReader { geo in
-                    let width = geo.size.width
-                    let height = geo.size.height
-                    let radius = min(width, height) * 0.4
-                    let center = CGPoint(x: width / 2, y: height / 2)
-                    
-                    Circle()
-                        .fill(continuousAngularGradient(colors: assignedColors, center: center))
-                        .frame(width: radius * 2, height: radius * 2)
-                        .position(center)
-                    
-                    drawLabels(notes: categories, center: center, radius: radius)
-                }
-                .frame(width: 400, height: 400)
+                RadialLayout {
+                    ForEach(thoughts.indices, id: \.self) { index in
+                        ThoughtBubbleView(thought: thoughts[index], color: colorForCategory(thoughts[index].category.name))
+                            .layoutValue(key: CategoryLayoutKey.self, value: thoughts[index].category.name)
+                    }
+                } .frame(width: 400, height: 400)
             }
             .scaleEffect(zoomLevel)
             .gesture(magnificationGesture)
+
         }
         .defaultScrollAnchor(.center)
-        .background(Color(.systemBackground))
-        .ignoresSafeArea()
     }
     
-    // ... Magnification Gesture
     var magnificationGesture: some Gesture {
         MagnificationGesture()
             .onChanged { value in
@@ -97,120 +56,10 @@ struct VisualizationView: View {
                 }
             }
     }
-    
-    // Properly places stops to define the blend on both sides of the core.
-    func continuousAngularGradient(colors: [Color], center: CGPoint) -> AngularGradient {
-        let n = categories.count
-        let sectorStep = 2 * .pi / Double(n)
-        
-        var gradientStops: [Gradient.Stop] = []
-        let fullPalette = colors + colors
-        
-        // The angle dedicated to the blend on ONE side (e.g., 10% of the sector)
-        let blendAngle = sectorStep * (blendProportion / 2.0)
-        
-        for index in 0..<n {
-            // Get angles based on the 3 o'clock start (0 radians)
-            let rawStart = Double(index) * sectorStep
-            let sectorColor = fullPalette[index]
-            
-            // 1. Blend Start Stop (Transition FROM previous color)
-            // This color is placed at the start angle + the blend zone size.
-            let coreStartAngle = rawStart + blendAngle
-            let coreStartLocation = Angle(radians: coreStartAngle).normalizedDegrees / 360.0
-            
-            // 2. Blend End Stop (Transition INTO next color)
-            // This color is placed at the end angle - the blend zone size.
-            let coreEndAngle = rawStart + sectorStep - blendAngle
-            let coreEndLocation = Angle(radians: coreEndAngle).normalizedDegrees / 360.0
-            
-            // Add stops for the solid core color
-            gradientStops.append(Gradient.Stop(color: sectorColor, location: coreStartLocation.clamped(to: 0...1)))
-            gradientStops.append(Gradient.Stop(color: sectorColor, location: coreEndLocation.clamped(to: 0...1)))
-            
-            // The blend occurs naturally in the space between the coreEndLocation (1)
-            // and the coreStartLocation of the next sector (2).
-        }
-        
-        // Sorting is crucial as locations wrap around 0/360
-        gradientStops.sort { $0.location < $1.location }
-        
-        // Add a final stop to ensure the smooth wrap-around to the first color
-        let firstColor = fullPalette[0]
-        let finalStop = Gradient.Stop(color: firstColor, location: 1.0)
-        
-        // We use the stops and a 0-360 range for the AngularGradient
-        let finalStops = gradientStops + [finalStop]
-        
-        return AngularGradient(
-            gradient: Gradient(stops: finalStops),
-            center: .center,
-            startAngle: Angle(degrees: 0),
-            endAngle: Angle(degrees: 360)
-        )
-    }
 }
 
-// MARK: - Sector Labels
 
-func drawLabels(notes: [String], center: CGPoint, radius: CGFloat) -> some View {
-    let n = notes.count
-    
-    return ForEach(0..<n, id: \.self) { k in
-        let (_, _, mid) = anglesForSector(index: k + 1, total: n)
-        
-        let labelPoint = point(on: center, radius: radius * 0.5, angle: mid)
-        Text(notes[k])
-            .font(.title3)
-            .bold()
-            .foregroundColor(.black)
-            .shadow(radius: 2)
-            .position(labelPoint)
-    }
-}
-
-// MARK: - Helper Functions & Extensions
-
-// This function keeps the visual layout aligned to 12 o'clock (top)
-func anglesForSector(index: Int, total: Int) -> (Double,Double, Double) {
-    let step = 2 * .pi / Double(total)
-    let rawStart = Double(index - 1) * step
-    let rawEnd = rawStart + step
-    let rawMid = (rawStart + rawEnd) / 2
-    
-    let rotationOffset = -Double.pi / 2
-    
-    let start = rawStart + rotationOffset
-    let end = rawEnd + rotationOffset
-    let mid = rawMid + rotationOffset
-    
-    return (start, end, mid)
-}
-
-func point(on center: CGPoint, radius: CGFloat, angle:Double) -> CGPoint {
-    CGPoint(
-        x: center.x + radius * CGFloat(cos(angle)),
-        y: center.y + radius * CGFloat(sin(angle))
-    )
-}
-
-extension Comparable {
-    func clamped(to limits: ClosedRange<Self>) -> Self {
-        return min(max(self, limits.lowerBound), limits.upperBound)
-    }
-}
-
-extension Angle {
-    var normalizedDegrees: Double {
-        var degrees = self.degrees.truncatingRemainder(dividingBy: 360)
-        if degrees < 0 {
-            degrees += 360
-        }
-        return degrees
-    }
-}
-
-// MARK: - GridBackground 
+// MARK: - GridBackground
 
 struct GridBackground: View {
     let size: CGFloat = 5000
@@ -238,6 +87,53 @@ struct GridBackground: View {
     }
 }
 
+
+struct ThoughtBubbleView: View {
+    let thought: Thought
+    let color: Color
+    
+    // Define a constant size for the bubble
+    private let bubbleSize: CGFloat = 70
+    
+    var body: some View {
+        Text(thought.content)
+            .font(.caption) // Use caption font to fit more text
+            .multilineTextAlignment(.center)
+            .foregroundStyle(.primary) // Use primary text color for readability
+            .padding(8) // Add some internal padding
+            .frame(width: bubbleSize, height: bubbleSize) // Apply the constant size
+            .background(color.opacity(0.15)) // Use the category color for the background
+            .cornerRadius(10) // Make it a rounded box
+            .overlay(
+                // Add a border using the category color
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(color, lineWidth: 2)
+            )
+    }
+}
+
+private func colorForCategory(_ categoryName: String) -> Color {
+        // Get the absolute hash value of the string
+        let hash = abs(categoryName.hashValue)
+        
+        // Map the hash to a hue value (0.0 to 1.0)
+        // Using 360 (degrees in a color wheel) gives a good distribution
+        let hue = Double(hash % 360) / 360.0
+        
+        // Use fixed saturation and brightness for a pleasing, consistent color palette
+        let saturation = 0.7
+        let brightness = 0.85
+        
+        return Color(hue: hue, saturation: saturation, brightness: brightness)
+}
+
+
+
+
+
 #Preview {
     VisualizationView()
+        .modelContainer(for: [Thought.self, Category.self], inMemory: false)
+    
 }
+
