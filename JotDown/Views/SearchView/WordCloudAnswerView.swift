@@ -115,6 +115,9 @@ struct WordCloudAnswerView: View {
                 }
             }
             .frame(width: geo.size.width, height: geo.size.height)
+            .onChange(of: geo.size) { oldSize, newSize in
+                controller.updateCanvasSize(newSize)
+            }
             .onReceive(NotificationCenter.default.publisher(for: .startCloud)) { note in
                 let words = (note.object as? [String]) ?? []
                 controller.startThinking(words: words, in: geo.size)

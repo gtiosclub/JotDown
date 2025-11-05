@@ -268,6 +268,7 @@ final class WordCloudController: ObservableObject {
     @Published  var streamed: String = ""
     @Published  var orbScale: CGFloat = 1.0
 
+    private var currentCanvasSize: CGSize = .zero
     private var pulseTasks: [UUID: Task<Void, Never>] = [:]
 
     func reset() {
@@ -276,6 +277,7 @@ final class WordCloudController: ObservableObject {
         bubbles.removeAll()
         streamed = ""
         orbScale = 1.0
+        currentCanvasSize = .zero
     }
 
     func startThinking(words: [String], in size: CGSize) {
@@ -283,6 +285,7 @@ final class WordCloudController: ObservableObject {
         phase = .thinking
         streamed = ""
         orbScale = 1.0
+        currentCanvasSize = size
         bubbles = spawnBubbles(words: words, in: size)
 
         // fade in
@@ -305,6 +308,27 @@ final class WordCloudController: ObservableObject {
                     }
 //                    try? await Task.sleep(nanoseconds: UInt64(b.pulseSpeed * 1_000_000_000))
                 }
+            }
+        }
+    }
+
+    func updateCanvasSize(_ newSize: CGSize) {
+        guard phase == .thinking,
+              !bubbles.isEmpty,
+              newSize != currentCanvasSize else {
+            return
+        }
+
+        currentCanvasSize = newSize
+
+        let baseSizes: [CGFloat] = bubbles.map { $0.baseSize }
+        let measured = zip(bubbles.map { $0.text }, baseSizes).map { (w, s) in textSize(w, fontSize: s) }
+        let orbRadius = min(newSize.width, newSize.height) * 0.175
+        let newCenters = placeRectsSpiral(sizes: measured, canvas: newSize, margin: 12, orbRadius: orbRadius)
+
+        withAnimation(.smooth) {
+            for i in bubbles.indices {
+                bubbles[i].pos = newCenters[i]
             }
         }
     }
