@@ -45,18 +45,19 @@ struct HeaderHomeView: View {
                             isFocused = false
                             if selectedIndex != nil && selectedIndex != 0 {
                                 selectedIndex = 0;
-                            } else if thoughtInput.trimmingCharacters(in: .whitespacesAndNewlines) != "" {
+                            } else {
                                 Task {
                                     try await addThought()
                                 }
                             }
                         } label: {
-                            Image(systemName: "plus")
+                            Image(systemName: selectedIndex != 0 ? "plus" : "checkmark")
                                 .fontWeight(.light)
                                 .font(.system(size: 30))
                                 .foregroundStyle(thoughtInput.trimmingCharacters(in: .whitespacesAndNewlines) != "" || selectedIndex != 0 ? Color(red: 109/255, green: 134/255, blue: 166/255) : Color.gray.opacity(0.4))
                                 .padding(.vertical, 10)
                         }
+                        .disabled(thoughtInput.trimmingCharacters(in: .whitespacesAndNewlines) == "" && selectedIndex == 0)
                     }
                 }
             }
