@@ -22,8 +22,6 @@ struct RadialLayout: @preconcurrency Layout {
     @MainActor func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout Void) {
         guard !subviews.isEmpty else { return }
         
-        let totalSubviewCount = subviews.count
-        
         //creates a dict, the key is the category, value is list of subviews
         let categories = Dictionary(grouping: subviews) { subview in
             subview[CategoryLayoutKey.self] ?? "Other"
@@ -47,13 +45,12 @@ struct RadialLayout: @preconcurrency Layout {
             
             let sectorAngle =  fullCircle / Double(categories.keys.count)
             
-            
             for (_, subview) in categoryViews.enumerated() {
                 let angleStep = sectorAngle / Double(capacity + 1)
                 let viewAngle = sectorStartAngle + (angleStep * Double(viewsAdded + 1))
                 
                 let viewSize = subview.sizeThatFits(.unspecified)
-                let radius = initialRadius + (80 * Double(currentRing))
+                let radius = initialRadius + (92 * Double(currentRing))
                 
                 let xPos = cos(viewAngle) * (radius - viewSize.width / 2)
                 let yPos = sin(viewAngle) * (radius - viewSize.height / 2)
@@ -65,7 +62,7 @@ struct RadialLayout: @preconcurrency Layout {
                 
                 if(viewsAdded == capacity) {
                     currentRing += 1
-                    capacity += 2
+                    capacity += 1
                     viewsAdded = 0
                 }
             }

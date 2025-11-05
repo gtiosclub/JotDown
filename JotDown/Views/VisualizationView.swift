@@ -10,25 +10,66 @@ import SwiftData
 
 struct VisualizationView: View {
     @Environment(\.modelContext) private var context
-    @Query var thoughts: [Thought]
+    @Query(sort: \Thought.dateCreated, order: .reverse) var thoughts: [Thought]
     
-    @State private var zoomLevel: CGFloat = 1.0
+    @State private var zoomLevel: CGFloat = 0.6
     @State private var finalZoomLevel: CGFloat = 1.0
     
     let minZoom: CGFloat = 0.5
     let maxZoom: CGFloat = 3.0
+    
+    var categories: [String] {
+            var uniqueNames = [String]()
+            var seenNames = Set<String>()
+            
+            // Loop through the thoughts in their query order
+            for thought in thoughts {
+                let name = thought.category.name
+                // If we haven't seen this name yet, add it
+                if !seenNames.contains(name) {
+                    uniqueNames.append(name)
+                    seenNames.insert(name)
+                }
+            }
+            return uniqueNames
+    }
+    
+    private func categoryOpacity(for currentZoom: CGFloat) -> Double {
+            let fadePoint: CGFloat = 1.0
+            // Calculate how far we are between minZoom and the fadePoint
+            let progress = (currentZoom - minZoom) / (fadePoint - minZoom)
+            // Invert the progress (1.0 -> 0.0) and clamp it between 0 and 1
+            return max(0.0, min(1.0, 1.0 - progress))
+    }
     
     
     var body: some View {
         ScrollView([.horizontal, .vertical]) {
             ZStack {
                 GridBackground()
+                
                 RadialLayout {
                     ForEach(thoughts.indices, id: \.self) { index in
-                        ThoughtBubbleView(thought: thoughts[index], color: colorForCategory(thoughts[index].category.name))
+                        ThoughtBubbleView(
+                            thought: thoughts[index],
+                            color: colorForCategory(thoughts[index].category.name),
+                            zoomLevel: zoomLevel
+                        )
                             .layoutValue(key: CategoryLayoutKey.self, value: thoughts[index].category.name)
                     }
                 } .frame(width: 400, height: 400)
+                RadialLayout {
+                    ForEach(categories, id: \.self) { category in
+                        Text(category)
+                            .layoutValue(key: CategoryLayoutKey.self, value: category)
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                    }
+                }
+                .frame(width: 400, height: 400)
+                .opacity(categoryOpacity(for: zoomLevel))
+                .animation(.easeInOut(duration: 0.2), value: zoomLevel)
+                .zIndex(0)
             }
             .scaleEffect(zoomLevel)
             .gesture(magnificationGesture)
@@ -49,6 +90,20 @@ struct VisualizationView: View {
                     self.finalZoomLevel = minZoom
                 } else if self.finalZoomLevel > maxZoom {
                     self.finalZoomLevel = maxZoom
+                }
+                
+                let transitionStart: CGFloat = 0.6
+                let transitionEnd: CGFloat = 1.0
+                let transitionMidpoint: CGFloat = (transitionStart + transitionEnd) / 2.0 // 0.875 Normally
+                
+                // 2. Check if we ended inside the transition zone
+                if self.finalZoomLevel > transitionStart && self.finalZoomLevel < transitionEnd {
+                    // 3. If so, snap to the nearest "clean" state
+                    if self.finalZoomLevel < transitionMidpoint {
+                        self.finalZoomLevel = transitionStart // Snap down
+                    } else {
+                        self.finalZoomLevel = transitionEnd // Snap up
+                    }
                 }
                 
                 withAnimation {
@@ -91,15 +146,28 @@ struct GridBackground: View {
 struct ThoughtBubbleView: View {
     let thought: Thought
     let color: Color
+    let zoomLevel: CGFloat
     
     // Define a constant size for the bubble
     private let bubbleSize: CGFloat = 70
+    
+    private var textOpacity: Double {
+            let fadeStart: CGFloat = 0.75
+            let fadeEnd: CGFloat = 1.0 // The zoom level where text is fully visible
+            
+            // Calculate progress between the start and end
+            let progress = (zoomLevel - fadeStart) / (fadeEnd - fadeStart)
+            // Clamp the result between 0.0 and 1.0
+            return max(0.0, min(1.0, progress))
+    }
     
     var body: some View {
         Text(thought.content)
             .font(.caption) // Use caption font to fit more text
             .multilineTextAlignment(.center)
             .foregroundStyle(.primary) // Use primary text color for readability
+            .opacity(textOpacity)
+            .animation(.easeInOut(duration: 0.2), value: textOpacity)
             .padding(8) // Add some internal padding
             .frame(width: bubbleSize, height: bubbleSize) // Apply the constant size
             .background(color.opacity(0.15)) // Use the category color for the background
