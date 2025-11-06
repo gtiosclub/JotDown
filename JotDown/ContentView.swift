@@ -22,7 +22,6 @@ struct ContentView: View {
     var body: some View {
         TabView(selection: $activeTab) {
             HomeView(
-                thoughtToSelect: $thoughtToSelect,
                 categoryToSelect: $categoryToSelect,
                 activeTab: $activeTab
             )
@@ -40,9 +39,8 @@ struct ContentView: View {
             
             DashboardView(
                 categoryToSelect: $categoryToSelect,
-                onThoughtSelected: { thought in
-                    thoughtToSelect = thought
-                    activeTab = 0
+                onThoughtSelected: { _ in
+                    
                 }
             )
             .tabItem {

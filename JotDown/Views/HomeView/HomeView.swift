@@ -18,7 +18,6 @@ struct HomeView: View {
     @FocusState private var isFocused: Bool
     @State var isSubmitting = false
     
-    @Binding var thoughtToSelect: Thought?
     @Binding var categoryToSelect: Category?
     @Binding var activeTab: Int
     
@@ -27,7 +26,6 @@ struct HomeView: View {
             
             Spacer()
             
-            // --- START FIX: Corrected this section ---
             HeaderHomeView(
                 thoughtInput: $thoughtInput,
                 selectedIndex: $selectedIndex,
@@ -39,7 +37,6 @@ struct HomeView: View {
                 thoughts: thoughts,
                 text: $thoughtInput,
                 selectedIndex: $selectedIndex,
-            // --- END FIX ---
                 isFocused: _isFocused,
                 addThought: addThought,
                 categoryToSelect: $categoryToSelect,
@@ -63,29 +60,6 @@ struct HomeView: View {
         .ignoresSafeArea(.keyboard)
         .onTapGesture {
             isFocused = false
-        }
-        .onChange(of: thoughtToSelect) { _, newThought in
-            guard let thought = newThought else { return }
-            
-            thoughtToSelect = nil
-            
-            if let index = thoughts.firstIndex(where: { $0.id == thought.id }) {
-                let targetIndex = index + 1
-                
-                if selectedIndex == 0 && targetIndex != 0 {
-                    
-                    selectedIndex = nil
-
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-                    
-                        selectedIndex = targetIndex
-                    }
-                } else {
-                    DispatchQueue.main.async {
-                        selectedIndex = targetIndex
-                    }
-                }
-            }
         }
     }
     

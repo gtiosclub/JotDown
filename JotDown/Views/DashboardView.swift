@@ -51,69 +51,70 @@ struct DashboardView: View {
         ZStack {
             // Main dashboard content when no category is selected
             if selectedCategory == nil {
-                VStack(alignment: .leading, spacing: 24) {
-                    // MARK: - Header Content
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text("jot")
-                                .font(.system(size: 40, weight: .bold))
-                                .foregroundColor(.black.opacity(0.9))
-                            Text("down")
-                                .font(.system(size: 40, weight: .regular))
-                                .foregroundColor(.gray)
+                ScrollView {
+                    
+                    VStack(alignment: .leading, spacing: 24) {
+                        // MARK: - Header Content
+                        HStack {
+                            VStack(alignment: .leading) {
+                                Text("jot")
+                                    .font(.system(size: 40, weight: .bold))
+                                    .foregroundColor(.black.opacity(0.9))
+                                Text("down")
+                                    .font(.system(size: 40, weight: .regular))
+                                    .foregroundColor(.gray)
+                            }
+                            .matchedGeometryEffect(id: "logo", in: dashboardNamespace) // <-- Tag logo
+                            Spacer()
+                            Button("edit") { }
+                                .font(.system(size: 12, weight: .regular))
+                                .foregroundColor(.black.opacity(0.7))
+                                .font(.body.weight(.medium))
+                                .padding(.horizontal, 15)
+                                .padding(.vertical, 8)
+                                .background(Color.gray.opacity(0.15))
+                                .clipShape(Capsule())
+                                .alignmentGuide(.bottom) { d in d[.bottom] }
                         }
-                        .matchedGeometryEffect(id: "logo", in: dashboardNamespace) // <-- Tag logo
-                        Spacer()
-                        Button("edit") { }
-                            .font(.system(size: 12, weight: .regular))
-                            .foregroundColor(.black.opacity(0.7))
-                            .font(.body.weight(.medium))
-                            .padding(.horizontal, 15)
-                            .padding(.vertical, 8)
-                            .background(Color.gray.opacity(0.15))
-                            .clipShape(Capsule())
-                            .alignmentGuide(.bottom) { d in d[.bottom] }
-                    }
-                    .padding(.horizontal)
-
-                    // MARK: - Stats Content
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text("\(thoughts.count)")
-                                .font(.title)
-                                .fontWeight(.bold)
-                            Text("notes")
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
+                        .padding(.horizontal)
+                        
+                        // MARK: - Stats Content
+                        HStack {
+                            VStack(alignment: .leading) {
+                                Text("\(thoughts.count)")
+                                    .font(.title)
+                                    .fontWeight(.bold)
+                                Text("notes")
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                            }
+                            .matchedGeometryEffect(id: "notes-stat", in: dashboardNamespace)
+                            Spacer()
+                            VStack(alignment: .leading) {
+                                Text("\(categories.count)")
+                                    .font(.title)
+                                    .fontWeight(.bold)
+                                Text("categories")
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                            }
+                            .matchedGeometryEffect(id: "categories-stat", in: dashboardNamespace)
+                            Spacer()
+                            Spacer()
+                            Spacer()
+                            VStack(alignment: .trailing) {
+                                Text(formattedDate)
+                                    .font(.subheadline)
+                                    .fontWeight(.bold)
+                                Text("date")
+                                    .font(.caption)
+                                    .foregroundColor(.gray)
+                            }
+                            .matchedGeometryEffect(id: "date-stat", in: dashboardNamespace)
                         }
-                        .matchedGeometryEffect(id: "notes-stat", in: dashboardNamespace)
-                        Spacer()
-                        VStack(alignment: .leading) {
-                            Text("\(categories.count)")
-                                .font(.title)
-                                .fontWeight(.bold)
-                            Text("categories")
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
-                        }
-                        .matchedGeometryEffect(id: "categories-stat", in: dashboardNamespace)
-                        Spacer()
-                        Spacer()
-                        Spacer()
-                        VStack(alignment: .trailing) {
-                            Text(formattedDate)
-                                .font(.subheadline)
-                                .fontWeight(.bold)
-                            Text("date")
-                                .font(.caption)
-                                .foregroundColor(.gray)
-                        }
-                        .matchedGeometryEffect(id: "date-stat", in: dashboardNamespace)
-                    }
-                    .padding(.horizontal)
-
-                    // MARK: - Scrollable Grid
-                    ScrollView {
+                        .padding(.horizontal)
+                        
+                        // MARK: - Scrollable Grid
                         LazyVGrid(columns: columns, spacing: 24) {
                             ForEach(sortedCategories) { category in
                                 NoteCategoryView(category: category, namespace: dashboardNamespace)
@@ -127,8 +128,6 @@ struct DashboardView: View {
                             .padding(.top, 25)
                         }
                     }
-                    .padding(.horizontal)
-                    .padding(.top, 40)
                 }
                 .padding(.top, 40)
                 .transition(.opacity)

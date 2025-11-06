@@ -50,17 +50,18 @@ struct CategoryDashboardView: View {
             )
             .ignoresSafeArea()
             
-            VStack(alignment: .leading, spacing: 0){
-                headerView
-                    .padding(.horizontal, 24)
-                    .padding(.top, 40)
-                Text(category.name)
-                    .font(.system(size: 48, weight: .semibold))
-                    .foregroundColor(.black)
-                    .padding(.top, 12)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .matchedGeometryEffect(id: "\(category.id)-title", in: namespace)
-                ScrollView {
+            ScrollView {
+                
+                VStack(alignment: .leading, spacing: 0){
+                    headerView
+                        .padding(.horizontal, 24)
+                        .padding(.top, 40)
+                    Text(category.name)
+                        .font(.system(size: 48, weight: .semibold))
+                        .foregroundColor(.black)
+                        .padding(.top, 12)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .matchedGeometryEffect(id: "\(category.id)-title", in: namespace)
                     LazyVGrid(columns: columns, spacing: 16){
                         ForEach(sortedThoughts) { thought in
                             CategoryItemView(thought: thought)
@@ -71,7 +72,6 @@ struct CategoryDashboardView: View {
                                 }
                         }
                     }
-                    .padding()
                 }
             }
         }
