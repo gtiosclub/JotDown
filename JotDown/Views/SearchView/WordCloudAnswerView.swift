@@ -32,7 +32,7 @@ struct WordCloudAnswerView: View {
                 }
 
                 // Orb (thinking / merging) - now scales with animation
-                if controller.phase == .thinking || controller.phase == .merging {
+                if controller.phase != .streaming {
                      OrbView()
                          .frame(
                             width: min(geo.size.width, geo.size.height) * 0.35 * controller.orbScale,
