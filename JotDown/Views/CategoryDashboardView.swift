@@ -25,40 +25,87 @@ struct CategoryDashboardView: View {
         })
     }
     
-    private let columns: [GridItem] = [ GridItem(.flexible(), spacing: 16),
+    // Grid layout for notes
+    private let columns: [GridItem] = [
+        GridItem(.flexible(), spacing: 16),
         GridItem(.flexible(), spacing: 16)
     ]
     
-    private static var dateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM, E d" // Match DashboardView's format
-        return formatter
-    }()
+    // Consistent gradient background
+    private var backgroundGradient: some View {
+        EllipticalGradient(
+            stops: [
+                Gradient.Stop(color: Color(red: 0.94, green: 0.87, blue: 0.94), location: 0.00),
+                Gradient.Stop(color: Color(red: 0.78, green: 0.85, blue: 0.93), location: 1.00),
+            ],
+            center: UnitPoint(x: 0.67, y: 0.46)
+        )
+        .ignoresSafeArea()
+    }
     
+    // Define the dark text color from the visual
+    private var textColor: Color {
+         Color(red: 0.35, green: 0.35, blue: 0.45)
+    }
+    
+    // Sort thoughts by date
     private var sortedThoughts: [Thought] {
             thoughts.sorted { $0.dateCreated > $1.dateCreated }
     }
     
     var body: some View {
         ZStack {
-            LinearGradient(
-                colors: [Color.gray.opacity(0.15), Color.white],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
+            backgroundGradient
             
-            VStack(alignment: .leading, spacing: 0){
-                headerView
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0){
+                    
+                    // MARK: - Header / Navigation
+                    Button(action: onDismiss) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 32, weight: .bold))
+                            
+                            Text(category.name.lowercased())
+                                .font(.system(size: 40, weight: .bold))
+                                .matchedGeometryEffect(id: "\(category.id)-title", in: namespace)
+                        }
+                        .foregroundColor(textColor)
+                    }
                     .padding(.horizontal, 24)
                     .padding(.top, 40)
-                Text(category.name)
-                    .font(.system(size: 48, weight: .semibold))
-                    .foregroundColor(.black)
-                    .padding(.top, 12)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .matchedGeometryEffect(id: "\(category.id)-title", in: namespace)
-                ScrollView {
+
+                    
+                    // MARK: - Stats & Select Button
+                    HStack(alignment: .bottom) {
+                        VStack(alignment: .leading) {
+                             Text("\(thoughts.count)")
+                                .font(.system(size: 28, weight: .bold))
+                                .foregroundColor(textColor)
+                            Text("notes")
+                                .font(.system(size: 15, weight: .regular))
+                                .foregroundColor(textColor.opacity(0.8))
+                        }
+                        .padding(.leading, 4)
+                        .matchedGeometryEffect(id: "\(category.id)-count", in: namespace)
+                        
+                        Spacer()
+                        
+                        Button("select") {
+                            // TODO: Implement Select functionality
+                        }
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
+                        .background(Color(red: 0.75, green: 0.75, blue: 0.9))
+                        .clipShape(Capsule())
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.top, 8)
+
+                    
+                    // MARK: - Notes Grid
                     LazyVGrid(columns: columns, spacing: 16){
                         ForEach(sortedThoughts) { thought in
                             CategoryItemView(thought: thought)
@@ -67,71 +114,10 @@ struct CategoryDashboardView: View {
                         }
                     }
                     .padding()
+                    .padding(.top, 16)
                 }
             }
-        }
-    }
-    
-    private var headerView: some View {
-        VStack(spacing: 24) {
-            // --- Header Content (Logo & Button) ---
-            HStack {
-                VStack(alignment: .leading) {
-                    Text("jot")
-                        .font(.system(size: 40, weight: .bold))
-                        .foregroundColor(.black.opacity(0.9))
-                    Text("down")
-                        .font(.system(size: 40, weight: .regular))
-                        .foregroundColor(.gray)
-                }
-                .matchedGeometryEffect(id: "logo", in: namespace)
-
-                Spacer()
-
-                Button("back") { onDismiss() }
-                    .font(.system(size: 12, weight: .regular))
-                    .foregroundColor(.black.opacity(0.7))
-                    .font(.body.weight(.medium))
-                    .padding(.horizontal, 15)
-                    .padding(.vertical, 8)
-                    .background(Color.gray.opacity(0.15))
-                    .clipShape(Capsule())
-                    .alignmentGuide(.bottom) {d in d[.bottom] }
-                    .matchedGeometryEffect(id: "header-button", in: namespace)
-            }
-            
-            // --- Stats Content (Notes, Category, Date) ---
-            HStack {
-                VStack(alignment: .leading) {
-                    Text("\(thoughts.count)")
-                        .font(.title)
-                        .fontWeight(.bold)
-                    Text("notes")
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                }
-                .matchedGeometryEffect(id: "notes-stat", in: namespace)
-
-                Spacer()
-
-                VStack {}
-                    .matchedGeometryEffect(id: "categories-stat", in: namespace)
-                    .opacity(0) // Make it invisible
-
-                Spacer()
-                Spacer()
-                Spacer()
-
-                VStack(alignment: .trailing) {
-                    Text(Date.now, formatter: Self.dateFormatter)
-                        .font(.subheadline)
-                        .fontWeight(.bold)
-                    Text("date")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                }
-                .matchedGeometryEffect(id: "date-stat", in: namespace)
-            }
+            .padding(.horizontal)
         }
     }
 }
@@ -146,22 +132,19 @@ struct NamespaceReader<Content: View>: View {
 }
 
 #Preview {
-    // Make SwiftData container to test visualization
     let container = try! ModelContainer(
         for: Thought.self, Category.self,
         configurations: ModelConfiguration(isStoredInMemoryOnly: true)
     )
     
-    // Create a fake category
-    let category = Category.dummyCategories.first!
+    let category = Category(name: "Recipes", categoryDescription: "test", isActive: true)
     container.mainContext.insert(category)
     
-    // Add sample thoughts, and assign them to the fake category
     let thoughts = [
-        "Try mango sticky rice mochi",
-        "Test a chocolate chip cookie recipe",
-        "Finish ISyE homework",
-        "Play some video games"
+        "i just realized i could make ice cream mochi but with mango sticky rice inside!!! First I need to figure out how to find good...",
+        "sriracha + tuna + miso soup??",
+        "lemon cake with matcha icing sounds so yummmmmm",
+        "Gochujang butter cookies..."
     ].map { content -> Thought in
         let thought = Thought(content: content)
         thought.category = category
@@ -171,12 +154,10 @@ struct NamespaceReader<Content: View>: View {
     
     try? container.mainContext.save()
     
-    // Return the preview view
     return NavigationStack {
         NamespaceReader { ns in
-            CategoryDashboardView(category: category, namespace: ns)
+            CategoryDashboardView(category: category, namespace: ns, onDismiss: {})
         }
     }
     .modelContainer(container)
 }
-

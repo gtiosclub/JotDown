@@ -36,82 +36,97 @@ struct NoteCategoryView: View {
         return recentThoughts.map { $0.content }
     }
 
+    // Define the dark text color from the visual
+    private var textColor: Color {
+         Color(red: 0.35, green: 0.35, blue: 0.45)
+    }
+
     @ViewBuilder
-    private func noteCard(text: String) -> some View {
-        ZStack {
-            //background
-            RoundedRectangle(cornerRadius: 15)
-                .fill(Color(.systemGray6))
-            // border
-            RoundedRectangle(cornerRadius: 15)
-                .stroke(Color.white, lineWidth: 10)
+    private func noteCard(text: String, isFront: Bool = false) -> some View {
+        ZStack(alignment: .topLeading) {
             // text
             Text(text)
                 .font(.system(size: 12, weight: .medium))
                 .padding(15)
+                .foregroundStyle(textColor)
                 .multilineTextAlignment(.leading)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
+        // background
+        .background(
+            isFront ?
+            .ultraThinMaterial // Frosted-glass effect for the front card
+            :
+            Material.regular // Opaque white-ish material for back cards
+        )
+        .cornerRadius(15)
         .aspectRatio(1.0, contentMode: .fit)
+        .clipped()
     }
 
     var body: some View {
-        VStack(alignment: .center, spacing: 12) {
-            ZStack(alignment: .bottom) {
+        VStack(alignment: .center, spacing: 16) {
+            ZStack(alignment: .center) {
                 // Back Card (Right) - 3rd newest note
                 if thoughts.count > 2 {
                     noteCard(text: thoughts[2].content)
                         .matchedGeometryEffect(id: thoughts[2].id, in: namespace)
-                        .rotationEffect(.degrees(10))
-                        .offset(x: 50, y: -50)
+                        .rotationEffect(.degrees(6))
+                        .offset(x: 30, y: -45)
+                        .opacity(0.6)
                 } else {
                     noteCard(text: "")
-                        .rotationEffect(.degrees(10))
-                        .offset(x: 50, y: -50)
+                        .rotationEffect(.degrees(6))
+                        .offset(x: 30, y: -45)
+                        .opacity(0.6)
                 }
 
                 // Middle Card (Left) - 2nd newest note
                 if thoughts.count > 1 {
                     noteCard(text: thoughts[1].content)
                         .matchedGeometryEffect(id: thoughts[1].id, in: namespace)
-                        .rotationEffect(.degrees(-10))
-                        .offset(x: -50, y: -75)
+                        .rotationEffect(.degrees(-6))
+                        .offset(x: -30, y: -60)
+                        .opacity(0.8)
                 } else {
                     noteCard(text: "")
-                        .rotationEffect(.degrees(-10))
-                        .offset(x: -50, y: -75)
+                        .rotationEffect(.degrees(-6))
+                        .offset(x: -30, y: -60)
+                        .opacity(0.8)
                 }
 
                 // Front Card (Center) - Newest note
                 if let newestThought = thoughts.first {
-                    noteCard(text: newestThought.content)
+                    noteCard(text: newestThought.content, isFront: true)
                         .matchedGeometryEffect(id: newestThought.id, in: namespace)
+                        .shadow(color: .black.opacity(0.1), radius: 10, y: 5)
                 } else {
-                    noteCard(text: "")
+                    noteCard(text: "", isFront: true)
                 }
             }
-            .scaleEffect(0.8)
             .compositingGroup()
-            .shadow(color: .black.opacity(0.1), radius: 5, y: 4)
-            .frame(height: 150, alignment: .bottom)
+            .frame(height: 125, alignment: .bottom)
 
-            HStack(spacing: 4) {
-                Text(category.name)
-                    .font(.headline)
-                    .matchedGeometryEffect(id: "\(category.id)-title", in: namespace)
-                // Text(category.emoji)
-                // TO DO: have foundation models create an emoji for the category
-            }
+            // MARK: - Title & Count
+            
+            // Category Name
+            Text(category.name)
+                .font(.system(size: 20, weight: .bold))
+                .foregroundStyle(textColor)
+                .matchedGeometryEffect(id: "\(category.id)-title", in: namespace)
 
-            // Display the total number of thoughts in this category
+            // Display the total number of thoughts in this category in a "pill"
             Text("\(thoughts.count) notes")
-                .font(.caption)
-                .fontWeight(.medium)
-                .foregroundStyle(.secondary)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 5)
-                .background(Color.gray.opacity(0.15))
+                .font(.system(size: 12, weight: .regular))
+                .foregroundStyle(textColor.opacity(0.8))
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(Color.black.opacity(0.04)) // Translucent pill
                 .clipShape(Capsule())
+                .overlay(
+                    Capsule()
+                        .stroke(Color.black.opacity(0.08), lineWidth: 1)
+                )
                 .matchedGeometryEffect(id: "\(category.id)-count", in: namespace)
         }
     }
