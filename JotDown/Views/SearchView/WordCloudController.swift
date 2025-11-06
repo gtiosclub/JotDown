@@ -297,7 +297,7 @@ final class WordCloudController: ObservableObject {
         for b in bubbles {
             pulseTasks[b.id] = Task { [weak self] in
                 guard let self else { return }
-//                try? await Task.sleep(nanoseconds: UInt64(b.stagger * 1_000_000_000))
+                try? await Task.sleep(nanoseconds: UInt64(b.stagger * 1_000_000_000))
                 while !Task.isCancelled && self.phase == .thinking {
                     await MainActor.run {
                         if let i = self.bubbles.firstIndex(where: { $0.id == b.id }) {
@@ -306,7 +306,7 @@ final class WordCloudController: ObservableObject {
                             }
                         }
                     }
-//                    try? await Task.sleep(nanoseconds: UInt64(b.pulseSpeed * 1_000_000_000))
+                    try? await Task.sleep(nanoseconds: UInt64(b.pulseSpeed * 1_000_000_000))
                 }
             }
         }

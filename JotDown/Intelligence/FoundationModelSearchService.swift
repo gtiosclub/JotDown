@@ -66,33 +66,33 @@ class FoundationModelSearchService {
     }
     
     static func queryResponseGenerator(query: String, in relevantThoughts: [Thought]) async -> String {
-            let session = LanguageModelSession()
-            var relevantThoughtsContent: [String] = []
-            var i: Int = 1
-            do  {
-                for thought in relevantThoughts{
-                    let contents = "Thought \(i):\(thought.content)"
-                    i+=1
-                    relevantThoughtsContent.append(contents)
+        let instructions: String = """
+                        You are a personal search assistant meant to find answers to queries based on user notes.
+                        Given the search query and the list of relevant notes:
+                        Infer the information in the notes to respond to the query. Try not to use the exact text from the notes unless necessary. 
+                        DO NOT include information that is irrelevant to the query. 
+                        DO NOT mention the 'user' 
+                        Summarize in one short sentence.
+                        """
+                let session = LanguageModelSession(instructions: instructions)
+                var relevantThoughtsContent: [String] = []
+                do  {
+                    for thought in relevantThoughts {
+                        relevantThoughtsContent.append(thought.content)
+                    }
+                    let queryResponsePrompt = """
+                        Search query: "\(query)" 
+                        Notes: ["\(relevantThoughtsContent.joined(separator: ", "))"]
+                        """
+                    let queryResponse = try await session.respond(to: queryResponsePrompt, generating: GeneratedResponse.self)
+                    
+                    return queryResponse.content.response
+                } catch {
+                    print("Error in Foundation Models search: \(error)")
+                    return ""
                 }
-                let queryResponsePrompt = """
-                Given the search query "\(query)" and these are the available relevant thoughts ["\(relevantThoughtsContent.joined(separator: ", "))"]
-                Infer the information in the thoughts to respond to the query. Try not to use the exact text from the toughts unless necessary.
-                Summarize in one short sentence.
-
-                Eg:
-                Relevant thoughts: Dogs are cool, Cats are mid, Mouse are bad
-                Query: Which animal is the best?
-                Response: Dogs are the best animal.
-                """
-                let queryResponse = try await session.respond(to: queryResponsePrompt, generating: GeneratedResponse.self )
-                return queryResponse.content.response
-            } catch {
-                print("Error in Foundation Models search: \(error)")
-                return ""
             }
         }
-}
 
 
 

@@ -20,21 +20,10 @@ struct CombinedSearchView: View {
     // Only searches after .5 seconds of stopped typing
     @State private var searchDebounceWorkItem: DispatchWorkItem?
     private let delayToSearch = 0.5
-    @Binding var selectedTab: Int
     @Namespace private var namespace
     var body: some View {
         ZStack {
-            VStack {
-//                Text("result")
-                
-                Spacer()
-                
-                CustomTabBar(selectedTab: $selectedTab)
-            }
-//            OrbView()
-//                .frame(width: 200, height: 200)
             WordCloudAnswerView(controller: cloud)
-                                        .padding()
         }
         .searchable(
             text: $searchText,
@@ -85,7 +74,7 @@ struct CombinedSearchView: View {
     }
     
     private func WordFinds(thoughts: [Thought]) -> [String]{
-        let noUseWords = ["the","a","an","to","for"]
+        let noUseWords = ["the","a","an","to","for","in","on","at","of","by"]
         var retWords:[String] = []
         let banned: Set<String> = Set(noUseWords.map {
             $0.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
@@ -121,5 +110,5 @@ extension Notification.Name {
 }
 
 #Preview {
-    CombinedSearchView(selectedTab: .constant(3))
+    CombinedSearchView()
 }
