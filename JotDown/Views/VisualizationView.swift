@@ -15,8 +15,8 @@ struct VisualizationView: View {
     @State private var zoomLevel: CGFloat = 0.6
     @State private var finalZoomLevel: CGFloat = 1.0
     
-    let minZoom: CGFloat = 0.5
-    let maxZoom: CGFloat = 3.0
+    let minZoom: CGFloat = 0.67
+    let maxZoom: CGFloat = 1.5
     
     var categories: [String] {
             var uniqueNames = [String]()
@@ -55,21 +55,36 @@ struct VisualizationView: View {
                             color: colorForCategory(thoughts[index].category.name),
                             zoomLevel: zoomLevel
                         )
-                            .layoutValue(key: CategoryLayoutKey.self, value: thoughts[index].category.name)
+                        .layoutValue(key: CategoryLayoutKey.self, value: thoughts[index].category.name)
                     }
                 } .frame(width: 400, height: 400)
                 RadialLayout {
                     ForEach(categories, id: \.self) { category in
                         Text(category)
                             .layoutValue(key: CategoryLayoutKey.self, value: category)
-                            .font(.largeTitle)
+                            .font(.title)
                             .fontWeight(.bold)
+                            .multilineTextAlignment(.center)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.5)
+                            .frame(maxWidth: 167) // limits width
+                            .fixedSize(horizontal: false, vertical: true) // which axis has a fixed size
                     }
                 }
                 .frame(width: 400, height: 400)
                 .opacity(categoryOpacity(for: zoomLevel))
                 .animation(.easeInOut(duration: 0.2), value: zoomLevel)
                 .zIndex(0)
+            }
+            .background {
+                EllipticalGradient(
+                    stops: [
+                        Gradient.Stop(color: Color(red: 0.94, green: 0.87, blue: 0.94), location: 0.00),
+                        Gradient.Stop(color: Color(red: 0.78, green: 0.85, blue: 0.93), location: 1.00),
+                    ],
+                    center: UnitPoint(x: 0.67, y: 0.46)
+                )
+                .ignoresSafeArea()
             }
             .scaleEffect(zoomLevel)
             .gesture(magnificationGesture)
@@ -119,7 +134,7 @@ struct VisualizationView: View {
 struct GridBackground: View {
     let size: CGFloat = 5000
     let spacing: CGFloat = 50
-    let lineColor = Color(.lightGray).opacity(0.7)
+    let lineColor = Color(.lightGray).opacity(0)
     let lineWidth: CGFloat = 1
     
     var body: some View {
