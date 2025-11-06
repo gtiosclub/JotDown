@@ -41,33 +41,6 @@ struct WordCloudAnswerView: View {
                          .animation(.spring(response: 0.6, dampingFraction: 0.75), value: controller.orbScale)
                 }
                 
-                // Morphing phase - orb transforms to rectangle
-//                if controller.phase == .morphing {
-//                    let purpledark = Color(.sRGB, red: 107/255.0, green: 107/255.0, blue: 138/255.0)
-//                    let gradient = LinearGradient(
-//                        colors: [purpledark],
-//                        startPoint: .topLeading,
-//                        endPoint: .bottomTrailing
-//                    )
-//                    
-//                    MorphableShape(progress: morphProgress)
-//                        .fill(.ultraThinMaterial)
-//                        .overlay(
-//                            MorphableShape(progress: morphProgress)
-//                                .fill(gradient.opacity(0.23))
-//                        )
-//                        .overlay(
-//                            MorphableShape(progress: morphProgress)
-//                                .strokeBorder(Color.white.opacity(0.25), lineWidth: 0.5)
-//                        )
-//                        .shadow(color: .black.opacity(0.1), radius: 28, y: 12)
-//                        .frame(width: geo.size.width, height: geo.size.height)
-//                        .onAppear {
-//                            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-//                                morphProgress = 1.0
-//                            }
-//                        }
-//                }
 
                 if controller.phase == .streaming {
                     ZStack {
