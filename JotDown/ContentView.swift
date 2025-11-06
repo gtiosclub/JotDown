@@ -50,8 +50,7 @@ struct ContentView: View {
             
             Tab(role: .search) {
                 NavigationStack {
-                    SearchView(searchText: $searchText)
-                        .searchable(text: $searchText)
+                    CombinedSearchView()
                         .navigationTitle("Search")
                 }
             } label: {
