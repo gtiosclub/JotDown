@@ -8,6 +8,7 @@ import FoundationModels
 import Foundation
 
 class FoundationModelSearchService {
+    @MainActor
     static func getRelevantThoughts(query: String, in thoughts: [Thought]) async -> [Thought] {
         let session = FoundationModels.LanguageModelSession()
         
