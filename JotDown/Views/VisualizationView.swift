@@ -11,6 +11,7 @@ import SwiftData
 struct VisualizationView: View {
     @Environment(\.modelContext) private var context
     @Query(sort: \Thought.dateCreated, order: .reverse) var thoughts: [Thought]
+    @Query var categories: [Category]
     
     @State private var zoomLevel: CGFloat = 0.6
     @State private var finalZoomLevel: CGFloat = 1.0
@@ -18,17 +19,30 @@ struct VisualizationView: View {
     let minZoom: CGFloat = 0.67
     let maxZoom: CGFloat = 1.5
     
-    var categories: [String] {
+    private var visibleThoughts: [Thought] {
+        thoughts
+            .filter{$0.category.isActive}
+    }
+    
+    private var activeCategories: [Category] {
+        categories
+            .filter{$0.isActive}
+    }
+    private var inactiveCategories: [Category] {
+        categories.filter{!$0.isActive}
+    }
+    
+    private var usedCategories: [String] {
             var uniqueNames = [String]()
             var seenNames = Set<String>()
             
             // Loop through the thoughts in their query order
             for thought in thoughts {
-                let name = thought.category.name
+                let cat = thought.category
                 // If we haven't seen this name yet, add it
-                if !seenNames.contains(name) {
-                    uniqueNames.append(name)
-                    seenNames.insert(name)
+                if !seenNames.contains(cat.name) && !inactiveCategories.contains(cat) {
+                    uniqueNames.append(cat.name)
+                    seenNames.insert(cat.name)
                 }
             }
             return uniqueNames
@@ -42,55 +56,73 @@ struct VisualizationView: View {
             return max(0.0, min(1.0, 1.0 - progress))
     }
     
-    
     var body: some View {
         ScrollView([.horizontal, .vertical]) {
             ZStack {
                 GridBackground()
-                
                 RadialLayout {
-                    ForEach(thoughts.indices, id: \.self) { index in
+                    ForEach(visibleThoughts.indices, id: \.self) { index in
                         ThoughtBubbleView(
-                            thought: thoughts[index],
-                            color: colorForCategory(thoughts[index].category.name),
+                            thought: visibleThoughts[index],
+                            color: colorForCategory(visibleThoughts[index].category.name),
                             zoomLevel: zoomLevel
                         )
-                        .layoutValue(key: CategoryLayoutKey.self, value: thoughts[index].category.name)
+                        .layoutValue(key: CategoryLayoutKey.self, value: visibleThoughts[index].category.name)
                     }
                 } .frame(width: 400, height: 400)
                 RadialLayout {
-                    ForEach(categories, id: \.self) { category in
-                        Text(category)
-                            .layoutValue(key: CategoryLayoutKey.self, value: category)
-                            .font(.title)
+                    if usedCategories.count == 1 {
+                        Text(usedCategories.first!)
+                            .font(.largeTitle)
                             .fontWeight(.bold)
+                            .position(x: -33, y: 25)
                             .multilineTextAlignment(.center)
                             .lineLimit(2)
                             .minimumScaleFactor(0.5)
-                            .frame(maxWidth: 167) // limits width
+                            .frame(maxWidth: 220) // limits width
                             .fixedSize(horizontal: false, vertical: true) // which axis has a fixed size
+                    } else {
+                        ForEach(usedCategories, id: \.self) { category in
+                            Text(category)
+                                .layoutValue(key: CategoryLayoutKey.self, value: category)
+                                .font(.largeTitle)
+                                .fontWeight(.bold)
+                                .foregroundColor(Color(red: 0.35, green: 0.35, blue: 0.45))
+                                .multilineTextAlignment(.center)
+                                .lineLimit(2)
+                                .minimumScaleFactor(0.5)
+                                .frame(maxWidth: 220) // limits width
+                                .fixedSize(horizontal: false, vertical: true) // which axis has a fixed size
+                        }
                     }
                 }
                 .frame(width: 400, height: 400)
                 .opacity(categoryOpacity(for: zoomLevel))
                 .animation(.easeInOut(duration: 0.2), value: zoomLevel)
                 .zIndex(0)
-            }
-            .background {
-                EllipticalGradient(
-                    stops: [
-                        Gradient.Stop(color: Color(red: 0.94, green: 0.87, blue: 0.94), location: 0.00),
-                        Gradient.Stop(color: Color(red: 0.78, green: 0.85, blue: 0.93), location: 1.00),
-                    ],
-                    center: UnitPoint(x: 0.67, y: 0.46)
-                )
-                .ignoresSafeArea()
+                Text("visualization")
+                    .foregroundColor(Color(red: 0.35, green: 0.35, blue: 0.45))
+                    .font(.system(size: 40, weight: .heavy))
+                    .offset(x: 15, y: 20)
             }
             .scaleEffect(zoomLevel)
             .gesture(magnificationGesture)
-
+            .frame(width: 800, height: 800)
         }
+        .background {
+            EllipticalGradient(
+                stops: [
+                    Gradient.Stop(color: Color(red: 0.94, green: 0.87, blue: 0.94), location: 0.00),
+                    Gradient.Stop(color: Color(red: 0.78, green: 0.85, blue: 0.93), location: 1.00),
+                ],
+                center: UnitPoint(x: 0.67, y: 0.46)
+            )
+            .ignoresSafeArea()
+        }
+        .scrollIndicators(.hidden)
         .defaultScrollAnchor(.center)
+        .scrollBounceBehavior(.basedOnSize)
+        .scrollContentBackground(.hidden)
     }
     
     var magnificationGesture: some Gesture {
@@ -132,7 +164,7 @@ struct VisualizationView: View {
 // MARK: - GridBackground
 
 struct GridBackground: View {
-    let size: CGFloat = 5000
+    let size: CGFloat = 4000
     let spacing: CGFloat = 50
     let lineColor = Color(.lightGray).opacity(0)
     let lineWidth: CGFloat = 1
@@ -156,7 +188,6 @@ struct GridBackground: View {
         .frame(width: size, height: size)
     }
 }
-
 
 struct ThoughtBubbleView: View {
     let thought: Thought
