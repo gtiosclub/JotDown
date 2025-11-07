@@ -100,10 +100,11 @@ struct VisualizationView: View {
                 .opacity(categoryOpacity(for: zoomLevel))
                 .animation(.easeInOut(duration: 0.2), value: zoomLevel)
                 .zIndex(0)
-                Text("visualization")
-                    .foregroundColor(Color(red: 0.35, green: 0.35, blue: 0.45))
-                    .font(.system(size: 40, weight: .heavy))
-                    .offset(x: 15, y: 20)
+                JotDownLogo(color: .gray, fontSize: 56)
+                    .frame(width: 200.0, height: 200.0)
+                    .font(.system(size: 100, weight: .heavy)) // This scales the symbol
+                    .glassEffect(.clear, in: .circle)
+                
             }
             .scaleEffect(zoomLevel)
             .gesture(magnificationGesture)
@@ -211,6 +212,7 @@ struct ThoughtBubbleView: View {
             Text(thought.content)
                 .font(.system(size: 12, weight: .medium)) // Use caption font to fit more text
                 .multilineTextAlignment(.center)
+                .lineLimit(3)
                 .foregroundColor(Color(red: 0.35, green: 0.35, blue: 0.45)) // Use primary text color for readability
                 .opacity(textOpacity)
                 .animation(.easeInOut(duration: 0.2), value: textOpacity)

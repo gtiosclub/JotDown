@@ -29,7 +29,7 @@ struct RadialLayout: @preconcurrency Layout {
         
         let sortedCategories = categories.keys.sorted()
         
-        let initialRadius = min(bounds.size.width, bounds.size.height) / 1.3
+        let initialRadius = min(bounds.size.width, bounds.size.height) / 1.6
         let fullCircle = Angle.degrees(360).radians
         
         //start from theta=pi/2
