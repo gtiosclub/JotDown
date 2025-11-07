@@ -14,16 +14,23 @@ struct HomeView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
     @State var thoughtInput: String = ""
-    @State private var selectedIndex: Int? = 0
+    @State private var selectedIndex: Int? = 0 {
+        didSet {
+            if selectedIndex == 0 {
+                isSelecting = false
+            }
+        }
+    }
     @FocusState private var isFocused: Bool
     @State var isSubmitting = false
+    @State var isSelecting = false
     
     var body: some View {
         VStack(spacing: 0) {
             
             Spacer()
             
-            HeaderHomeView(thoughtInput: $thoughtInput, selectedIndex: $selectedIndex, isSubmitting: $isSubmitting, isFocused: _isFocused, addThought: addThought)
+            HeaderHomeView(thoughtInput: $thoughtInput, selectedIndex: $selectedIndex, isSubmitting: $isSubmitting, isSelecting: $isSelecting, isFocused: _isFocused, addThought: addThought)
             ThoughtCardsList(thoughts: thoughts, text: $thoughtInput, selectedIndex: $selectedIndex, isFocused: _isFocused, addThought: addThought)
             FooterHomeView(noteCount: thoughts.count, date: selectedIndex != nil && selectedIndex != 0 ? thoughts[selectedIndex! - 1].dateCreated : Date())
             
