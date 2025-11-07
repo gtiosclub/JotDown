@@ -14,10 +14,10 @@ struct CategoryDashboardView: View {
     var onDismiss: () -> Void
     
     @Query private var thoughts: [Thought]
-    @Query private var allCategories: [Category] // Query for all categories
-    @Environment(\.modelContext) private var context // Add model context
+    @Query private var allCategories: [Category]
+    @Environment(\.modelContext) private var context
     
-    // State for selection logic
+    // Selection logic
     @State private var isSelecting: Bool = false
     @State private var selectedThoughtIDs: Set<Thought.ID> = []
     
@@ -26,7 +26,6 @@ struct CategoryDashboardView: View {
         self.namespace = namespace
         self.onDismiss = onDismiss
         
-        // --- Predicate Fix ---
         let localCategoryName = category.name
         let localCategoryID = category.id
         
@@ -57,7 +56,7 @@ struct CategoryDashboardView: View {
         .ignoresSafeArea()
     }
     
-    // Define the dark text color from the visual
+    // Text color
     private var textColor: Color {
          Color(red: 0.35, green: 0.35, blue: 0.45)
     }
@@ -97,7 +96,7 @@ struct CategoryDashboardView: View {
                     .padding(.top, 40)
                     
                     // MARK: - Stats & Select / Cancel & Controls
-                    HStack(alignment: .bottom) {
+                    HStack(alignment: .center) {
                         if isSelecting {
                             // --- Selection Mode ---
                             Button(action: {
@@ -134,18 +133,22 @@ struct CategoryDashboardView: View {
                             
                             Spacer()
                             
-                            Button("select") {
+                            Button {
                                 withAnimation(.spring) {
                                     isSelecting = true
                                 }
+                            } label: {
+                                Text("select")
+                                    .font(.system(size: 12, weight: .regular))
+                                    .foregroundStyle(.white)
+                                    .padding(.horizontal, 20)
+                                    .padding(.vertical, 12)
+                                    .background(Color(red: 0.75, green: 0.75, blue: 0.9))
+                                    .clipShape(Capsule())
                             }
-                            .font(.system(size: 14, weight: .regular))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 8)
-                            .background(Color(red: 0.75, green: 0.75, blue: 0.9))
-                            .clipShape(Capsule())
                             .transaction { $0.animation = .spring }
+                            .matchedGeometryEffect(id: "select-move-button", in: namespace)
+                            .matchedGeometryEffect(id: "select-delete-button", in: namespace)
                         }
                     }
                     .padding(.horizontal, 24)
@@ -215,6 +218,7 @@ struct CategoryDashboardView: View {
                 .clipShape(Capsule())
             }
             .disabled(!hasSelection)
+            .matchedGeometryEffect(id: "select-move-button", in: namespace)
         
             // --- DELETE BUTTON ---
             Button {
@@ -232,6 +236,7 @@ struct CategoryDashboardView: View {
                 .clipShape(Capsule())
             }
             .disabled(!hasSelection)
+            .matchedGeometryEffect(id: "select-delete-button", in: namespace)
         }
         .transaction { $0.animation = .spring }
     }
