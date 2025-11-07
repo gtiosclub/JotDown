@@ -11,7 +11,7 @@ struct LoadingPage: View {
     var body: some View {
         VStack {
             ProgressView()
-                .progressViewStyle(CircularProgressViewStyle())
+                .progressViewStyle(.circular)
                 .scaleEffect(1.4)
             
             Text("Creating suggestions...")

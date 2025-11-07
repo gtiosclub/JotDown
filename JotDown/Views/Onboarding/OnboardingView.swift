@@ -53,39 +53,37 @@ struct OnboardingView: View {
                             .padding(.top, 70)
                         }
                         
-                        switch currentPage {
-                        case 0:
-                            WelcomePage(currentPage: $currentPage, pageHeight: $pageHeight)
-                                .transition(.opacity)
-
-                        case 1:
-                            InfoPage(currentPage: $currentPage, pageHeight: $pageHeight)
-                                .transition(.opacity)
-
-                        case 2:
-                            CategoriesExamplePage(currentPage: $currentPage, pageHeight: $pageHeight)
-                                .transition(.opacity)
-
-                        case 3:
-                            PromptPage(userInput: $userInput) {
-                                await generateCategories()
+                        Group {
+                            switch currentPage {
+                            case 0:
+                                WelcomePage()
+                                
+                            case 1:
+                                InfoPage(currentPage: $currentPage, pageHeight: $pageHeight)
+                                
+                            case 2:
+                                CategoriesExamplePage(currentPage: $currentPage, pageHeight: $pageHeight)
+                                
+                            case 3:
+                                PromptPage(userInput: $userInput) {
+                                    await generateCategories()
+                                }
+                                
+                            case 4:
+                                if isGenerating {
+                                    LoadingPage()
+                                } else {
+                                    CategorySelectionPage(
+                                        selectedCategories: $selectedCategories,
+                                        suggestedCategories: $suggestedCategories
+                                    )
+                                }
+                                
+                            default:
+                                EmptyView()
                             }
-                            .transition(.opacity)
-
-                        case 4:
-                            if isGenerating {
-                                LoadingPage()
-                            } else {
-                                CategorySelectionPage(
-                                    selectedCategories: $selectedCategories,
-                                    suggestedCategories: $suggestedCategories
-                                )
-                                .transition(.opacity)
-                            }
-
-                        default:
-                            EmptyView()
                         }
+                        .transition(.opacity)
 
                         
                         if (!isGenerating || currentPage > 4) {

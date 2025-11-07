@@ -32,24 +32,24 @@ struct InfoPage: View {
                 ZStack {
                     HStack {
                         Spacer()
-                        categoryCardExample(title: "Dog", scale: 1, opacity: 0.4, rotation:10, width: 230)
+                        CategoryCardExample(title: "Dog", scale: 1, opacity: 0.4, rotation:10, width: 230)
                         
                     }
                     .padding(.trailing, 95)
                     HStack {
                         Spacer()
-                        categoryCardExample(title: "Adventures", scale: 1, opacity: 0.6, rotation: 6, width: 260)
+                        CategoryCardExample(title: "Adventures", scale: 1, opacity: 0.6, rotation: 6, width: 260)
                             .padding(.top, 60)
                         
                     }
                     .padding(.trailing, 75)
                     HStack {
                         Spacer()
-                        categoryCardExample(title: "Volunteering", scale: 1, opacity: 0.8, rotation: 3, width: 295)
+                        CategoryCardExample(title: "Volunteering", scale: 1, opacity: 0.8, rotation: 3, width: 295)
                             .padding(.top, 130)
                     }
                     .padding(.trailing, 55)
-                    categoryCardExample(title: "Greek Life", scale: 1, opacity: 1, rotation: 0)
+                    CategoryCardExample(title: "Greek Life", scale: 1, opacity: 1, rotation: 0)
                         .padding(.top, 200)
                     
                 }
@@ -64,7 +64,7 @@ struct InfoPage: View {
     }
 }
 
-struct categoryCardExample: View {
+private struct CategoryCardExample: View {
     var title: String
     var scale: Double = 1.0
     var opacity: Double = 1.0

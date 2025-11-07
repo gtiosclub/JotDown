@@ -8,16 +8,12 @@
 import SwiftUI
 
 struct WelcomePage: View {
-    
-    @Binding var currentPage: Int
-    @Binding var pageHeight: Int
-    
     var body: some View {
         VStack {
             
             Spacer()
             
-            JotDownLogoHeavy()
+            JotDownLogo(style: .heavy)
                 .padding(.bottom, 48)
             
             // Subtext
