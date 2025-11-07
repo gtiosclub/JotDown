@@ -107,7 +107,7 @@ struct VisualizationView: View {
             }
             .scaleEffect(zoomLevel)
             .gesture(magnificationGesture)
-            .frame(width: 800, height: 800)
+            .frame(width: 1500, height: 1500)
         }
         .background {
             EllipticalGradient(
@@ -208,21 +208,22 @@ struct ThoughtBubbleView: View {
     }
     
     var body: some View {
-        Text(thought.content)
-            .font(.caption) // Use caption font to fit more text
-            .multilineTextAlignment(.center)
-            .foregroundStyle(.primary) // Use primary text color for readability
-            .opacity(textOpacity)
-            .animation(.easeInOut(duration: 0.2), value: textOpacity)
-            .padding(8) // Add some internal padding
-            .frame(width: bubbleSize, height: bubbleSize) // Apply the constant size
-            .background(color.opacity(0.15)) // Use the category color for the background
-            .cornerRadius(10) // Make it a rounded box
-            .overlay(
-                // Add a border using the category color
-                RoundedRectangle(cornerRadius: 10)
-                    .stroke(color, lineWidth: 2)
-            )
+            Text(thought.content)
+                .font(.system(size: 12, weight: .medium)) // Use caption font to fit more text
+                .multilineTextAlignment(.center)
+                .foregroundColor(Color(red: 0.35, green: 0.35, blue: 0.45)) // Use primary text color for readability
+                .opacity(textOpacity)
+                .animation(.easeInOut(duration: 0.2), value: textOpacity)
+                .padding(.vertical, 10) // Add some internal padding
+                .padding(.horizontal, 10)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(.ultraThinMaterial)
+                        .fill(color.opacity(0.5))
+                )
+                .cornerRadius(10)
+                .shadow(color: .black.opacity(0.15), radius: 5, x: 0, y: 4)
+                .frame(maxWidth: 120, maxHeight: 35)
     }
 }
 
