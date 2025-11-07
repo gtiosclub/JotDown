@@ -8,11 +8,11 @@
 import WatchConnectivity
 import Combine
 
-class WatchSessionManager: NSObject, ObservableObject, WCSessionDelegate {
+@Observable class WatchSessionManager: NSObject, WCSessionDelegate {
     static let shared = WatchSessionManager()
     
-    @Published var thoughts: [[String: Any]] = []
-    @Published var searchResults: [[String: Any]] = []
+    var thoughts: [[String: Any]] = []
+    var searchResults: [[String: Any]] = []
     
     override init() {
         super.init()
