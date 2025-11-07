@@ -14,6 +14,8 @@ struct DashboardView: View {
 
     @State private var selectedCategory: Category?
     @Namespace private var dashboardNamespace
+    @State private var isSelecting = false
+    @State private var selectedThoughts: Set<Thought> = []
     
     // two-column grid layout.
     let columns: [GridItem] = [
