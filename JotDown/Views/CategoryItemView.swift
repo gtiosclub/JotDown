@@ -64,6 +64,25 @@ struct CategoryItemView: View {
         .background(Color(.systemGray6))
         .cornerRadius(25)
         .shadow(color:.black.opacity(0.1), radius: 5, x: 0, y: 2)
+        .contextMenu {
+            Button {
+                // TODO: Pinning stuff
+            } label: {
+                Label("Pin Note", systemImage: "pin")
+            }
+            
+            Button {
+                // TODO: Copy stuff
+            } label: {
+                Label("Copy Note", systemImage: "doc.on.doc")
+            }
+            
+            Button {
+                // TODO: Share stuff
+            } label: {
+                Label("Share Note", systemImage: "square.and.arrow.up")
+            }
+        }
     }
 }
 
