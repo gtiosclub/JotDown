@@ -51,7 +51,7 @@ struct ContentView: View {
             Tab(role: .search) {
                 NavigationStack {
                     CombinedSearchView()
-                        .navigationTitle("Search")
+//                        .navigationTitle("Search")
                 }
             } label: {
                 Image("Search")

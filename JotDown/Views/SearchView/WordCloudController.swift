@@ -73,7 +73,7 @@ final class WordCloudController: ObservableObject {
 
         let baseSizes: [CGFloat] = bubbles.map { $0.baseSize }
         let measured = zip(bubbles.map { $0.text }, baseSizes).map { (w, s) in textSize(w, fontSize: s) }
-        let orbRadius = min(newSize.width, newSize.height) * 0.175
+        let orbRadius = min(newSize.width, newSize.height) * 0.25
         let newCenters = placeRectsSpiral(sizes: measured, canvas: newSize, margin: 12, orbRadius: orbRadius)
 
         withAnimation(.smooth) {
@@ -89,8 +89,8 @@ final class WordCloudController: ObservableObject {
         let c = CGPoint(x: size.width/2, y: size.height/2)
         
         // Animate orb growing as words converge - slower and larger
-        withAnimation(.spring(response: 0.8, dampingFraction: 0.7)) {
-            orbScale = 3.0
+        withAnimation(.linear(duration: 0.06 * Double(bubbles.count))) {
+            orbScale = 1.8
         }
         
         for i in bubbles.indices {
@@ -202,7 +202,7 @@ final class WordCloudController: ObservableObject {
            let measured = zip(words, baseSizes).map { (w, s) in textSize(w, fontSize: s) }
 
            // Compute non-overlapping centers, leaving space for orb in center
-           let orbRadius = min(size.width, size.height) * 0.175  // Match orb size
+           let orbRadius = min(size.width, size.height) * 0.25  // Match orb size
            let centers = placeRectsSpiral(sizes: measured, canvas: size, margin: 12, orbRadius: orbRadius)
 
            // Build bubbles

@@ -11,11 +11,12 @@ import Orb
 
 struct CombinedSearchView: View {
     @Environment(\.modelContext) private var modelContext
+    
     @Query(sort: \Thought.dateCreated, order: .reverse) private var thoughts: [Thought]
     @StateObject private var cloud = WordCloudController()
     @State private var searchText: String = ""
     @State var result: String = ""
-    @State private var isSearching: Bool = false
+    //    @State private var isSearching: Bool = false
     @State private var hasSearched: Bool = false
     // Only searches after .5 seconds of stopped typing
     @State private var searchDebounceWorkItem: DispatchWorkItem?
@@ -23,8 +24,25 @@ struct CombinedSearchView: View {
     @Namespace private var namespace
     var body: some View {
         ZStack {
+            backgroundGradient
+            VStack(alignment: .leading, spacing: 24) {
+                HStack {
+                    Text("the orb")
+                        .font(.system(size: 40, weight: .bold))
+                        .foregroundColor(textColor)
+                }
+                .padding(.horizontal)
+                .frame(alignment: .leading)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .padding(.horizontal)
+            .padding(.top, 40)
+            .transition(.opacity)
             WordCloudAnswerView(controller: cloud)
+                
         }
+        
+        
         .searchable(
             text: $searchText,
             placement: .automatic,
@@ -53,13 +71,15 @@ struct CombinedSearchView: View {
             }
             
             let workItem = DispatchWorkItem {
-                isSearching = true
                 Task {
                     let r = await searchRagFoundationQuery(query: searchText, in: thoughts)
+                        
                     await MainActor.run {
                         result = r
-                        isSearching = false
-                        NotificationCenter.default.post(name: .finishCloud, object: r)
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                            
+                            NotificationCenter.default.post(name: .finishCloud, object: r)
+                        }
                     }
                 }
                 
@@ -70,6 +90,8 @@ struct CombinedSearchView: View {
             // Schedule it to run after 0.5 seconds
             DispatchQueue.main.asyncAfter(deadline: .now() + delayToSearch, execute: workItem)
         }
+        .navigationBarHidden(true)
+        
         
     }
     
@@ -100,6 +122,21 @@ struct CombinedSearchView: View {
         let queryResult = await FoundationModelSearchService.queryResponseGenerator(query: query, in: results)
         return queryResult
         
+    }
+    
+    private var backgroundGradient: some View {
+        EllipticalGradient(
+            stops: [
+                Gradient.Stop(color: Color(red: 0.94, green: 0.87, blue: 0.94), location: 0.00),
+                Gradient.Stop(color: Color(red: 0.78, green: 0.85, blue: 0.93), location: 1.00),
+            ],
+            center: UnitPoint(x: 0.67, y: 0.46)
+        )
+        .ignoresSafeArea()
+    }
+    
+    private var textColor: Color {
+        Color(red: 0.35, green: 0.35, blue: 0.45)
     }
 }
 

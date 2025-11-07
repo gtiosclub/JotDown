@@ -11,6 +11,12 @@ import Orb
 struct WordCloudAnswerView: View {
     @ObservedObject var controller: WordCloudController
     @State private var morphProgress: CGFloat = 0
+    @Environment(\.isSearching) var isSearching
+    let orbConfig = OrbConfiguration(
+        backgroundColors: [.purple, Color(red: 0.35, green: 0.35, blue: 0.45)],
+        glowColor: Color(red: 0.35, green: 0.35, blue: 0.45),
+        coreGlowIntensity: 1.2
+    )
     
     var body: some View {
         GeometryReader { geo in
@@ -30,47 +36,40 @@ struct WordCloudAnswerView: View {
                         .animation(.easeInOut(duration: 0.25), value: b.opacity)
                         .animation(.spring(response: 0.45, dampingFraction: 0.85), value: b.pos)
                 }
-
+                
                 // Orb (thinking / merging) - now scales with animation
                 if controller.phase != .streaming {
-                     OrbView()
-                         .frame(
-                            width: min(geo.size.width, geo.size.height) * 0.35 * controller.orbScale,
-                            height: min(geo.size.width, geo.size.height) * 0.35 * controller.orbScale
-                         )
-                         .animation(.spring(response: 0.6, dampingFraction: 0.75), value: controller.orbScale)
+                    OrbView(configuration: orbConfig)
+                        .frame(
+                            width: min(geo.size.width, geo.size.height) * 0.5 * controller.orbScale,
+                            height: min(geo.size.width, geo.size.height) * 0.5 * controller.orbScale
+                        )
+                    //                         .animation(.linear(duration: 4), value: controller.orbScale)
                 }
                 
-
+                
                 if controller.phase == .streaming {
                     ZStack {
-                        let purpledark = Color(.sRGB, red: 107/255.0, green: 107/255.0, blue: 138/255.0)
-                        let gradient = LinearGradient(
-                            colors: [purpledark],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
+                        
                         
                         // Text on top
                         Text(controller.streamed)
-                            .font(.system(size: 17, weight: .regular, design: .rounded))
-                            .foregroundColor(.primary)
-                            .multilineTextAlignment(.leading)
-                            .padding(24)
+                            .font(.system(size: 22, weight: .regular, design: .rounded))
+                            .foregroundColor(textColor)
+                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: geo.size.width * 0.8)
                             .opacity(min(morphProgress * 1.5, 1.0)) // Fade in with morph
-                            .frame(width: geo.size.width * morphProgress)
+                        //                            .frame(width: min(geo.size.width * morphProgress)
+                            .frame(alignment: .topLeading)
+                        
                             .background(
                                 MorphableShape(progress: morphProgress)
-                                    .fill(.ultraThinMaterial)
+                                    .fill(cardBackgroundColor)
                                     .overlay(
                                         MorphableShape(progress: morphProgress)
-                                            .fill(gradient.opacity(0.23))
+                                            .strokeBorder(cardBorderColor, lineWidth: 1)
                                     )
-                                    .overlay(
-                                            MorphableShape(progress: morphProgress)
-                                            .strokeBorder(Color.white.opacity(0.25), lineWidth: 0.5)
-                                    )
-                                    .shadow(color: .black.opacity(0.1), radius: 28, y: 12)
+                                    .shadow(color: .black.opacity(0.2), radius: 10, y: 2)
                                     .frame(width: geo.size.width, height: geo.size.height)
                                     .onAppear {
                                         withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
@@ -78,6 +77,7 @@ struct WordCloudAnswerView: View {
                                         }
                                     }
                             )
+                        
                     }
                     .frame(width: geo.size.width, height: geo.size.height)
                     .onAppear {
@@ -85,6 +85,7 @@ struct WordCloudAnswerView: View {
                             morphProgress = 1.0
                         }
                     }
+                    
                 }
             }
             .frame(width: geo.size.width, height: geo.size.height)
@@ -101,8 +102,27 @@ struct WordCloudAnswerView: View {
                 controller.finishWith(answer: answer, size: geo.size)
             }
         }
+        .onChange(of: isSearching, initial: false) { _, newValue in
+            if !newValue {
+                withAnimation {
+                    controller.reset()
+                }
+            }
+        }
         .ignoresSafeArea(.keyboard)
         .allowsHitTesting(false)
+    }
+    
+    private var textColor: Color {
+        Color(red: 0.35, green: 0.35, blue: 0.45)
+    }
+    
+    private var cardBackgroundColor: Color {
+        Color(red: 0.95, green: 0.94, blue: 0.97) // Soft lavender-white
+    }
+    
+    private var cardBorderColor: Color {
+        Color(red: 0.88, green: 0.87, blue: 0.92).opacity(0.6)
     }
 }
 
