@@ -27,7 +27,7 @@ struct CombinedSearchView: View {
             backgroundGradient
             VStack(alignment: .leading, spacing: 24) {
                 HStack {
-                    Text("the orb")
+                    Text("search")
                         .font(.system(size: 40, weight: .bold))
                         .foregroundColor(textColor)
                 }
