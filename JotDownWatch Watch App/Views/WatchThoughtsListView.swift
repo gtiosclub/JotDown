@@ -9,9 +9,11 @@ import SwiftData
 import SwiftUI
 
 struct WatchThoughtsListView: View {
-    
-    @ObservedObject private var watchSession = WatchSessionManager.shared
-    var title: String = ""
+    private var watchSession = WatchSessionManager.shared
+    var title: String
+    init(title: String) {
+        self.title = title
+    }
     var dataSource: [[String: Any]] {
         if title == "Thoughts" {
             return watchSession.thoughts
@@ -54,5 +56,6 @@ struct WatchThoughtsListView: View {
 }
 
 #Preview {
-    WatchThoughtsListView()
+    WatchThoughtsListView(title: "Thoughts")
 }
+

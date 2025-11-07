@@ -12,7 +12,7 @@ struct WatchThoughtsEntryView: View {
 
     @State private var thoughtInput: String = ""
     @State private var characterLimit: Int = 250
-    @ObservedObject private var session = WatchSessionManager.shared
+    private var session = WatchSessionManager.shared
     @Environment(\.dismiss) private var dismiss
     
     func calculateColor() -> Color {
