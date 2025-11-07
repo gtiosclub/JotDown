@@ -76,6 +76,7 @@ struct VisualizationView: View {
                             .font(.largeTitle)
                             .fontWeight(.bold)
                             .position(x: -33, y: 25)
+                            .foregroundColor(Color(red: 0.35, green: 0.35, blue: 0.45))
                             .multilineTextAlignment(.center)
                             .lineLimit(2)
                             .minimumScaleFactor(0.5)
@@ -104,11 +105,10 @@ struct VisualizationView: View {
                     .frame(width: 200.0, height: 200.0)
                     .font(.system(size: 100, weight: .heavy)) // This scales the symbol
                     .glassEffect(.clear, in: .circle)
-                
             }
             .scaleEffect(zoomLevel)
             .gesture(magnificationGesture)
-            .frame(width: 1500, height: 1500)
+            .frame(width: 1000 * zoomLevel, height: 1400 * zoomLevel)
         }
         .background {
             EllipticalGradient(
