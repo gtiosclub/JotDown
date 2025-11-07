@@ -9,7 +9,7 @@ import SwiftUI
 
 struct WatchSearchView: View {
     
-    @ObservedObject private var session = WatchSessionManager.shared
+    private var session = WatchSessionManager.shared
     @State private var searchInput: String = ""
     @State private var showResults = false
     
