@@ -36,12 +36,10 @@ struct RecategorizeThoughtShortcut: AppIntent {
             predicate: #Predicate { $0.name == newCategory }
         )
 
-        let category: Category
-        if let existing = try context.fetch(categoryFetch).first {
-            category = existing
-        } else {
-            category = Category(name: newCategory)
-            context.insert(category)
+        guard let category = try context.fetch(categoryFetch).first else {
+            return .result(
+                dialog: IntentDialog("The category '\(newCategory)' does not exist.")
+            )
         }
 
         thought.category = category
