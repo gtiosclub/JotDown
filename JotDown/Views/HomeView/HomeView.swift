@@ -17,14 +17,15 @@ struct HomeView: View {
     @State private var selectedIndex: Int? = 0
     @FocusState private var isFocused: Bool
     @State var isSubmitting = false
+    @State var showWritableThought = true
     
     var body: some View {
         VStack(spacing: 0) {
             
             Spacer()
             
-            HeaderHomeView(thoughtInput: $thoughtInput, selectedIndex: $selectedIndex, isSubmitting: $isSubmitting, isFocused: _isFocused, addThought: addThought)
-            ThoughtCardsList(thoughts: thoughts, text: $thoughtInput, selectedIndex: $selectedIndex, isFocused: _isFocused, addThought: addThought)
+            HeaderHomeView(thoughtInput: $thoughtInput, selectedIndex: $selectedIndex, isSubmitting: $isSubmitting, showWritableThought: $showWritableThought, isFocused: _isFocused, addThought: addThought)
+            ThoughtCardsList(thoughts: thoughts, text: $thoughtInput, selectedIndex: $selectedIndex, showWritableThought: $showWritableThought, isFocused: _isFocused, addThought: addThought)
             FooterHomeView(noteCount: thoughts.count, date: selectedIndex != nil && selectedIndex != 0 ? thoughts[selectedIndex! - 1].dateCreated : Date())
             
             Spacer()
@@ -62,5 +63,8 @@ struct HomeView: View {
         dismiss()
         
         thoughtInput = ""
+        
+        selectedIndex = 1
+        showWritableThought = false
     }
 }
