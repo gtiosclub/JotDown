@@ -13,47 +13,54 @@ struct ContentView: View {
     @State private var isShowingThoughtEntry = true
     @Environment(\.modelContext) private var context
     @Query var users: [User]
+    @State private var searchText: String = ""
     
     var body: some View {
         TabView {
-            NavigationStack {
-                ThoughtsListView()
-                    .toolbar {
-                        ToolbarItem(placement: .cancellationAction) {
-                            Button("Profile", systemImage: "gear") {
-                                isShowingProfileView = true
-                            }
-                        }
-                        ToolbarItem() {
-                            Button("Add Thought", systemImage: "plus") {
-                                isShowingThoughtEntry = true
-                            }
-                        }
-                    }
-            }
-            .sheet(isPresented: $isShowingProfileView) {
-                ProfileView()
-            }
-            .sheet(isPresented: $isShowingThoughtEntry) {
-                ThoughtsEntryView()
-            }
-            .onAppear {
-                if users.isEmpty {
-                    let defaultUser = User(name: "", bio: "")
-                    context.insert(defaultUser)
+            Tab {
+                NavigationStack {
+                    HomeView()
                 }
-            }.tabItem {
-                Label("Thoughts", systemImage: "list.bullet")
+                .onAppear {
+                    if users.isEmpty {
+                        let defaultUser = User(name: "", bio: "")
+                        context.insert(defaultUser)
+                    }
+                }
+            } label: {
+                Image("Visualize")
+                    .renderingMode(.template)
             }
-
-            NavigationStack {
-                SearchView()
-                    .navigationTitle("Search")
+            
+            Tab {
+                DashboardView()
+            } label: {
+                Image("Dashboard")
+                    .renderingMode(.template)
             }
-            .tabItem {
-                Label("Search", systemImage: "magnifyingglass")
+            
+            Tab {
+                NavigationStack {
+                    ProfileView()
+                }
+            } label: {
+                Image("User")
+                    .renderingMode(.template)
             }
+            
+            Tab(role: .search) {
+                NavigationStack {
+                    CombinedSearchView()
+                        .navigationTitle("Search")
+                }
+            } label: {
+                Image("Search")
+                    .renderingMode(.template)
+            }
+            
         }
+        // to change tab icon color onSelected add:
+        // .tint(.gray)
     }
 }
 
@@ -61,3 +68,4 @@ struct ContentView: View {
     ContentView()
         .modelContainer(for: [Thought.self, Category.self], inMemory: false)
 }
+

@@ -8,6 +8,7 @@
 import AppIntents
 import SwiftData
 import SwiftUI
+import WatchConnectivity
 
 @main
 struct JotDownApp: App {
@@ -22,6 +23,8 @@ struct JotDownApp: App {
         )
 
         AppDependencyManager.shared.add(dependency: modelContainer)
+        
+        WatchSessionManager.shared.setup(context: ModelContext(modelContainer))
 
         self.container = modelContainer
     }
