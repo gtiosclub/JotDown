@@ -130,34 +130,3 @@ struct NamespaceReader<Content: View>: View {
     }
     var body: some View { content(ns) }
 }
-
-#Preview {
-    let container = try! ModelContainer(
-        for: Thought.self, Category.self,
-        configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-    )
-    
-    let category = Category(name: "Recipes", categoryDescription: "test", isActive: true)
-    container.mainContext.insert(category)
-    
-    let thoughts = [
-        "i just realized i could make ice cream mochi but with mango sticky rice inside!!! First I need to figure out how to find good...",
-        "sriracha + tuna + miso soup??",
-        "lemon cake with matcha icing sounds so yummmmmm",
-        "Gochujang butter cookies..."
-    ].map { content -> Thought in
-        let thought = Thought(content: content)
-        thought.category = category
-        container.mainContext.insert(thought)
-        return thought
-    }
-    
-    try? container.mainContext.save()
-    
-    return NavigationStack {
-        NamespaceReader { ns in
-            CategoryDashboardView(category: category, namespace: ns, onDismiss: {})
-        }
-    }
-    .modelContainer(container)
-}

@@ -75,7 +75,6 @@ struct ThoughtCard: View {
            .padding(EdgeInsets(top: 23, leading: 14, bottom: 23, trailing: 14))
            .frame(width: 251, height: 436)
        }
-       .frame(width: 251, height: 472)
     }
 }
 
