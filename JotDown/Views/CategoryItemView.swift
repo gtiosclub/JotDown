@@ -9,6 +9,9 @@ import SwiftUI
 
 struct CategoryItemView: View {
     let thought: Thought
+    var isSelecting: Bool = false
+    var isSelected: Bool = false
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(thought.content)
@@ -21,8 +24,6 @@ struct CategoryItemView: View {
                 .padding(.bottom, 8)
             Spacer()
             
-//            Text(thought.dateCreated.formatted(date: .abbreviated, time: .shortened))
-//                .font(.caption)
             HStack(alignment: .top){
                 Text("Last Edited")
                     .font(.system(size: 7, weight: .regular))
@@ -64,15 +65,25 @@ struct CategoryItemView: View {
         .background(Color(.systemGray6))
         .cornerRadius(25)
         .shadow(color:.black.opacity(0.1), radius: 5, x: 0, y: 2)
+        .overlay(alignment: .topTrailing) {
+            if isSelecting {
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                    .font(.title3)
+                    .fontWeight(.light)
+                    .foregroundStyle(isSelected ? Color(red: 0.75, green: 0.75, blue: 0.9) : .gray.opacity(0.4))
+                    .padding(12)
+            }
+        }
     }
 }
-
-//#Preview {
-//    IndividualNotecardView()
-//}
 
 #Preview {
     // Sample instance of Thought for previewing
     let sampleThought = Thought(content: "i just realized i could make ice cream mochi but with mango sticky rice inside!!!")
-    return CategoryItemView(thought: sampleThought)
+    return Group {
+        CategoryItemView(thought: sampleThought, isSelecting: true, isSelected: false)
+            .padding()
+        CategoryItemView(thought: sampleThought, isSelecting: true, isSelected: true)
+            .padding()
+    }
 }
