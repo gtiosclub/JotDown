@@ -25,87 +25,91 @@ struct DashboardView: View {
     
     // Categories sorted by number of notes (descending)
     private var sortedCategories: [Category] {
-        categories.sorted { lhs, rhs in
+        // Find "Other" category
+        let otherCategory = categories.first { $0.name.lowercased() == "other" }
+        
+        // Get all other categories, filtering out "Other"
+        let remainingCategories = categories.filter {
+            let name = $0.name.lowercased()
+            return name != "other"
+        }
+        
+        // Sort the remaining categories by note count
+        let sortedRemaining = remainingCategories.sorted { lhs, rhs in
             let leftCount = thoughts.filter { $0.category == lhs }.count
             let rightCount = thoughts.filter { $0.category == rhs }.count
-            return leftCount > rightCount
+            return leftCount > rightCount // Sort descending by count
+        }
+        
+        // Combine the lists, putting "Other" first if it exists
+        if let other = otherCategory {
+            return [other] + sortedRemaining
+        } else {
+            return sortedRemaining
         }
     }
 
-    // Formatter for the live date display
-    private var formattedDate: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM, E d"
-        return formatter.string(from: Date.now)
+    // Consistent gradient background
+    private var backgroundGradient: some View {
+        EllipticalGradient(
+            stops: [
+                Gradient.Stop(color: Color(red: 0.94, green: 0.87, blue: 0.94), location: 0.00),
+                Gradient.Stop(color: Color(red: 0.78, green: 0.85, blue: 0.93), location: 1.00),
+            ],
+            center: UnitPoint(x: 0.67, y: 0.46)
+        )
+        .ignoresSafeArea()
+    }
+    
+    // Define the dark text color from the visual
+    private var textColor: Color {
+         Color(red: 0.35, green: 0.35, blue: 0.45)
     }
 
     var body: some View {
         ZStack {
+            backgroundGradient
+            
             // Main dashboard content when no category is selected
             if selectedCategory == nil {
-                VStack(alignment: .leading, spacing: 24) {
-                    // MARK: - Header Content
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text("jot")
+                
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 24) {
+                        // MARK: - Header Content
+                        HStack {
+                            Text("dashboard")
                                 .font(.system(size: 40, weight: .bold))
-                                .foregroundColor(.black.opacity(0.9))
-                            Text("down")
-                                .font(.system(size: 40, weight: .regular))
-                                .foregroundColor(.gray)
+                                .foregroundColor(textColor)
+                                .matchedGeometryEffect(id: "logo", in: dashboardNamespace)
                         }
-                        .matchedGeometryEffect(id: "logo", in: dashboardNamespace) // <-- Tag logo
-                        Spacer()
-                        Button("edit") { }
-                            .font(.system(size: 12, weight: .regular))
-                            .foregroundColor(.black.opacity(0.7))
-                            .font(.body.weight(.medium))
-                            .padding(.horizontal, 15)
-                            .padding(.vertical, 8)
-                            .background(Color.gray.opacity(0.15))
-                            .clipShape(Capsule())
-                            .alignmentGuide(.bottom) { d in d[.bottom] }
-                    }
-                    .padding(.horizontal)
+                        .padding(.horizontal)
 
-                    // MARK: - Stats Content
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text("\(thoughts.count)")
-                                .font(.title)
-                                .fontWeight(.bold)
-                            Text("notes")
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
+                        // MARK: - Stats Content
+                        HStack(spacing: 24) {
+                            VStack(alignment: .leading) {
+                                Text("\(thoughts.count)")
+                                    .font(.system(size: 28, weight: .bold))
+                                    .foregroundColor(textColor)
+                                Text("notes")
+                                    .font(.system(size: 15, weight: .regular))
+                                    .foregroundColor(textColor.opacity(0.8))
+                            }
+                            .matchedGeometryEffect(id: "notes-stat", in: dashboardNamespace)
+                            
+                            VStack(alignment: .leading) {
+                                Text("\(categories.count)")
+                                    .font(.system(size: 28, weight: .bold))
+                                    .foregroundColor(textColor)
+                                Text("categories")
+                                    .font(.system(size: 15, weight: .regular))
+                                    .foregroundColor(textColor.opacity(0.8))
+                            }
+                            .matchedGeometryEffect(id: "categories-stat", in: dashboardNamespace)
                         }
-                        .matchedGeometryEffect(id: "notes-stat", in: dashboardNamespace)
-                        Spacer()
-                        VStack(alignment: .leading) {
-                            Text("\(categories.count)")
-                                .font(.title)
-                                .fontWeight(.bold)
-                            Text("categories")
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
-                        }
-                        .matchedGeometryEffect(id: "categories-stat", in: dashboardNamespace)
-                        Spacer()
-                        Spacer()
-                        Spacer()
-                        VStack(alignment: .trailing) {
-                            Text(formattedDate)
-                                .font(.subheadline)
-                                .fontWeight(.bold)
-                            Text("date")
-                                .font(.caption)
-                                .foregroundColor(.gray)
-                        }
-                        .matchedGeometryEffect(id: "date-stat", in: dashboardNamespace)
-                    }
-                    .padding(.horizontal)
+                        .padding(.horizontal)
 
-                    // MARK: - Scrollable Grid
-                    ScrollView {
+                        // MARK: - Note Categories
+                        
                         LazyVGrid(columns: columns, spacing: 24) {
                             ForEach(sortedCategories) { category in
                                 NoteCategoryView(category: category, namespace: dashboardNamespace)
@@ -118,12 +122,15 @@ struct DashboardView: View {
                             }
                             .padding(.top, 25)
                         }
+                        .padding(.horizontal)
+                        .padding(.top, 40)
+                        
                     }
-                    .padding(.horizontal)
                     .padding(.top, 40)
+                    .padding(.horizontal)
+                    .transition(.opacity)
                 }
-                .padding(.top, 40)
-                .transition(.opacity)
+                
             }
 
             // Selected category overlay
@@ -137,7 +144,7 @@ struct DashboardView: View {
                         }
                     }
                 )
-                .transition(.identity)
+                .transition(.opacity)
             }
         }
         .animation(.spring(response: 0.45, dampingFraction: 0.8), value: selectedCategory)

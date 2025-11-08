@@ -33,6 +33,11 @@ struct JotDownApp: App {
         WindowGroup {
             ContentView()
                 .modelContainer(container)
+                .onAppear {
+                    let testThought = Thought(content: "Finish homework")
+                    testThought.category = Category(name: "Assignments")
+                }
         }
     }
 }
+

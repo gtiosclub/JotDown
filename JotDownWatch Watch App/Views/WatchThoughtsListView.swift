@@ -9,39 +9,53 @@ import SwiftData
 import SwiftUI
 
 struct WatchThoughtsListView: View {
-    
-    @ObservedObject private var watchSession = WatchSessionManager.shared
+    private var watchSession = WatchSessionManager.shared
+    var title: String
+    init(title: String) {
+        self.title = title
+    }
+    var dataSource: [[String: Any]] {
+        if title == "Thoughts" {
+            return watchSession.thoughts
+        } else {
+            return watchSession.searchResults
+        }
+    }
     
     var body: some View {
-        // TODO: Add functionality to display thoughts from iOS app
         List {
-            if watchSession.thoughts.isEmpty {
+            if dataSource.isEmpty {
                 Text("No thoughts yet")
                     .foregroundStyle(.secondary)
             } else {
-                ForEach(Array(watchSession.thoughts.enumerated()), id: \.offset) { _, item in
+                ForEach(Array(dataSource.enumerated()), id: \.offset) { _, item in
                     VStack(alignment: .leading, spacing: 4) {
                         Text(item["content"] as? String ?? "Unknown Thought")
                             .font(.body)
                             .truncationMode(.tail)
                         
-//                        if let dateStr = item["dateCreated"] as? String {
-//                            Text(Self.formatDate(dateStr))
-//                                .font(.caption2)
-//                                .foregroundStyle(.gray)
-//                        }
+                        //                        if let dateStr = item["dateCreated"] as? String {
+                        //                            Text(Self.formatDate(dateStr))
+                        //                                .font(.caption2)
+                        //                                .foregroundStyle(.gray)
+                        //                        }
                     }
                     .padding(.vertical, 2)
                 }
             }
+            
         }
-        .navigationTitle("Thoughts")
+        .navigationTitle(title)
         .onAppear {
-            watchSession.requestThoughts()
+            if (title == "Thoughts") {
+                watchSession.requestThoughts()
+            }
         }
+        
     }
 }
 
 #Preview {
-    WatchThoughtsListView()
+    WatchThoughtsListView(title: "Thoughts")
 }
+

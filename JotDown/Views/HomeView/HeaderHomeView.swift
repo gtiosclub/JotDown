@@ -188,20 +188,28 @@ struct HeaderHomeView: View {
                 .opacity(selectedIndex == 0 ? 0.6 : 1.0)
                 .cornerRadius(25)
                 
-                Button {
-                    isFocused = false
-        
-                    Task {
-                        try await addThought()
+                if isSubmitting {
+                    ProgressView()
+                } else {
+                    Button {
+                        isFocused = false
+                        if selectedIndex != nil && selectedIndex != 0 {
+                            selectedIndex = 0
+                        } else {
+                            Task {
+                                try await addThought()
+                            }
+                        }
+                        
+                    } label: {
+                        Image(systemName: selectedIndex != 0 ? "plus" : "checkmark")
+                            .fontWeight(.light)
+                            .font(.system(size: 30))
+                            .foregroundStyle(Color(red: 109/255, green: 134/255, blue: 166/255))
+                            .padding(.vertical, 10)
+                            .frame(width: 30, height: 30)
                     }
- 
-                } label: {
-                    Image(systemName: selectedIndex != 0 ? "plus" : "checkmark")
-                        .fontWeight(.light)
-                        .font(.system(size: 30))
-                        .foregroundStyle(Color(red: 109/255, green: 134/255, blue: 166/255))
-                        .padding(.vertical, 10)
-                        .frame(width: 30, height: 30)
+                    .disabled(thoughtInput.trimmingCharacters(in: .whitespacesAndNewlines) == "" && selectedIndex == 0)
                 }
             }
         }
