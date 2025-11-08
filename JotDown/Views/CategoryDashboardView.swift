@@ -50,7 +50,12 @@ struct CategoryDashboardView: View {
     
     // Sort thoughts by date
     private var sortedThoughts: [Thought] {
-            thoughts.sorted { $0.dateCreated > $1.dateCreated }
+        thoughts.sorted {
+            if $0.isPinned == $1.isPinned {
+                return $0.dateCreated > $1.dateCreated
+            }
+            return $0.isPinned && !$1.isPinned
+        }
     }
     
     var body: some View {
@@ -108,9 +113,13 @@ struct CategoryDashboardView: View {
                     // MARK: - Notes Grid
                     LazyVGrid(columns: columns, spacing: 16){
                         ForEach(sortedThoughts) { thought in
-                            CategoryItemView(thought: thought)
-                                .aspectRatio(1.0, contentMode: .fit)
-                                .matchedGeometryEffect(id: thought.id, in: namespace)
+                            CategoryItemView(thought: thought, onPin: { t in
+                                t.isPinned.toggle()
+                                try? t.modelContext?.save()
+                            })
+                            .id(thought.id)
+                            .aspectRatio(1.0, contentMode: .fit)
+                            .matchedGeometryEffect(id: thought.id, in: namespace)
                         }
                     }
                     .padding()

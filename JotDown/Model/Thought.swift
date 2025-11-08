@@ -14,6 +14,7 @@ class Thought {
     var content: String
     var category: Category
     var vectorEmbedding: [Double]
+    var isPinned: Bool = false
         
     init(content: String) {
         self.dateCreated = Date()

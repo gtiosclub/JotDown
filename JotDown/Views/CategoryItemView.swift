@@ -9,6 +9,7 @@ import SwiftUI
 
 struct CategoryItemView: View {
     let thought: Thought
+    var onPin : (Thought) -> Void = { _ in }
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(thought.content)
@@ -64,15 +65,24 @@ struct CategoryItemView: View {
         .background(Color(.systemGray6))
         .cornerRadius(25)
         .shadow(color:.black.opacity(0.1), radius: 5, x: 0, y: 2)
+        .overlay(alignment: .topTrailing) {
+            if thought.isPinned {
+                Image(systemName: "pin.fill")
+                    .foregroundColor(.gray)
+                    .padding(6)
+            }
+        }
         .contextMenu {
             Button {
-                // TODO: Pinning stuff
+                onPin(thought)
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
             } label: {
-                Label("Pin Note", systemImage: "pin")
+                Label(thought.isPinned ? "Unpin Note" : "Pin Note", systemImage: "pin")
             }
             
             Button {
-                // TODO: Copy stuff
+                UIPasteboard.general.string = thought.content
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
             } label: {
                 Label("Copy Note", systemImage: "doc.on.doc")
             }
@@ -92,6 +102,6 @@ struct CategoryItemView: View {
 
 #Preview {
     // Sample instance of Thought for previewing
-    let sampleThought = Thought(content: "i just realized i could make ice cream mochi but with mango sticky rice inside!!!")
+    let sampleThought = Thought(content: "I just realized i could make ice cream mochi but with mango sticky rice inside!!!")
     return CategoryItemView(thought: sampleThought)
 }
