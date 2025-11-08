@@ -88,6 +88,10 @@ struct HomeView: View {
             thoughtBeingEdited = nil
             isSelecting = false
             selectedThoughts.removeAll()
+            
+            if let index = thoughts.firstIndex(of: thoughtToEdit) {
+                selectedIndex = index + 1
+            }
         }
     }
     
@@ -96,23 +100,23 @@ struct HomeView: View {
         let previousIndex = selectedIndex ?? 0
         
         let newCount = thoughts.count - selectedThoughts.count
-
+        
         if newCount == 0 {
             selectedIndex = 0
         } else {
             selectedIndex = min(previousIndex, newCount)
         }
-
+        
         for thought in selectedThoughts {
             context.delete(thought)
         }
-
+        
         try context.save()
-
+        
         await MainActor.run {
             selectedThoughts.removeAll()
-
+            
         }
     }
-
+    
 }
