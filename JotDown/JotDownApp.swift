@@ -35,7 +35,7 @@ struct JotDownApp: App {
                 .modelContainer(container)
                 .onAppear {
                     let testThought = Thought(content: "Finish homework")
-                    testThought.category = Category(name: "Assignments")
+                    testThought.category = Category(name: "Assignments", categoryDescription: "")
                 }
         }
     }

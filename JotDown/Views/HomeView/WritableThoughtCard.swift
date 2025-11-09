@@ -20,14 +20,13 @@ struct WritableThoughtCard: View {
                .fill(Color.white.opacity(0.61))
                .frame(width: 337, height: 436)
                .shadow(color: Color.black.opacity(0.05), radius: 7.7, x: 0, y: 2)
-//               .glassEffect()
            
            VStack(alignment: .leading) {
                ZStack(alignment: .topLeading) {
                    if text.isEmpty {
                        // Placeholder text for the TextEditor since it doesn't have a placeholder property
                        Text(placeholderText)
-                           .foregroundColor(Color(red: 0.49, green: 0.58, blue: 0.70))
+                           .foregroundColor(Color(red: 191/255, green: 191/255, blue: 213/255))
                            .font(.system(size: 24, weight: .regular))
                    }
                    
@@ -75,7 +74,7 @@ struct ClearTextEditor: UIViewRepresentable {
         textView.font = font
         textView.typingAttributes = [
             .font: font,
-            .foregroundColor: UIColor(red: 0.49, green: 0.58, blue: 0.70, alpha: 1),
+            .foregroundColor: UIColor(red: 107/255, green: 107/255, blue: 138/255, alpha: 1),
             .paragraphStyle: paragraphStyle
         ]
         

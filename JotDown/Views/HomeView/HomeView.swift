@@ -23,6 +23,7 @@ struct HomeView: View {
     }
     @FocusState private var isFocused: Bool
     @State var isSubmitting = false
+    @State var showWritableThought = true
     @State private var isSelecting: Bool = false
     @State private var isEditing: Bool = false
     @State private var selectedThoughts: Set<Thought> = []
@@ -33,8 +34,8 @@ struct HomeView: View {
             
             Spacer()
             
-            HeaderHomeView(thoughtInput: $thoughtInput, selectedIndex: $selectedIndex, isSubmitting: $isSubmitting, isFocused: _isFocused, addThought: addThought, saveEditedThought: saveEditedThought, deleteSelectedThoughts: deleteSelectedThoughts, isSelecting: $isSelecting, isEditing: $isEditing, selectedThoughts: $selectedThoughts, thoughtBeingEdited: $thoughtBeingEdited)
-            ThoughtCardsList(thoughts: thoughts, text: $thoughtInput, selectedIndex: $selectedIndex, isFocused: _isFocused, isSelecting: $isSelecting, selectedThoughts: $selectedThoughts, addThought: addThought)
+            HeaderHomeView(thoughtInput: $thoughtInput, selectedIndex: $selectedIndex, isSubmitting: $isSubmitting, showWritableThought: $showWritableThought, isFocused: _isFocused, addThought: addThought, saveEditedThought: saveEditedThought, deleteSelectedThoughts: deleteSelectedThoughts, isSelecting: $isSelecting, isEditing: $isEditing, selectedThoughts: $selectedThoughts, thoughtBeingEdited: $thoughtBeingEdited)
+            ThoughtCardsList(thoughts: thoughts, text: $thoughtInput, selectedIndex: $selectedIndex, showWritableThought: $showWritableThought, isFocused: _isFocused, isSelecting: $isSelecting, selectedThoughts: $selectedThoughts, addThought: addThought)
             FooterHomeView(noteCount: thoughts.count, date: selectedIndex != nil && selectedIndex != 0 ? thoughts[selectedIndex! - 1].dateCreated : Date())
             
             Spacer()
@@ -72,6 +73,9 @@ struct HomeView: View {
         dismiss()
         
         thoughtInput = ""
+        
+        selectedIndex = 1
+        showWritableThought = false
     }
     
     func saveEditedThought() async throws {

@@ -12,6 +12,7 @@ struct HeaderHomeView: View {
     @Binding var thoughtInput: String
     @Binding var selectedIndex: Int?
     @Binding var isSubmitting: Bool
+    @Binding var showWritableThought: Bool
     @FocusState var isFocused: Bool
     let addThought: () async throws -> Void
     let saveEditedThought: () async throws -> Void
@@ -194,7 +195,9 @@ struct HeaderHomeView: View {
                     Button {
                         isFocused = false
                         if selectedIndex != nil && selectedIndex != 0 {
-                            selectedIndex = 0
+                            showWritableThought = true
+                            selectedIndex = 0;
+                            isFocused = true
                         } else {
                             Task {
                                 try await addThought()

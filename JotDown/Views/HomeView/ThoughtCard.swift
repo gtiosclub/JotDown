@@ -22,13 +22,12 @@ struct ThoughtCard: View {
            RoundedRectangle(cornerRadius: 30)
                .fill(Color.white.opacity(0.61))
                .frame(width: 251, height: 436)
-//               .glassEffect()
                .shadow(color: Color.black.opacity(0.05), radius: 7.7, x: 0, y: 2)
            
            VStack(alignment: .leading) {
                Text(thought.content)
                    .frame(maxWidth: .infinity, alignment: .leading)
-                   .foregroundColor(Color(red: 0.49, green: 0.58, blue: 0.70))
+                   .foregroundColor(Color(red: 107/255, green: 107/255, blue: 138/255))
                    .font(.custom("SF Pro", size: 24))
                    .lineSpacing(12)
                    .fontWeight(.regular)
@@ -40,7 +39,7 @@ struct ThoughtCard: View {
                    Text(ThoughtCard.timeFormatter.string(from: thought.dateCreated))
                        .font(.system(size: 16, weight: .regular))
                        .italic()
-                       .foregroundColor(Color(red: 0.49, green: 0.58, blue: 0.70))
+                       .foregroundColor(Color(red: 107/255, green: 107/255, blue: 138/255))
                        .lineLimit(1)
                        .truncationMode(.tail)
                    Spacer()
@@ -51,13 +50,13 @@ struct ThoughtCard: View {
                                Text(thought.category.name)
                                    .font(.system(size: 16, weight: .regular))
                                    .italic()
-                                   .foregroundColor(Color(red: 0.49, green: 0.58, blue: 0.70))
+                                   .foregroundColor(Color(red: 107/255, green: 107/255, blue: 138/255))
                                    .lineLimit(1)
                                    .truncationMode(.tail)
                                Text("→")
                                    .font(.system(size: 16, weight: .regular))
                                    .italic()
-                                   .foregroundColor(Color(red: 0.49, green: 0.58, blue: 0.70))
+                                   .foregroundColor(Color(red: 107/255, green: 107/255, blue: 138/255))
                                    .padding(EdgeInsets(top: 0, leading: -2, bottom: 0, trailing: 0))
                            }
                        }
@@ -66,7 +65,7 @@ struct ThoughtCard: View {
                        Text(thought.category.name)
                            .font(.system(size: 16, weight: .regular))
                            .italic()
-                           .foregroundColor(.gray.opacity(0.6))
+                           .foregroundColor(Color(red: 107/255, green: 107/255, blue: 138/255))
                            .lineLimit(1)
                            .truncationMode(.tail)
                    }
@@ -74,7 +73,7 @@ struct ThoughtCard: View {
            }
            .padding(EdgeInsets(top: 23, leading: 14, bottom: 23, trailing: 14))
            .frame(width: 251, height: 436)
-       }
+        }
     }
 }
 
