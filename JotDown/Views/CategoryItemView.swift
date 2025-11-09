@@ -82,10 +82,10 @@ struct CategoryItemView: View {
             
             Button {
                 UIPasteboard.general.string = thought.content
-                UINotificationFeedbackGenerator().notificationOccurred(.success)
             } label: {
                 Label("Copy Note", systemImage: "doc.on.doc")
             }
+            .sensoryFeedback(.success, trigger: true)
             
             Button {
                 // TODO: Share stuff
