@@ -106,8 +106,10 @@ struct ThoughtCardsList: View {
                             }
                             
                             if (!isDragging) {
+                                // new note swiped
                                 sendHapticFeedback = true
                                 showWritableThought = true
+                                isFocused = true
                             }
                         } else {
                             sendHapticFeedback = true
@@ -126,6 +128,8 @@ struct ThoughtCardsList: View {
                             }
                         }
                         showWritableThought = false
+                        isFocused = false
+                        text = ""
                     }
                     .simultaneousGesture(
                         DragGesture(minimumDistance: 0)
@@ -147,7 +151,7 @@ struct ThoughtCardsList: View {
     }
 }
 
-struct FirstCardOffsetPreferenceKey: PreferenceKey {
+private struct FirstCardOffsetPreferenceKey: PreferenceKey {
     static var defaultValue: CGFloat = 0
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
         // only take the value if it's not the default (meaning it's from the first card)

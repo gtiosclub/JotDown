@@ -47,6 +47,7 @@ struct HeaderHomeView: View {
                             if selectedIndex != nil && selectedIndex != 0 {
                                 showWritableThought = true
                                 selectedIndex = 0;
+                                isFocused = true
                             } else {
                                 Task {
                                     try await addThought()
