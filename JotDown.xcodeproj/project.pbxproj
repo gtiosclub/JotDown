@@ -11,6 +11,7 @@
 		220E246D2EAAE46900653A8D /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220E246C2EAAE46900653A8D /* SwiftUI.framework */; };
 		220E247C2EAAE46A00653A8D /* JotDownWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 220E24682EAAE46900653A8D /* JotDownWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		91F461BE2E8C8A5C00CF6134 /* JotDownWatch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 91F461B42E8C8A5B00CF6134 /* JotDownWatch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		DA113ED22EA84782002AACD2 /* Orb in Frameworks */ = {isa = PBXBuildFile; productRef = DA113ED12EA84782002AACD2 /* Orb */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -125,6 +126,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DA113ED22EA84782002AACD2 /* Orb in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -229,6 +231,7 @@
 			);
 			name = JotDown;
 			packageProductDependencies = (
+				DA113ED12EA84782002AACD2 /* Orb */,
 			);
 			productName = JotDown;
 			productReference = B7F375652E821797008F0846 /* JotDown.app */;
@@ -264,6 +267,9 @@
 			);
 			mainGroup = B7F3755C2E821797008F0846;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				DA113ED02EA84782002AACD2 /* XCRemoteSwiftPackageReference "Orb" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = B7F375662E821797008F0846 /* Products */;
 			projectDirPath = "";
@@ -405,7 +411,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 6MTCHYNPAT;
+				DEVELOPMENT_TEAM = S9H49CA96W;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = JotDownWatch;
@@ -438,7 +444,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 6MTCHYNPAT;
+				DEVELOPMENT_TEAM = S9H49CA96W;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = JotDownWatch;
@@ -592,7 +598,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 6MTCHYNPAT;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = JotDown/Info.plist;
@@ -625,7 +631,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 6MTCHYNPAT;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = JotDown/Info.plist;
@@ -691,6 +697,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		DA113ED02EA84782002AACD2 /* XCRemoteSwiftPackageReference "Orb" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/metasidd/Orb";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.2.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		DA113ED12EA84782002AACD2 /* Orb */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DA113ED02EA84782002AACD2 /* XCRemoteSwiftPackageReference "Orb" */;
+			productName = Orb;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = B7F3755D2E821797008F0846 /* Project object */;
 }

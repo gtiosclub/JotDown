@@ -48,11 +48,18 @@ struct ContentView: View {
                     .renderingMode(.template)
             }
             
+            Tab {
+                NavigationStack {
+                    VisualizationView()
+                }
+            } label: {
+                Image(.dashboard)
+                    .renderingMode(.template)
+            }
+            
             Tab(role: .search) {
                 NavigationStack {
-                    SearchView(searchText: $searchText)
-                        .searchable(text: $searchText)
-                        .navigationTitle("Search")
+                    CombinedSearchView()
                 }
             } label: {
                 Image("Search")

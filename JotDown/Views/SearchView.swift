@@ -112,13 +112,9 @@ struct SearchView: View {
             }
         case .rag:
             isSearching = true
-            Task {
-                let r = await searchRAG(query: query, in: thoughts)
-                await MainActor.run {
-                    results = r
-                    isSearching = false
-                }
-            }
+            results = searchRAG(query: query, in: thoughts)
+            isSearching = false
+            
         }
     }
     
@@ -136,7 +132,7 @@ struct SearchView: View {
         }
     }
     
-    private func searchRAG(query: String, in thoughts: [Thought]) async -> [Thought] {
+    private func searchRAG(query: String, in thoughts: [Thought]) -> [Thought] {
         let ragSystem = RAGSystem()
         let results = ragSystem.sortThoughts(thoughts: thoughts, query: query, limit: 5)
         return results
