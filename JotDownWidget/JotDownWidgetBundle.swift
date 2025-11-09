@@ -8,9 +8,11 @@
 import WidgetKit
 import SwiftUI
 
+@main
 struct JotDownWidgetBundle: WidgetBundle {
     var body: some Widget {
-        JotDownWidget()
+        NewThoughtWidget()
+        RecentNotesWidget()
         JotDownWidgetControl()
         JotDownWidgetLiveActivity()
     }

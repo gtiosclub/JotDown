@@ -60,6 +60,7 @@
 		220E24682EAAE46900653A8D /* JotDownWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = JotDownWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		220E246A2EAAE46900653A8D /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		220E246C2EAAE46900653A8D /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		22234CCD2EBD6B4900D4F065 /* JotDownWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = JotDownWidgetExtension.entitlements; sourceTree = "<group>"; };
 		91F461B42E8C8A5B00CF6134 /* JotDownWatch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "JotDownWatch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B7F375652E821797008F0846 /* JotDown.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JotDown.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -78,6 +79,16 @@
 				Info.plist,
 			);
 			target = B7F375642E821797008F0846 /* JotDown */;
+		};
+		22FD3CF82EB4214500D7BB44 /* Exceptions for "JotDown" folder in "JotDownWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Intelligence/EmbeddingHelpers.swift,
+				Model/Category.swift,
+				Model/Thought.swift,
+				Model/User.swift,
+			);
+			target = 220E24672EAAE46900653A8D /* JotDownWidgetExtension */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -99,6 +110,7 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				220E24832EAAE49500653A8D /* Exceptions for "JotDown" folder in "JotDown" target */,
+				22FD3CF82EB4214500D7BB44 /* Exceptions for "JotDown" folder in "JotDownWidgetExtension" target */,
 			);
 			path = JotDown;
 			sourceTree = "<group>";
@@ -145,6 +157,7 @@
 		B7F3755C2E821797008F0846 = {
 			isa = PBXGroup;
 			children = (
+				22234CCD2EBD6B4900D4F065 /* JotDownWidgetExtension.entitlements */,
 				B7F375672E821797008F0846 /* JotDown */,
 				91F461B52E8C8A5B00CF6134 /* JotDownWatch Watch App */,
 				220E246E2EAAE46900653A8D /* JotDownWidget */,
@@ -349,6 +362,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = JotDownWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 6MTCHYNPAT;
@@ -379,6 +393,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = JotDownWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 6MTCHYNPAT;
@@ -596,6 +611,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = JotDown/JotDown.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
@@ -629,6 +645,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = JotDown/JotDown.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
