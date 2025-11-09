@@ -60,41 +60,6 @@ struct ThoughtCardsList: View {
                         .frame(width: proxy.size.width * 0.3, height: 472)
                         .offset(x: 0)
                         .opacity(revealAmount)
-            ScrollViewReader { scrollProxy in
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(alignment: .center, spacing: 16) {
-                        WritableThoughtCard(text: $text, isFocused: _isFocused, addThought: addThought)
-                            .id(0)
-                        
-                        ForEach(thoughts) { thought in
-                            let id = thoughts.firstIndex(of: thought)! + 1
-
-                            ZStack(alignment: .topTrailing) {
-                                ThoughtCard(thought: thought)
-                                    .opacity(isSelecting && !selectedThoughts.contains(thought) ? 0.6 : 1.0)
-                                    .overlay(alignment: .topTrailing) {
-                                        if isSelecting {
-                                            Image(systemName: selectedThoughts.contains(thought) ? "checkmark.circle.fill" : "circle")
-                                                .font(.system(size: 24))
-                                                .foregroundStyle(selectedThoughts.contains(thought) ? .blue : .gray.opacity(0.6))
-                                                .padding(8)
-                                        }
-                                    }
-                            }
-                            .id(id)
-                            .onTapGesture {
-                                if isSelecting {
-                                    toggleSelection(for: thought)
-                                } else {
-                                    selectedIndex = id
-                                }
-                            }
-                        }
-                    }
-                    .scrollDisabled(isSelecting)
-                    .scrollTargetLayout()
-                    .padding(.leading, leadingPadding)
-                    .padding(.trailing, trailingPadding)
                 }
                 
                 ScrollViewReader { scrollProxy in
@@ -105,26 +70,47 @@ struct ThoughtCardsList: View {
                                     .id(0)
                             }
                             
-                            ForEach(thoughts.indices, id: \.self) { index in
+                            ForEach(thoughts) { thought in
+                                let index = thoughts.firstIndex(of: thought)!
                                 let id = index + 1
-                                ThoughtCard(thought: thoughts[index])
-                                    .id(id)
-                                    .background(
-                                        GeometryReader { cardGeometry in
-                                            Color.clear
-                                                .preference(
-                                                    key: FirstCardOffsetPreferenceKey.self,
-                                                    value: index == 0 ? cardGeometry.frame(in: .named("scroll")).minX : FirstCardOffsetPreferenceKey.defaultValue
-                                                )
+
+                                ZStack(alignment: .topTrailing) {
+                                    ThoughtCard(thought: thought)
+                                        .opacity(isSelecting && !selectedThoughts.contains(thought) ? 0.6 : 1.0)
+                                        .overlay(alignment: .topTrailing) {
+                                            if isSelecting {
+                                                Image(systemName: selectedThoughts.contains(thought) ? "checkmark.circle.fill" : "circle")
+                                                    .font(.system(size: 24))
+                                                    .foregroundStyle(selectedThoughts.contains(thought) ? .blue : .gray.opacity(0.6))
+                                                    .padding(8)
+                                            }
                                         }
-                                    )
+                                        .background(
+                                            GeometryReader { cardGeometry in
+                                                Color.clear
+                                                    .preference(
+                                                        key: FirstCardOffsetPreferenceKey.self,
+                                                        value: index == 0 ? cardGeometry.frame(in: .named("scroll")).minX : FirstCardOffsetPreferenceKey.defaultValue
+                                                    )
+                                            }
+                                        )
+                                }
+                                .id(id)
+                                .onTapGesture {
+                                    if isSelecting {
+                                        toggleSelection(for: thought)
+                                    } else {
+                                        selectedIndex = id
+                                    }
+                                }
                             }
-                            .onDelete(perform: deleteNote)
                         }
+                        .scrollDisabled(isSelecting)
                         .scrollTargetLayout()
                         .padding(.leading, leadingPadding)
                         .padding(.trailing, trailingPadding)
                     }
+                    .frame(height: 472)
                     .coordinateSpace(name: "scroll")
                     .scrollTargetBehavior(.viewAligned)
                     .scrollPosition(id: $selectedIndex)
@@ -152,12 +138,12 @@ struct ThoughtCardsList: View {
                             sendHapticFeedback = true
                         }
                     }
-                    .onChange(of: selectedIndex) { oldIndex, newIndex in
+                    .onChange(of: selectedIndex ?? -1) { oldIndex, newIndex in
                         if newIndex != 1 {
                             resetOffsets()
                         }
                         
-                        guard showWritableThought && newIndex == 1 else { return }
+                        guard showWritableThought && newIndex >= 1 else { return }
                         
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
                             withAnimation(.smooth) {
