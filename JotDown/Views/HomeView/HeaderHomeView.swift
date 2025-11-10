@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct HeaderHomeView: View {
-    @Bindable var viewModel: HomeViewModel
+    @Environment(HomeViewModel.self) private var viewModel
     @FocusState var isFocused: Bool
 
     var body: some View {

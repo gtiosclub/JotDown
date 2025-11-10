@@ -19,13 +19,15 @@ class HomeViewModel {
     var thoughtBeingEdited: Thought? = nil
 
     private let context: ModelContext
-    private let categories: [Category]
     private let dismiss: DismissAction
 
-    init(context: ModelContext, categories: [Category], dismiss: DismissAction) {
+    init(context: ModelContext, dismiss: DismissAction) {
         self.context = context
-        self.categories = categories
         self.dismiss = dismiss
+    }
+
+    private var categories: [Category] {
+        (try? context.fetch(FetchDescriptor<Category>())) ?? []
     }
 
     @MainActor

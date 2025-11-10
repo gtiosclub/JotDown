@@ -10,7 +10,6 @@ import SwiftUI
 
 struct HomeView: View {
     @Query(sort: \Thought.dateCreated, order: .reverse) var thoughts: [Thought]
-    @Query private var categories: [Category]
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
     @FocusState private var isFocused: Bool
@@ -21,8 +20,8 @@ struct HomeView: View {
             Spacer()
 
             if let viewModel {
-                HeaderHomeView(viewModel: viewModel, isFocused: _isFocused)
-                ThoughtCardsList(thoughts: thoughts, viewModel: viewModel, isFocused: _isFocused)
+                HeaderHomeView(isFocused: _isFocused)
+                ThoughtCardsList(thoughts: thoughts, isFocused: _isFocused)
                 FooterHomeView(noteCount: thoughts.count, date: viewModel.selectedIndex != nil && viewModel.selectedIndex != 0 ? thoughts[viewModel.selectedIndex! - 1].dateCreated : Date())
             }
 
@@ -36,8 +35,9 @@ struct HomeView: View {
         }
         .onAppear {
             if viewModel == nil {
-                viewModel = HomeViewModel(context: context, categories: categories, dismiss: dismiss)
+                viewModel = HomeViewModel(context: context, dismiss: dismiss)
             }
         }
+        .environment(viewModel)
     }
 }

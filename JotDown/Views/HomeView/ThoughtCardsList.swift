@@ -9,14 +9,13 @@ import SwiftData
 
 struct ThoughtCardsList: View {
     var thoughts: [Thought]
-    @Bindable var viewModel: HomeViewModel
+    @Environment(HomeViewModel.self) private var viewModel
     @FocusState var isFocused: Bool
     @State private var firstCardOffset: CGFloat = 0
     @GestureState private var isDragging = false
     @State private var sendHapticFeedback: Bool = true
 
-    
-    // Handles new note offset
+
     private func handlePreferenceChange(offset: CGFloat, proxy: GeometryProxy, thoughtWidth: CGFloat) {
         if viewModel.selectedIndex == 1 && thoughts.count > 0 {
             let thoughtPadding = (proxy.size.width - thoughtWidth) / 2
@@ -35,6 +34,8 @@ struct ThoughtCardsList: View {
     }
     
     var body: some View {
+        @Bindable var viewModel = viewModel
+
         GeometryReader { proxy in
             let writableWidth: CGFloat = 337
             let thoughtWidth: CGFloat = 251
