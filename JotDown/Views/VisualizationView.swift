@@ -101,7 +101,7 @@ struct VisualizationView: View {
                 .opacity(categoryOpacity(for: zoomLevel))
                 .animation(.easeInOut(duration: 0.2), value: zoomLevel)
                 .zIndex(0)
-                JotDownLogo(color: .gray, fontSize: 56)
+                JotDownLogo(style: .heavy, color: .gray)
                     .frame(width: 200.0, height: 200.0)
                     .font(.system(size: 100, weight: .heavy)) // This scales the symbol
                     .glassEffect(.clear, in: .circle)

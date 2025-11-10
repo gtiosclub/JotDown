@@ -227,7 +227,3 @@ struct HeaderHomeView: View {
         }
     }
 }
-
-struct Constants {
-    static let TextLightText: Color = Color(red: 0.52, green: 0.52, blue: 0.69)
-}
