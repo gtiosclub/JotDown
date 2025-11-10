@@ -9,29 +9,15 @@ import SwiftUI
 import SwiftData
 
 struct HeaderHomeView: View {
-    @Binding var thoughtInput: String
-    @Binding var selectedIndex: Int?
-    @Binding var isSubmitting: Bool
-    @Binding var showWritableThought: Bool
+    @Bindable var viewModel: HomeViewModel
     @FocusState var isFocused: Bool
-    let addThought: () async throws -> Void
-    let saveEditedThought: () async throws -> Void
-    let deleteSelectedThoughts: () async throws -> Void
-    @Binding var isSelecting: Bool
-    @Binding var isEditing: Bool
-    @Binding var selectedThoughts: Set<Thought>
-    @Binding var thoughtBeingEdited: Thought?
-    
+
     var body: some View {
         HStack {
-            if isEditing {
+            if viewModel.isEditing {
                 Button {
-                    isSelecting = false
-                    selectedThoughts.removeAll()
-                    isEditing = false
+                    viewModel.cancelEditing()
                     isFocused = true
-                    selectedIndex = 0
-                    thoughtInput = ""
                 } label: {
                     HStack(spacing: 4) {
                         Image(systemName: "chevron.left")
@@ -39,17 +25,17 @@ struct HeaderHomeView: View {
                     }
                 }
                 .font(Font.custom("SF Pro", size: 20))
-                .foregroundColor(Constants.TextLightText)
+                .foregroundColor(.secondaryText)
                 .padding(0)
-                
+
                 Spacer()
-                
+
                 Button {
-                    selectedIndex = 0
+                    viewModel.selectedIndex = 0
                     isFocused = true
-                    isEditing = false
+                    viewModel.isEditing = false
                     Task {
-                        try await saveEditedThought()
+                        try await viewModel.saveEditedThought()
                     }
                 } label: {
                     Text("done")
@@ -61,26 +47,15 @@ struct HeaderHomeView: View {
                         .font(.system(size: 15, weight: .medium))
                         .frame(width: 15, height: 15)
                 }
-                .disabled(selectedThoughts.count != 1)
-                .opacity(selectedThoughts.count != 1 ? 0.6: 1.0)
+                .disabled(viewModel.selectedThoughts.count != 1)
+                .opacity(viewModel.selectedThoughts.count != 1 ? 0.6: 1.0)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)
-                .background(
-                    LinearGradient(
-                        stops: [
-                            Gradient.Stop(color: Color(red: 0.61, green: 0.63, blue: 1), location: 0.00),
-                            Gradient.Stop(color: Color(red: 0.43, green: 0.44, blue: 0.81), location: 1.00),
-                        ],
-                        startPoint: UnitPoint(x: 0.5, y: 0),
-                        endPoint: UnitPoint(x: 0.5, y: 1)
-                    )
-                )
+                .background(LinearGradient.primaryButton)
                 .cornerRadius(25)
-            } else if isSelecting {
-                // MARK: - Selection Mode UI
+            } else if viewModel.isSelecting {
                 Button {
-                    isSelecting = false
-                    selectedThoughts.removeAll()
+                    viewModel.cancelSelection()
                 } label: {
                     HStack(spacing: 4) {
                         Image(systemName: "chevron.left")
@@ -88,19 +63,15 @@ struct HeaderHomeView: View {
                     }
                 }
                 .font(Font.custom("SF Pro", size: 20))
-                .foregroundColor(Constants.TextLightText)
+                .foregroundColor(.secondaryText)
                 .padding(0)
-                
+
                 Spacer()
-                
+
                 Button {
-                    if let thoughtToEdit = selectedThoughts.first {
-                        thoughtInput = thoughtToEdit.content
-                        thoughtBeingEdited = thoughtToEdit
-                        selectedIndex = 0
-                        isSelecting = false
+                    if let thoughtToEdit = viewModel.selectedThoughts.first {
+                        viewModel.startEditing(thought: thoughtToEdit)
                         isFocused = true
-                        isEditing = true
                     }
                 } label: {
                     Text("edit")
@@ -112,25 +83,16 @@ struct HeaderHomeView: View {
                         .font(.system(size: 15, weight: .medium))
                         .frame(width: 15, height: 15)
                 }
-                .disabled(selectedThoughts.count != 1)
-                .opacity(selectedThoughts.count != 1 ? 0.6: 1.0)
+                .disabled(viewModel.selectedThoughts.count != 1)
+                .opacity(viewModel.selectedThoughts.count != 1 ? 0.6: 1.0)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)
-                .background(
-                    LinearGradient(
-                        stops: [
-                            Gradient.Stop(color: Color(red: 0.61, green: 0.63, blue: 1), location: 0.00),
-                            Gradient.Stop(color: Color(red: 0.43, green: 0.44, blue: 0.81), location: 1.00),
-                        ],
-                        startPoint: UnitPoint(x: 0.5, y: 0),
-                        endPoint: UnitPoint(x: 0.5, y: 1)
-                    )
-                )
+                .background(LinearGradient.primaryButton)
                 .cornerRadius(25)
-                
+
                 Button {
                     Task {
-                        try await deleteSelectedThoughts()
+                        try await viewModel.deleteSelectedThoughts()
                     }
                 } label: {
                     Text("delete")
@@ -142,30 +104,20 @@ struct HeaderHomeView: View {
                         .font(.system(size: 15, weight: .medium))
                         .frame(width: 15, height: 15)
                 }
-                .disabled(selectedThoughts.isEmpty)
-                .opacity(selectedThoughts.isEmpty ? 0.6: 1.0)
+                .disabled(viewModel.selectedThoughts.isEmpty)
+                .opacity(viewModel.selectedThoughts.isEmpty ? 0.6: 1.0)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)
-                .background(
-                    LinearGradient(
-                        stops: [
-                            Gradient.Stop(color: Color(red: 0.61, green: 0.63, blue: 1), location: 0.00),
-                            Gradient.Stop(color: Color(red: 0.43, green: 0.44, blue: 0.81), location: 1.00),
-                        ],
-                        startPoint: UnitPoint(x: 0.5, y: 0),
-                        endPoint: UnitPoint(x: 0.5, y: 1)
-                    )
-                )
+                .background(LinearGradient.primaryButton)
                 .cornerRadius(25)
                 
             } else {
-                // MARK: - Normal Mode UI
                 JotDownLogo()
-                
+
                 Spacer()
-                
+
                 Button {
-                    isSelecting = true
+                    viewModel.isSelecting = true
                     isFocused = false
                 } label: {
                     Text("select")
@@ -175,54 +127,44 @@ struct HeaderHomeView: View {
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)
-                .background(
-                    LinearGradient(
-                        stops: [
-                            Gradient.Stop(color: Color(red: 0.61, green: 0.63, blue: 1), location: 0.00),
-                            Gradient.Stop(color: Color(red: 0.43, green: 0.44, blue: 0.81), location: 1.00),
-                        ],
-                        startPoint: UnitPoint(x: 0.5, y: 0),
-                        endPoint: UnitPoint(x: 0.5, y: 1)
-                    )
-                )
-                .disabled(selectedIndex == 0)
-                .opacity(selectedIndex == 0 ? 0.6 : 1.0)
+                .background(LinearGradient.primaryButton)
+                .disabled(viewModel.selectedIndex == 0)
+                .opacity(viewModel.selectedIndex == 0 ? 0.6 : 1.0)
                 .cornerRadius(25)
-                
-                if isSubmitting {
+
+                if viewModel.isSubmitting {
                     ProgressView()
                 } else {
                     Button {
                         isFocused = false
-                        if selectedIndex != nil && selectedIndex != 0 {
-                            showWritableThought = true
-                            selectedIndex = 0;
+                        if viewModel.selectedIndex != nil && viewModel.selectedIndex != 0 {
+                            viewModel.showWritableThought = true
+                            viewModel.selectedIndex = 0
                             isFocused = true
                         } else {
                             Task {
-                                try await addThought()
+                                try await viewModel.addThought()
                             }
                         }
-                        
                     } label: {
-                        Image(systemName: selectedIndex != 0 ? "plus" : "checkmark")
+                        Image(systemName: viewModel.selectedIndex != 0 ? "plus" : "checkmark")
                             .fontWeight(.light)
                             .font(.system(size: 30))
                             .foregroundStyle(Color(red: 109/255, green: 134/255, blue: 166/255))
                             .padding(.vertical, 10)
                             .frame(width: 30, height: 30)
                     }
-                    .disabled(thoughtInput.trimmingCharacters(in: .whitespacesAndNewlines) == "" && selectedIndex == 0)
+                    .disabled(viewModel.thoughtInput.trimmingCharacters(in: .whitespacesAndNewlines) == "" && viewModel.selectedIndex == 0)
                 }
             }
         }
         .padding(.horizontal, 30)
         .padding(.vertical, 0)
         .frame(height: 100)
-        .onChange(of: selectedIndex) {
-            if selectedIndex == 0 && !isEditing {
-                isSelecting = false
-                selectedThoughts.removeAll()
+        .onChange(of: viewModel.selectedIndex) {
+            if viewModel.selectedIndex == 0 && !viewModel.isEditing {
+                viewModel.isSelecting = false
+                viewModel.selectedThoughts.removeAll()
             }
         }
     }

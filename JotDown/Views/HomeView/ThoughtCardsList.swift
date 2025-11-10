@@ -8,15 +8,9 @@ import SwiftUI
 import SwiftData
 
 struct ThoughtCardsList: View {
-    @Environment(\.modelContext) private var context
     var thoughts: [Thought]
-    @Binding var text: String
-    @Binding var selectedIndex: Int?
-    @Binding var showWritableThought: Bool
+    @Bindable var viewModel: HomeViewModel
     @FocusState var isFocused: Bool
-    @Binding var isSelecting: Bool
-    @Binding var selectedThoughts: Set<Thought>
-    let addThought: () async throws -> Void
     @State private var firstCardOffset: CGFloat = 0
     @GestureState private var isDragging = false
     @State private var sendHapticFeedback: Bool = true
@@ -24,12 +18,12 @@ struct ThoughtCardsList: View {
     
     // Handles new note offset
     private func handlePreferenceChange(offset: CGFloat, proxy: GeometryProxy, thoughtWidth: CGFloat) {
-        if selectedIndex == 1 && thoughts.count > 0 {
+        if viewModel.selectedIndex == 1 && thoughts.count > 0 {
             let thoughtPadding = (proxy.size.width - thoughtWidth) / 2
             let expectedCardMinX = thoughtPadding
-            
+
             let rightwardMovement = max(0, offset - expectedCardMinX)
-            
+
             firstCardOffset = rightwardMovement
         } else {
             firstCardOffset = 0
@@ -47,11 +41,11 @@ struct ThoughtCardsList: View {
             
             let writablePadding: CGFloat = (proxy.size.width - writableWidth) / 2
             let thoughtPadding: CGFloat = (proxy.size.width - thoughtWidth) / 2
-            let leadingPadding: CGFloat = showWritableThought && selectedIndex == 0 ? writablePadding : thoughtPadding
+            let leadingPadding: CGFloat = viewModel.showWritableThought && viewModel.selectedIndex == 0 ? writablePadding : thoughtPadding
             let trailingPadding: CGFloat = thoughts.count > 0 ? thoughtPadding : 0
-            
+
             let revealAmount: CGFloat = max(0, min(firstCardOffset / 80, 1.0))
-            let shouldShowNewNote: Bool = !showWritableThought && thoughts.count > 0 && selectedIndex == 1 && firstCardOffset > 0
+            let shouldShowNewNote: Bool = !viewModel.showWritableThought && thoughts.count > 0 && viewModel.selectedIndex == 1 && firstCardOffset > 0
                 
             ZStack(alignment: .leading) {
                 // new note action that appears when swiping right
@@ -65,23 +59,23 @@ struct ThoughtCardsList: View {
                 ScrollViewReader { scrollProxy in
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(alignment: .center, spacing: 16) {
-                            if showWritableThought {
-                                WritableThoughtCard(text: $text, isFocused: _isFocused, addThought: addThought)
+                            if viewModel.showWritableThought {
+                                WritableThoughtCard(text: $viewModel.thoughtInput, isFocused: _isFocused, addThought: { try await viewModel.addThought() })
                                     .id(0)
                             }
-                            
+
                             ForEach(thoughts) { thought in
                                 let index = thoughts.firstIndex(of: thought)!
                                 let id = index + 1
 
                                 ZStack(alignment: .topTrailing) {
                                     ThoughtCard(thought: thought)
-                                        .opacity(isSelecting && !selectedThoughts.contains(thought) ? 0.6 : 1.0)
+                                        .opacity(viewModel.isSelecting && !viewModel.selectedThoughts.contains(thought) ? 0.6 : 1.0)
                                         .overlay(alignment: .topTrailing) {
-                                            if isSelecting {
-                                                Image(systemName: selectedThoughts.contains(thought) ? "checkmark.circle.fill" : "circle")
+                                            if viewModel.isSelecting {
+                                                Image(systemName: viewModel.selectedThoughts.contains(thought) ? "checkmark.circle.fill" : "circle")
                                                     .font(.system(size: 24))
-                                                    .foregroundStyle(selectedThoughts.contains(thought) ? .blue : .gray.opacity(0.6))
+                                                    .foregroundStyle(viewModel.selectedThoughts.contains(thought) ? .blue : .gray.opacity(0.6))
                                                     .padding(8)
                                             }
                                         }
@@ -97,15 +91,15 @@ struct ThoughtCardsList: View {
                                 }
                                 .id(id)
                                 .onTapGesture {
-                                    if isSelecting {
-                                        toggleSelection(for: thought)
+                                    if viewModel.isSelecting {
+                                        viewModel.toggleSelection(for: thought)
                                     } else {
-                                        selectedIndex = id
+                                        viewModel.selectedIndex = id
                                     }
                                 }
                             }
                         }
-                        .scrollDisabled(isSelecting)
+                        .scrollDisabled(viewModel.isSelecting)
                         .scrollTargetLayout()
                         .padding(.leading, leadingPadding)
                         .padding(.trailing, trailingPadding)
@@ -113,46 +107,45 @@ struct ThoughtCardsList: View {
                     .frame(height: 472)
                     .coordinateSpace(name: "scroll")
                     .scrollTargetBehavior(.viewAligned)
-                    .scrollPosition(id: $selectedIndex)
+                    .scrollPosition(id: $viewModel.selectedIndex)
                     .scrollClipDisabled()
-                    .animation(.smooth, value: selectedIndex)
+                    .animation(.smooth, value: viewModel.selectedIndex)
                     .onPreferenceChange(FirstCardOffsetPreferenceKey.self) { offset in
                         if offset != FirstCardOffsetPreferenceKey.defaultValue {
                             handlePreferenceChange(offset: offset, proxy: proxy, thoughtWidth: thoughtWidth)
                         }
                         
-                        if !showWritableThought && firstCardOffset >= 55.0 {
+                        if !viewModel.showWritableThought && firstCardOffset >= 55.0 {
                             if (sendHapticFeedback) {
                                 let generator = UIImpactFeedbackGenerator(style: .light)
                                 generator.impactOccurred()
                                 sendHapticFeedback = false
                             }
-                            
+
                             if (!isDragging) {
-                                // new note swiped
                                 sendHapticFeedback = true
-                                showWritableThought = true
+                                viewModel.showWritableThought = true
                                 isFocused = true
                             }
                         } else {
                             sendHapticFeedback = true
                         }
                     }
-                    .onChange(of: selectedIndex ?? -1) { oldIndex, newIndex in
+                    .onChange(of: viewModel.selectedIndex ?? -1) { oldIndex, newIndex in
                         if newIndex != 1 {
                             resetOffsets()
                         }
-                        
-                        guard showWritableThought && newIndex >= 1 else { return }
-                        
+
+                        guard viewModel.showWritableThought && newIndex >= 1 else { return }
+
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
                             withAnimation(.smooth) {
                                 scrollProxy.scrollTo(1, anchor: .center)
                             }
                         }
-                        showWritableThought = false
+                        viewModel.showWritableThought = false
                         isFocused = false
-                        text = ""
+                        viewModel.thoughtInput = ""
                     }
                     .simultaneousGesture(
                         DragGesture(minimumDistance: 0)
@@ -164,13 +157,6 @@ struct ThoughtCardsList: View {
             }
         }
         .frame(height: 472)
-    }
-    private func toggleSelection(for thought: Thought) {
-        if selectedThoughts.contains(thought) {
-            selectedThoughts.remove(thought)
-        } else {
-            selectedThoughts.insert(thought)
-        }
     }
 }
 
