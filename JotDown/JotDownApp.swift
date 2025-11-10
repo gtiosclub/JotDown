@@ -33,12 +33,14 @@ struct JotDownApp: App {
 
     var body: some Scene {
         WindowGroup {
-            if hasCompletedOnboarding {
-                ContentView()
-                    .modelContainer(container)
-            } else {
-                OnboardingView()
+            Group {
+                if hasCompletedOnboarding {
+                    ContentView()
+                } else {
+                    OnboardingView()
+                }
             }
+            .modelContainer(container)
         }
     }
 }
