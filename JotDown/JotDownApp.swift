@@ -12,6 +12,8 @@ import WatchConnectivity
 
 @main
 struct JotDownApp: App {
+    
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
     let container: ModelContainer
 
     init() {
@@ -31,12 +33,14 @@ struct JotDownApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .modelContainer(container)
-                .onAppear {
-                    let testThought = Thought(content: "Finish homework")
-                    testThought.category = Category(name: "Assignments", categoryDescription: "")
+            Group {
+                if hasCompletedOnboarding {
+                    ContentView()
+                } else {
+                    OnboardingView()
                 }
+            }
+            .modelContainer(container)
         }
     }
 }
