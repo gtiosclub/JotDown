@@ -175,8 +175,21 @@ struct OnboardingView: View {
     
     @MainActor
     private func uploadSelectedCategories() {
+        // Create a new User object with the bio and selected categories
+        let newUser = User(name: "", bio: userInput)
+        
+        // Insert the new user into the model context
+        context.insert(newUser)
+        
         for category in selectedCategories {
             context.insert(category)
+        }
+        
+        //save the context
+        do {
+            try context.save()
+        } catch {
+            print("Failed to save context: \(error)")
         }
     }
 

@@ -81,7 +81,9 @@ struct BackButton: View {
     var body: some View {
         Button(action: {
             withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                currentPage -= 1
+                if (currentPage > 0) {
+                    currentPage -= 1
+                }
 
                 if currentPage >= 1 {
                     pageHeight = 800
