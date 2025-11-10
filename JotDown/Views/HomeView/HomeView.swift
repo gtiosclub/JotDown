@@ -28,6 +28,9 @@ struct HomeView: View {
     @State private var isEditing: Bool = false
     @State private var selectedThoughts: Set<Thought> = []
     @State private var thoughtBeingEdited: Thought? = nil
+    @Binding var selectedTab: Int
+    @Binding var categoryToPresent: Category?
+
     
     var body: some View {
         VStack(spacing: 0) {
@@ -35,7 +38,7 @@ struct HomeView: View {
             Spacer()
             
             HeaderHomeView(thoughtInput: $thoughtInput, selectedIndex: $selectedIndex, isSubmitting: $isSubmitting, showWritableThought: $showWritableThought, isFocused: _isFocused, addThought: addThought, saveEditedThought: saveEditedThought, deleteSelectedThoughts: deleteSelectedThoughts, isSelecting: $isSelecting, isEditing: $isEditing, selectedThoughts: $selectedThoughts, thoughtBeingEdited: $thoughtBeingEdited)
-            ThoughtCardsList(thoughts: thoughts, text: $thoughtInput, selectedIndex: $selectedIndex, showWritableThought: $showWritableThought, isFocused: _isFocused, isSelecting: $isSelecting, selectedThoughts: $selectedThoughts, addThought: addThought)
+            ThoughtCardsList(thoughts: thoughts, text: $thoughtInput, selectedIndex: $selectedIndex, showWritableThought: $showWritableThought, isFocused: _isFocused, isSelecting: $isSelecting, selectedThoughts: $selectedThoughts, addThought: addThought, selectedTab: $selectedTab, categoryToPresent: $categoryToPresent)
             FooterHomeView(noteCount: thoughts.count, date: selectedIndex != nil && selectedIndex != 0 ? thoughts[selectedIndex! - 1].dateCreated : Date())
             
             Spacer()

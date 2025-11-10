@@ -20,6 +20,8 @@ struct ThoughtCardsList: View {
     @State private var firstCardOffset: CGFloat = 0
     @GestureState private var isDragging = false
     @State private var sendHapticFeedback: Bool = true
+    @Binding var selectedTab: Int
+    @Binding var categoryToPresent: Category?
 
     
     // Handles new note offset
@@ -75,7 +77,7 @@ struct ThoughtCardsList: View {
                                 let id = index + 1
 
                                 ZStack(alignment: .topTrailing) {
-                                    ThoughtCard(thought: thought)
+                                    ThoughtCard(thought: thought, selectedTab: $selectedTab, categoryToPresent: $categoryToPresent)
                                         .opacity(isSelecting && !selectedThoughts.contains(thought) ? 0.6 : 1.0)
                                         .overlay(alignment: .topTrailing) {
                                             if isSelecting {

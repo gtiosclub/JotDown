@@ -14,58 +14,79 @@ struct ContentView: View {
     @Environment(\.modelContext) private var context
     @Query var users: [User]
     @State private var searchText: String = ""
+    @State private var selectedTab = 0
+    @Namespace private var ns
+    @State private var categoryToPresent: Category? = nil
+    @State private var dashboardResetID = UUID()
+
     
     var body: some View {
-        TabView {
-            Tab {
-                NavigationStack {
-                    HomeView()
-                }
-                .onAppear {
-                    if users.isEmpty {
-                        let defaultUser = User(name: "", bio: "")
-                        context.insert(defaultUser)
+        TabView(selection: $selectedTab) {
+            NavigationStack {
+                HomeView(selectedTab: $selectedTab, categoryToPresent: $categoryToPresent)
+                    .onAppear {
+                        if users.isEmpty {
+                            let defaultUser = User(name: "", bio: "")
+                            context.insert(defaultUser)
+                        }
                     }
-                }
-            } label: {
+            }
+            .tabItem {
                 Image("Visualize")
                     .renderingMode(.template)
             }
+            .tag(0)
             
-            Tab {
+            NavigationStack {
                 DashboardView()
-            } label: {
+            }
+            .id(dashboardResetID)
+            .tabItem {
                 Image("Dashboard")
                     .renderingMode(.template)
             }
+            .tag(1)
             
-            Tab {
-                NavigationStack {
-                    ProfileView()
-                }
-            } label: {
+            NavigationStack {
+                ProfileView()
+            }
+            .tabItem {
                 Image("User")
                     .renderingMode(.template)
             }
+            .tag(2)
             
-            Tab {
-                NavigationStack {
-                    VisualizationView()
-                }
-            } label: {
+            NavigationStack {
+                VisualizationView()
+            }
+            .tabItem {
                 Image(.dashboard)
                     .renderingMode(.template)
             }
+            .tag(3)
             
-            Tab(role: .search) {
-                NavigationStack {
-                    CombinedSearchView()
-                }
-            } label: {
+            NavigationStack {
+                CombinedSearchView()
+            }
+            .tabItem {
                 Image("Search")
                     .renderingMode(.template)
             }
+            .tag(4)
             
+        }
+        .onChange(of: selectedTab) { oldValue, newValue in
+            if oldValue == 1 && newValue != 1 {
+                dashboardResetID = UUID()
+                categoryToPresent = nil
+            }
+        }
+        .fullScreenCover(item: $categoryToPresent) { show in
+            CategoryDashboardView(
+                category: show,
+                namespace: ns,
+                onDismiss: { categoryToPresent = nil }
+            )
         }
         // to change tab icon color onSelected add:
         // .tint(.gray)
