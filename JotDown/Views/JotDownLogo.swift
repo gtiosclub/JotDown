@@ -7,14 +7,9 @@
 import SwiftUI
 
 struct JotDownLogo: View {
-    
     var style: JotDownLogoStyle = .regular
     var color: Color = .white
-    
-    //For gradient
-    var color1: Color = Color(red: 161/255, green: 161/255, blue: 222/255)
-    var color2: Color = Color(red: 107/255, green: 107/255, blue: 138/255)
-    
+
     var body: some View {
         if (style == .regular) {
             VStack(alignment: .leading, spacing: -12) {
@@ -27,7 +22,6 @@ struct JotDownLogo: View {
             .shadow(color: .black.opacity(0.04), radius: 4.8, x: 0, y: 4)
             .foregroundStyle(color.opacity(0.82))
         } else if (style == .heavy) {
-            
             VStack(alignment: .leading, spacing: -12) {
                 Text("jot")
                 Text("down")
@@ -45,7 +39,6 @@ struct JotDownLogo: View {
                 )
             )
         }
-
     }
 }
 

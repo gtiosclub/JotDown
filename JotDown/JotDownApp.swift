@@ -44,3 +44,4 @@ struct JotDownApp: App {
         }
     }
 }
+

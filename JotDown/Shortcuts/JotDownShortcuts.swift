@@ -20,6 +20,16 @@ struct JotDownShortcuts: AppShortcutsProvider {
                 systemImageName: "square.and.pencil"
             ),
             AppShortcut(
+                intent: RecategorizeThoughtShortcut(),
+                phrases: [
+                    "Recategorize thought in \(.applicationName)",
+                    "Change category in \(.applicationName)",
+                    "Move note in \(.applicationName)"
+                ],
+                shortTitle: "Recategorize Thought",
+                systemImageName: "arrow.triangle.branch"
+            ),
+            AppShortcut(
                 intent: ReadNotesInCategoryShortcut(),
                 phrases: [
                     "Read thoughts from \(.applicationName)",
@@ -41,3 +51,4 @@ struct JotDownShortcuts: AppShortcutsProvider {
         ]
     }
 }
+
