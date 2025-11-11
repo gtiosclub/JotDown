@@ -54,10 +54,10 @@ struct DashboardView: View {
         ZStack {
             EllipticalGradient.primaryBackground
                 .ignoresSafeArea()
-            
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+
             // Main dashboard content when no category is selected
             if selectedCategory == nil {
-                
                 ScrollView {
                     VStack(alignment: .leading, spacing: 24) {
                         // MARK: - Header Content
@@ -79,7 +79,7 @@ struct DashboardView: View {
                         .padding(.horizontal)
 
                         // MARK: - Note Categories
-                        
+
                         LazyVGrid(columns: columns, spacing: 24) {
                             ForEach(sortedCategories) { category in
                                 NoteCategoryView(category: category, namespace: dashboardNamespace)
@@ -94,13 +94,12 @@ struct DashboardView: View {
                         }
                         .padding(.horizontal)
                         .padding(.top, 40)
-                        
                     }
                     .padding(.top, 40)
                     .padding(.horizontal)
                     .transition(.opacity)
+                    .zIndex(1)
                 }
-                
             }
 
             // Selected category overlay
@@ -115,6 +114,7 @@ struct DashboardView: View {
                     }
                 )
                 .transition(.opacity)
+                .zIndex(1)
             }
         }
         .animation(.spring(response: 0.45, dampingFraction: 0.8), value: selectedCategory)

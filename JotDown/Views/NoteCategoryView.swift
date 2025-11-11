@@ -109,12 +109,14 @@ struct NoteCategoryView: View {
             Text(category.name)
                 .font(.system(size: 20, weight: .bold))
                 .foregroundStyle(.primaryText)
+                .fixedSize()
                 .matchedGeometryEffect(id: "\(category.id)-title", in: namespace)
 
             // Display the total number of thoughts in this category in a "pill"
             Text("\(thoughts.count) notes")
                 .font(.system(size: 12, weight: .regular))
                 .foregroundStyle(.primaryText.opacity(0.8))
+                .fixedSize()
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
                 .background(Color.black.opacity(0.04)) // Translucent pill

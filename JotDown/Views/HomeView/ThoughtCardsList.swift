@@ -55,14 +55,19 @@ struct ThoughtCardsList: View {
                         .frame(width: proxy.size.width * 0.3, height: 472)
                         .offset(x: 0)
                         .opacity(revealAmount)
+                        .transition(.opacity.combined(with: .scale(scale: 0.8)))
                 }
-                
+
                 ScrollViewReader { scrollProxy in
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(alignment: .center, spacing: 16) {
                             if viewModel.showWritableThought {
                                 WritableThoughtCard(text: $viewModel.thoughtInput, isFocused: _isFocused, addThought: { try await viewModel.addThought() })
                                     .id(0)
+                                    .transition(
+                                        .move(edge: .leading)
+                                        .combined(with: .opacity)
+                                    )
                             }
 
                             ForEach(thoughts) { thought in
@@ -110,7 +115,6 @@ struct ThoughtCardsList: View {
                     .scrollTargetBehavior(.viewAligned)
                     .scrollPosition(id: $viewModel.selectedIndex)
                     .scrollClipDisabled()
-                    .animation(.smooth, value: viewModel.selectedIndex)
                     .onPreferenceChange(FirstCardOffsetPreferenceKey.self) { offset in
                         if offset != FirstCardOffsetPreferenceKey.defaultValue {
                             handlePreferenceChange(offset: offset, proxy: proxy, thoughtWidth: thoughtWidth)
@@ -125,7 +129,9 @@ struct ThoughtCardsList: View {
 
                             if (!isDragging) {
                                 sendHapticFeedback = true
-                                viewModel.showWritableThought = true
+                                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                                    viewModel.showWritableThought = true
+                                }
                                 isFocused = true
                             }
                         } else {
@@ -139,12 +145,10 @@ struct ThoughtCardsList: View {
 
                         guard viewModel.showWritableThought && newIndex >= 1 else { return }
 
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                            withAnimation(.smooth) {
-                                scrollProxy.scrollTo(1, anchor: .center)
-                            }
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                            viewModel.showWritableThought = false
+                            scrollProxy.scrollTo(0, anchor: .leading)
                         }
-                        viewModel.showWritableThought = false
                         isFocused = false
                         viewModel.thoughtInput = ""
                     }
@@ -156,6 +160,8 @@ struct ThoughtCardsList: View {
                     )
                 }
             }
+            .animation(.spring(response: 0.35, dampingFraction: 0.8), value: shouldShowNewNote)
+            .animation(.interactiveSpring(response: 0.25, dampingFraction: 0.9), value: revealAmount)
         }
         .frame(height: 472)
     }
