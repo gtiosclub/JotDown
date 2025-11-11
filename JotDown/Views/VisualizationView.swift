@@ -14,7 +14,7 @@ struct VisualizationView: View {
     @Query(sort: \Thought.dateCreated, order: .reverse) var thoughts: [Thought]
     @Query var categories: [Category]
     
-    @State private var zoomLevel: CGFloat = 0.6
+    @State private var zoomLevel: CGFloat = 1.0
     @State private var finalZoomLevel: CGFloat = 1.0
     
     let minZoom: CGFloat = 0.67
