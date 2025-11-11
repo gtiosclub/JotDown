@@ -40,13 +40,13 @@ struct OnboardingView: View {
                                     .frame(height: 6)
                                     .padding(.trailing, 5)
                                     .foregroundStyle(
-                                        (currentPage == 1) ? Color(red: 107/255, green: 107/255, blue: 138/255) : Color(red: 191/255, green: 191/255, blue: 213/255)
+                                        (currentPage == 1) ? Color.mediumText : Color.placeholderText
                                     )
                                 RoundedRectangle(cornerRadius: 5)
                                     .frame(height: 6)
                                     .padding(.leading, 5)
                                     .foregroundStyle(
-                                        (currentPage == 2) ? Color(red: 107/255, green: 107/255, blue: 138/255) : Color(red: 191/255, green: 191/255, blue: 213/255)
+                                        (currentPage == 2) ? Color.mediumText : Color.placeholderText
                                     )
                             }
                             .padding(.horizontal, 50)
@@ -164,7 +164,7 @@ struct OnboardingView: View {
         do {
             let generator = CategoryGenerator()
             let newCategories = try await generator.generateCategories(using: trimmedInput)
-            suggestedCategories = newCategories
+            suggestedCategories = newCategories.filter { $0.name.lowercased() != "other" }
             isGenerating = false
         } catch {
             print("Failed to generate categories: \(error)")
@@ -180,6 +180,9 @@ struct OnboardingView: View {
         
         // Insert the new user into the model context
         context.insert(newUser)
+        
+        let otherCategory = Category(name: "Other", categoryDescription: "For all other notes that don't match with given categories.")
+        context.insert(otherCategory)
         
         for category in selectedCategories {
             context.insert(category)

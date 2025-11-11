@@ -16,7 +16,8 @@ struct DashboardView: View {
     @Namespace private var dashboardNamespace
     @State private var isSelecting = false
     @State private var selectedThoughts: Set<Thought> = []
-    
+    @State private var showVisualization = false
+
     // two-column grid layout.
     let columns: [GridItem] = [
         GridItem(.flexible(), spacing: 0),
@@ -49,67 +50,57 @@ struct DashboardView: View {
         }
     }
 
-    // Consistent gradient background
-    private var backgroundGradient: some View {
-        EllipticalGradient(
-            stops: [
-                Gradient.Stop(color: Color(red: 0.94, green: 0.87, blue: 0.94), location: 0.00),
-                Gradient.Stop(color: Color(red: 0.78, green: 0.85, blue: 0.93), location: 1.00),
-            ],
-            center: UnitPoint(x: 0.67, y: 0.46)
-        )
-        .ignoresSafeArea()
-    }
-    
-    // Define the dark text color from the visual
-    private var textColor: Color {
-         Color(red: 0.35, green: 0.35, blue: 0.45)
-    }
-
     var body: some View {
         ZStack {
-            backgroundGradient
-            
+            EllipticalGradient.primaryBackground
+                .ignoresSafeArea()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+
             // Main dashboard content when no category is selected
             if selectedCategory == nil {
-                
                 ScrollView {
                     VStack(alignment: .leading, spacing: 24) {
                         // MARK: - Header Content
                         HStack {
                             Text("dashboard")
-                                .font(.system(size: 40, weight: .bold))
-                                .foregroundColor(textColor)
+                                .titleStyle()
                                 .matchedGeometryEffect(id: "logo", in: dashboardNamespace)
                         }
                         .padding(.horizontal)
 
                         // MARK: - Stats Content
                         HStack(spacing: 24) {
-                            VStack(alignment: .leading) {
-                                Text("\(thoughts.count)")
-                                    .font(.system(size: 28, weight: .bold))
-                                    .foregroundColor(textColor)
-                                Text("notes")
-                                    .font(.system(size: 15, weight: .regular))
-                                    .foregroundColor(textColor.opacity(0.8))
+                            StatDisplay(value: "\(thoughts.count)", label: "notes")
+                                .matchedGeometryEffect(id: "notes-stat", in: dashboardNamespace)
+
+                            StatDisplay(value: "\(categories.count)", label: "categories")
+                                .matchedGeometryEffect(id: "categories-stat", in: dashboardNamespace)
+
+                            Spacer()
+
+                            Button {
+                                withAnimation(.spring) {
+                                    showVisualization = true
+                                }
+                            } label: {
+                                Label("Visualization", systemImage: "map")
+                                    .imageScale(.large)
+                                    .fontWeight(.semibold)
+                                    .padding(6)
                             }
-                            .matchedGeometryEffect(id: "notes-stat", in: dashboardNamespace)
-                            
-                            VStack(alignment: .leading) {
-                                Text("\(categories.count)")
-                                    .font(.system(size: 28, weight: .bold))
-                                    .foregroundColor(textColor)
-                                Text("categories")
-                                    .font(.system(size: 15, weight: .regular))
-                                    .foregroundColor(textColor.opacity(0.8))
-                            }
-                            .matchedGeometryEffect(id: "categories-stat", in: dashboardNamespace)
+                            .labelStyle(.iconOnly)
+                            .buttonStyle(.glassProminent)
+                            .buttonBorderShape(.circle)
+                            .tint(Color.buttonGradientStart)
+                            .matchedTransitionSource(
+                                id: "vis_button",
+                                in: dashboardNamespace
+                            )
                         }
                         .padding(.horizontal)
 
                         // MARK: - Note Categories
-                        
+
                         LazyVGrid(columns: columns, spacing: 24) {
                             ForEach(sortedCategories) { category in
                                 NoteCategoryView(category: category, namespace: dashboardNamespace)
@@ -124,13 +115,12 @@ struct DashboardView: View {
                         }
                         .padding(.horizontal)
                         .padding(.top, 40)
-                        
                     }
                     .padding(.top, 40)
                     .padding(.horizontal)
                     .transition(.opacity)
+                    .zIndex(1)
                 }
-                
             }
 
             // Selected category overlay
@@ -145,8 +135,18 @@ struct DashboardView: View {
                     }
                 )
                 .transition(.opacity)
+                .zIndex(1)
             }
         }
         .animation(.spring(response: 0.45, dampingFraction: 0.8), value: selectedCategory)
+        .sheet(isPresented: $showVisualization) {
+            NavigationStack {
+                VisualizationView()
+            }
+            .navigationTransition(
+                .zoom(sourceID: "vis_button", in: dashboardNamespace)
+            )
+            .interactiveDismissDisabled()
+        }
     }
 }

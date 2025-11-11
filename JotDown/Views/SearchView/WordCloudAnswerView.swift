@@ -13,8 +13,8 @@ struct WordCloudAnswerView: View {
     @State private var morphProgress: CGFloat = 0
     @Environment(\.isSearching) var isSearching
     let orbConfig = OrbConfiguration(
-        backgroundColors: [.purple, Color(red: 0.35, green: 0.35, blue: 0.45)],
-        glowColor: Color(red: 0.35, green: 0.35, blue: 0.45),
+        backgroundColors: [.purple, .primaryText],
+        glowColor: .primaryText,
         coreGlowIntensity: 1.2
     )
     
@@ -55,7 +55,7 @@ struct WordCloudAnswerView: View {
                         // Text on top
                         Text(controller.streamed)
                             .font(.system(size: 22, weight: .regular, design: .rounded))
-                            .foregroundColor(textColor)
+                            .foregroundColor(.primaryText)
                             .multilineTextAlignment(.center)
                             .frame(maxWidth: geo.size.width * 0.8)
                             .opacity(min(morphProgress * 1.5, 1.0)) // Fade in with morph
@@ -112,11 +112,7 @@ struct WordCloudAnswerView: View {
         .ignoresSafeArea(.keyboard)
         .allowsHitTesting(false)
     }
-    
-    private var textColor: Color {
-        Color(red: 0.35, green: 0.35, blue: 0.45)
-    }
-    
+
     private var cardBackgroundColor: Color {
         Color(red: 0.95, green: 0.94, blue: 0.97) // Soft lavender-white
     }
