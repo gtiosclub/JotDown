@@ -14,146 +14,157 @@ struct VisualizationView: View {
     @Query(sort: \Thought.dateCreated, order: .reverse) var thoughts: [Thought]
     @Query var categories: [Category]
     
-    @State private var zoomLevel: CGFloat = 1.0
-    @State private var finalZoomLevel: CGFloat = 1.0
-    
+    // MARK: - Zoom and Pan States
+    @State private var scale: CGFloat = 1.0
+    @State private var finalScale: CGFloat = 1.0
+    @State private var offset: CGSize = .zero
+    @State private var lastOffset: CGSize = .zero
+    @State private var pinchAnchor: CGPoint? = nil
+
+    // MARK: - Zoom Limits
     let minZoom: CGFloat = 0.67
     let maxZoom: CGFloat = 1.5
     
+    // MARK: - Derived Collections
     private var visibleThoughts: [Thought] {
-        thoughts
-            .filter{$0.category.isActive}
+        thoughts.filter { $0.category.isActive }
     }
-    
     private var activeCategories: [Category] {
-        categories
-            .filter{$0.isActive}
+        categories.filter { $0.isActive }
     }
     private var inactiveCategories: [Category] {
-        categories.filter{!$0.isActive}
+        categories.filter { !$0.isActive }
     }
     
     private var usedCategories: [String] {
-            var uniqueNames = [String]()
-            var seenNames = Set<String>()
-            
-            // Loop through the thoughts in their query order
-            for thought in thoughts {
-                let cat = thought.category
-                // If we haven't seen this name yet, add it
-                if !seenNames.contains(cat.name) && !inactiveCategories.contains(cat) {
-                    uniqueNames.append(cat.name)
-                    seenNames.insert(cat.name)
-                }
+        var uniqueNames = [String]()
+        var seenNames = Set<String>()
+        for thought in thoughts {
+            let cat = thought.category
+            if !seenNames.contains(cat.name) && !inactiveCategories.contains(cat) {
+                uniqueNames.append(cat.name)
+                seenNames.insert(cat.name)
             }
-            return uniqueNames
+        }
+        return uniqueNames
     }
     
     private func categoryOpacity(for currentZoom: CGFloat) -> Double {
-            let fadePoint: CGFloat = 1.0
-            // Calculate how far we are between minZoom and the fadePoint
-            let progress = (currentZoom - minZoom) / (fadePoint - minZoom)
-            // Invert the progress (1.0 -> 0.0) and clamp it between 0 and 1
-            return max(0.0, min(1.0, 1.0 - progress))
+        let fadePoint: CGFloat = 1.0
+        let progress = (currentZoom - minZoom) / (fadePoint - minZoom)
+        return max(0.0, min(1.0, 1.0 - progress))
     }
     
+    // MARK: - Body
     var body: some View {
-        ScrollView([.horizontal, .vertical]) {
-            ZStack {
-                GridBackground()
-                RadialLayout {
-                    ForEach(visibleThoughts.indices, id: \.self) { index in
-                        ThoughtBubbleView(
-                            thought: visibleThoughts[index],
-                            color: colorForCategory(visibleThoughts[index].category.name),
-                            zoomLevel: zoomLevel
-                        )
-                        .layoutValue(key: CategoryLayoutKey.self, value: visibleThoughts[index].category.name)
+        GeometryReader { geo in
+            ScrollView([.horizontal, .vertical], showsIndicators: false) {
+                ZStack {
+                    GridBackground()
+                    
+                    // Thought bubbles layout
+                    RadialLayout {
+                        ForEach(visibleThoughts.indices, id: \.self) { index in
+                            ThoughtBubbleView(
+                                thought: visibleThoughts[index],
+                                color: colorForCategory(visibleThoughts[index].category.name),
+                                zoomLevel: scale
+                            )
+                            .layoutValue(key: CategoryLayoutKey.self, value: visibleThoughts[index].category.name)
+                        }
                     }
-                } .frame(width: 400, height: 400)
-                RadialLayout {
-                    if usedCategories.count == 1 {
-                        Text(usedCategories.first!)
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                            .position(x: -33, y: 25)
-                            .foregroundColor(.primaryText)
-                            .multilineTextAlignment(.center)
-                            .lineLimit(2)
-                            .minimumScaleFactor(0.5)
-                            .frame(maxWidth: 220) // limits width
-                            .fixedSize(horizontal: false, vertical: true) // which axis has a fixed size
-                    } else {
-                        ForEach(usedCategories, id: \.self) { category in
-                            Text(category)
-                                .layoutValue(key: CategoryLayoutKey.self, value: category)
+                    .frame(width: 400, height: 400)
+                    
+                    // Category labels layout
+                    RadialLayout {
+                        if usedCategories.count == 1 {
+                            Text(usedCategories.first!)
                                 .font(.largeTitle)
                                 .fontWeight(.bold)
+                                .position(x: -33, y: 25)
                                 .foregroundColor(.primaryText)
                                 .multilineTextAlignment(.center)
                                 .lineLimit(2)
                                 .minimumScaleFactor(0.5)
-                                .frame(maxWidth: 220) // limits width
-                                .fixedSize(horizontal: false, vertical: true) // which axis has a fixed size
+                                .frame(maxWidth: 220)
+                                .fixedSize(horizontal: false, vertical: true)
+                        } else {
+                            ForEach(usedCategories, id: \.self) { category in
+                                Text(category)
+                                    .layoutValue(key: CategoryLayoutKey.self, value: category)
+                                    .font(.largeTitle)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.primaryText)
+                                    .multilineTextAlignment(.center)
+                                    .lineLimit(2)
+                                    .minimumScaleFactor(0.5)
+                                    .frame(maxWidth: 220)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
                         }
                     }
+                    .frame(width: 400, height: 400)
+                    .opacity(categoryOpacity(for: scale))
+                    .animation(.easeInOut(duration: 0.2), value: scale)
+                    .zIndex(0)
+                    
+                    // JotDown logo
+                    JotDownLogo(style: .heavy, color: .gray)
+                        .frame(width: 200.0, height: 200.0)
+                        .font(.system(size: 100, weight: .heavy))
+                        .glassEffect(.clear, in: .circle)
                 }
-                .frame(width: 400, height: 400)
-                .opacity(categoryOpacity(for: zoomLevel))
-                .animation(.easeInOut(duration: 0.2), value: zoomLevel)
-                .zIndex(0)
-                JotDownLogo(style: .heavy, color: .gray)
-                    .frame(width: 200.0, height: 200.0)
-                    .font(.system(size: 100, weight: .heavy)) // This scales the symbol
-                    .glassEffect(.clear, in: .circle)
+                // MARK: - Zoom and Pan Applied Here
+                .scaleEffect(scale)
+                .offset(offset)
+                .gesture(magnificationGesture(in: geo))
+                .animation(.easeInOut(duration: 0.15), value: scale)
+                .animation(.easeInOut(duration: 0.15), value: offset)
+                .frame(width: 1000, height: 1400)
             }
-            .scaleEffect(zoomLevel)
-            .gesture(magnificationGesture)
-            .frame(width: 1000 * zoomLevel, height: 1400 * zoomLevel)
-        }
-        .primaryBackground()
-        .scrollIndicators(.hidden)
-        .defaultScrollAnchor(.center)
-        .scrollBounceBehavior(.basedOnSize)
-        .scrollContentBackground(.hidden)
-        .toolbar {
-            Button(role: .close) {
-                dismiss()
+            .primaryBackground()
+            .scrollIndicators(.hidden)
+            .defaultScrollAnchor(.center)
+            .scrollBounceBehavior(.basedOnSize)
+            .scrollContentBackground(.hidden)
+            .toolbar {
+                Button(role: .close) {
+                    dismiss()
+                }
             }
         }
     }
     
-    var magnificationGesture: some Gesture {
+    // MARK: - Gesture Logic
+    func magnificationGesture(in geo: GeometryProxy) -> some Gesture {
         MagnificationGesture()
             .onChanged { value in
-                self.zoomLevel = self.finalZoomLevel * value
+                if pinchAnchor == nil {
+                    let center = CGPoint(x: geo.size.width / 2, y: geo.size.height / 2)
+                    pinchAnchor = center
+                }
+                
+                let newScale = (finalScale * value).clamped(to: minZoom...maxZoom)
+                let scaleDelta = newScale / scale
+                
+                if let anchor = pinchAnchor {
+                    let anchorVector = CGSize(
+                        width: anchor.x - geo.size.width / 2,
+                        height: anchor.y - geo.size.height / 2
+                    )
+                    
+                    offset = CGSize(
+                        width: lastOffset.width - anchorVector.width * (scaleDelta - 1),
+                        height: lastOffset.height - anchorVector.height * (scaleDelta - 1)
+                    )
+                }
+                
+                scale = newScale
             }
-            .onEnded { value in
-                self.finalZoomLevel = self.zoomLevel
-                
-                if self.finalZoomLevel < minZoom {
-                    self.finalZoomLevel = minZoom
-                } else if self.finalZoomLevel > maxZoom {
-                    self.finalZoomLevel = maxZoom
-                }
-                
-                let transitionStart: CGFloat = 0.6
-                let transitionEnd: CGFloat = 1.0
-                let transitionMidpoint: CGFloat = (transitionStart + transitionEnd) / 2.0 // 0.875 Normally
-                
-                // 2. Check if we ended inside the transition zone
-                if self.finalZoomLevel > transitionStart && self.finalZoomLevel < transitionEnd {
-                    // 3. If so, snap to the nearest "clean" state
-                    if self.finalZoomLevel < transitionMidpoint {
-                        self.finalZoomLevel = transitionStart // Snap down
-                    } else {
-                        self.finalZoomLevel = transitionEnd // Snap up
-                    }
-                }
-                
-                withAnimation {
-                    self.zoomLevel = self.finalZoomLevel
-                }
+            .onEnded { _ in
+                finalScale = scale
+                lastOffset = offset
+                pinchAnchor = nil
             }
     }
 }
@@ -163,3 +174,9 @@ struct VisualizationView: View {
         .modelContainer(for: [Thought.self, Category.self], inMemory: false)
 }
 
+// MARK: - Helper
+extension Comparable {
+    func clamped(to range: ClosedRange<Self>) -> Self {
+        min(max(self, range.lowerBound), range.upperBound)
+    }
+}
