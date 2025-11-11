@@ -16,6 +16,10 @@ struct ContentView: View {
     @Namespace private var ns
     @State private var categoryToPresent: Category? = nil
     @State private var dashboardResetID = UUID()
+    
+    @State private var pendingDashboardResetToken: UUID? = nil
+    private let dashboardResetDelay: TimeInterval = 0.35
+
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -72,11 +76,30 @@ struct ContentView: View {
             }
         }
         .onChange(of: selectedTab) { oldValue, newValue in
+            // came to dashboard so cancel any pending reset
+            if newValue == 1 {
+                pendingDashboardResetToken = nil
+                return
+            }
+
+            // we just left category screen, so start a delayed reset
             if oldValue == 1 && newValue != 1 {
-                dashboardResetID = UUID()
-                categoryToPresent = nil
+                let token = UUID()
+                pendingDashboardResetToken = token
+
+                DispatchQueue.main.asyncAfter(deadline: .now() + dashboardResetDelay) {
+                    guard selectedTab != 1, pendingDashboardResetToken == token else { return }
+
+                    withTransaction(Transaction(animation: nil)) {
+                        dashboardResetID = UUID()
+                    }
+
+                    categoryToPresent = nil
+                    pendingDashboardResetToken = nil
+                }
             }
         }
+
         .fullScreenCover(item: $categoryToPresent) { show in
             CategoryDashboardView(
                 category: show,
