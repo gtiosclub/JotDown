@@ -46,6 +46,7 @@ extension Text {
     func titleStyle() -> some View {
         self.font(.system(size: 40, weight: .bold))
             .foregroundColor(.primaryText)
+            .fixedSize()
     }
 
     func largeTitleStyle() -> some View {
@@ -81,5 +82,6 @@ extension Text {
     func statDescriptionStyle() -> some View {
         self.font(.system(size: 15, weight: .regular))
             .foregroundColor(.primaryText.opacity(0.8))
+            .fixedSize()
     }
 }

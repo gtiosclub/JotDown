@@ -38,14 +38,15 @@ struct FooterHomeView: View {
                   .font(Font.custom("SF Pro", size: 36))
                   .multilineTextAlignment(.center)
                   .foregroundColor(.white)
-                
+                  .contentTransition(.numericText())
+
                 Text("date")
                   .font(Font.custom("SF Pro", size: 15))
                   .multilineTextAlignment(.center)
                   .foregroundColor(.white)
             }
-          
         }
+        .animation(.default, value: date)
         .padding(.horizontal, 30)
         .padding(.vertical, 0)
         .frame(alignment: .bottom)

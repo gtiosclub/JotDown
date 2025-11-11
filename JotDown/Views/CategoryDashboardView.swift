@@ -89,12 +89,9 @@ struct CategoryDashboardView: View {
                                     selectedThoughtIDs.removeAll()
                                 }
                             }) {
-                                HStack(spacing: 4) {
-                                    Image(systemName: "chevron.left")
-                                    Text("cancel")
-                                }
-                                .font(.system(size: 20, weight: .light))
-                                .foregroundStyle(.primaryText)
+                                Text("cancel")
+                                    .font(.system(size: 20, weight: .light))
+                                    .foregroundStyle(.primaryText)
                             }
                             
                             Spacer()
