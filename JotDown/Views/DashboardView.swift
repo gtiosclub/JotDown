@@ -139,5 +139,14 @@ struct DashboardView: View {
             }
         }
         .animation(.spring(response: 0.45, dampingFraction: 0.8), value: selectedCategory)
+        .fullScreenCover(isPresented: $showVisualization) {
+            NavigationStack {
+                VisualizationView()
+            }
+            .navigationTransition(
+                .zoom(sourceID: "vis_button", in: dashboardNamespace)
+            )
+            .interactiveDismissDisabled()
+        }
     }
 }
