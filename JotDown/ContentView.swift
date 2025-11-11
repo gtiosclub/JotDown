@@ -1,3 +1,10 @@
+//
+//  ContentView.swift
+//  JotDown
+//
+//  Created by Rahul on 9/22/25.
+//
+
 import SwiftData
 import SwiftUI
 
