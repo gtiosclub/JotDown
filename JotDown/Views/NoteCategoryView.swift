@@ -36,10 +36,6 @@ struct NoteCategoryView: View {
         return recentThoughts.map { $0.content }
     }
 
-    // Define the dark text color from the visual
-    private var textColor: Color {
-         Color(red: 0.35, green: 0.35, blue: 0.45)
-    }
 
     @ViewBuilder
     private func noteCard(text: String, isFront: Bool = false) -> some View {
@@ -48,7 +44,7 @@ struct NoteCategoryView: View {
             Text(text)
                 .font(.system(size: 12, weight: .medium))
                 .padding(15)
-                .foregroundStyle(textColor)
+                .foregroundStyle(.primaryText)
                 .multilineTextAlignment(.leading)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
@@ -112,13 +108,13 @@ struct NoteCategoryView: View {
             // Category Name
             Text(category.name)
                 .font(.system(size: 20, weight: .bold))
-                .foregroundStyle(textColor)
+                .foregroundStyle(.primaryText)
                 .matchedGeometryEffect(id: "\(category.id)-title", in: namespace)
 
             // Display the total number of thoughts in this category in a "pill"
             Text("\(thoughts.count) notes")
                 .font(.system(size: 12, weight: .regular))
-                .foregroundStyle(textColor.opacity(0.8))
+                .foregroundStyle(.primaryText.opacity(0.8))
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
                 .background(Color.black.opacity(0.04)) // Translucent pill

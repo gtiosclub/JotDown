@@ -44,22 +44,6 @@ struct CategoryDashboardView: View {
         GridItem(.flexible(), spacing: 16)
     ]
     
-    // Consistent gradient background
-    private var backgroundGradient: some View {
-        EllipticalGradient(
-            stops: [
-                Gradient.Stop(color: Color(red: 0.94, green: 0.87, blue: 0.94), location: 0.00),
-                Gradient.Stop(color: Color(red: 0.78, green: 0.85, blue: 0.93), location: 1.00),
-            ],
-            center: UnitPoint(x: 0.67, y: 0.46)
-        )
-        .ignoresSafeArea()
-    }
-    
-    // Text color
-    private var textColor: Color {
-         Color(red: 0.35, green: 0.35, blue: 0.45)
-    }
     
     // Sort thoughts by date
     private var sortedThoughts: [Thought] {
@@ -73,7 +57,8 @@ struct CategoryDashboardView: View {
     
     var body: some View {
         ZStack {
-            backgroundGradient
+            EllipticalGradient.primaryBackground
+                .ignoresSafeArea()
             
             ScrollView {
                 VStack(alignment: .leading, spacing: 0){
@@ -85,11 +70,10 @@ struct CategoryDashboardView: View {
                     }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 32, weight: .bold))
-                            .foregroundStyle(textColor)
+                            .foregroundStyle(.primaryText)
                             .contentShape(Rectangle())
                         Text(category.name.lowercased())
-                            .font(.system(size: 40, weight: .bold))
-                            .foregroundStyle(textColor)
+                            .titleStyle()
                             .matchedGeometryEffect(id: "\(category.id)-title", in: namespace)
                     }
                     .padding(.horizontal, 24)
@@ -110,7 +94,7 @@ struct CategoryDashboardView: View {
                                     Text("cancel")
                                 }
                                 .font(.system(size: 20, weight: .light))
-                                .foregroundStyle(textColor)
+                                .foregroundStyle(.primaryText)
                             }
                             
                             Spacer()
@@ -119,17 +103,10 @@ struct CategoryDashboardView: View {
                             
                         } else {
                             // --- Normal Mode ---
-                            VStack(alignment: .center) {
-                                 Text("\(thoughts.count)")
-                                    .font(.system(size: 28, weight: .bold))
-                                    .foregroundStyle(textColor)
-                                Text("notes")
-                                    .font(.system(size: 15, weight: .regular))
-                                    .foregroundStyle(textColor.opacity(0.8))
-                            }
-                            .padding(.leading, 4)
-                            .padding(.top, 10)
-                            .matchedGeometryEffect(id: "\(category.id)-count", in: namespace)
+                            StatDisplay(value: "\(thoughts.count)", label: "notes")
+                                .padding(.leading, 4)
+                                .padding(.top, 10)
+                                .matchedGeometryEffect(id: "\(category.id)-count", in: namespace)
                             
                             Spacer()
                             
@@ -143,7 +120,7 @@ struct CategoryDashboardView: View {
                                     .foregroundStyle(.white)
                                     .padding(.horizontal, 20)
                                     .padding(.vertical, 12)
-                                    .background(Color(red: 0.75, green: 0.75, blue: 0.9))
+                                    .background(Color.selectionAccent)
                                     .clipShape(Capsule())
                             }
                             .transaction { $0.animation = .spring }
@@ -214,7 +191,7 @@ struct CategoryDashboardView: View {
                 .foregroundStyle(.white.opacity(buttonOpacity))
                 .padding(.horizontal, 20)
                 .padding(.vertical, 12)
-                .background(Color(red: 0.75, green: 0.75, blue: 0.9).opacity(buttonOpacity))
+                .background(Color.selectionAccent.opacity(buttonOpacity))
                 .clipShape(Capsule())
             }
             .disabled(!hasSelection)
@@ -232,7 +209,7 @@ struct CategoryDashboardView: View {
                 .foregroundStyle(.white.opacity(buttonOpacity))
                 .padding(.horizontal, 20)
                 .padding(.vertical, 12)
-                .background(Color(red: 0.75, green: 0.75, blue: 0.9).opacity(buttonOpacity))
+                .background(Color.selectionAccent.opacity(buttonOpacity))
                 .clipShape(Capsule())
             }
             .disabled(!hasSelection)

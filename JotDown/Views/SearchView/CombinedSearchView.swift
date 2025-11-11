@@ -24,12 +24,12 @@ struct CombinedSearchView: View {
     @Namespace private var namespace
     var body: some View {
         ZStack {
-            backgroundGradient
+            EllipticalGradient.primaryBackground
+                .ignoresSafeArea()
             VStack(alignment: .leading, spacing: 24) {
                 HStack {
                     Text("search")
-                        .font(.system(size: 40, weight: .bold))
-                        .foregroundColor(textColor)
+                        .titleStyle()
                 }
                 .padding(.horizontal)
                 .frame(alignment: .leading)
@@ -124,20 +124,6 @@ struct CombinedSearchView: View {
         
     }
     
-    private var backgroundGradient: some View {
-        EllipticalGradient(
-            stops: [
-                Gradient.Stop(color: Color(red: 0.94, green: 0.87, blue: 0.94), location: 0.00),
-                Gradient.Stop(color: Color(red: 0.78, green: 0.85, blue: 0.93), location: 1.00),
-            ],
-            center: UnitPoint(x: 0.67, y: 0.46)
-        )
-        .ignoresSafeArea()
-    }
-    
-    private var textColor: Color {
-        Color(red: 0.35, green: 0.35, blue: 0.45)
-    }
 }
 
 

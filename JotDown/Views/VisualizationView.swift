@@ -76,7 +76,7 @@ struct VisualizationView: View {
                             .font(.largeTitle)
                             .fontWeight(.bold)
                             .position(x: -33, y: 25)
-                            .foregroundColor(Color(red: 0.35, green: 0.35, blue: 0.45))
+                            .foregroundColor(.primaryText)
                             .multilineTextAlignment(.center)
                             .lineLimit(2)
                             .minimumScaleFactor(0.5)
@@ -88,7 +88,7 @@ struct VisualizationView: View {
                                 .layoutValue(key: CategoryLayoutKey.self, value: category)
                                 .font(.largeTitle)
                                 .fontWeight(.bold)
-                                .foregroundColor(Color(red: 0.35, green: 0.35, blue: 0.45))
+                                .foregroundColor(.primaryText)
                                 .multilineTextAlignment(.center)
                                 .lineLimit(2)
                                 .minimumScaleFactor(0.5)
@@ -110,16 +110,7 @@ struct VisualizationView: View {
             .gesture(magnificationGesture)
             .frame(width: 1000 * zoomLevel, height: 1400 * zoomLevel)
         }
-        .background {
-            EllipticalGradient(
-                stops: [
-                    Gradient.Stop(color: Color(red: 0.94, green: 0.87, blue: 0.94), location: 0.00),
-                    Gradient.Stop(color: Color(red: 0.78, green: 0.85, blue: 0.93), location: 1.00),
-                ],
-                center: UnitPoint(x: 0.67, y: 0.46)
-            )
-            .ignoresSafeArea()
-        }
+        .primaryBackground()
         .scrollIndicators(.hidden)
         .defaultScrollAnchor(.center)
         .scrollBounceBehavior(.basedOnSize)
@@ -161,96 +152,8 @@ struct VisualizationView: View {
     }
 }
 
-
-// MARK: - GridBackground
-
-struct GridBackground: View {
-    let size: CGFloat = 4000
-    let spacing: CGFloat = 50
-    let lineColor = Color(.lightGray).opacity(0)
-    let lineWidth: CGFloat = 1
-    
-    var body: some View {
-        Canvas { context, size in
-            for x in stride(from: 0, to: size.width, by: spacing) {
-                var path = Path()
-                path.move(to: CGPoint(x: x, y: 0))
-                path.addLine(to: CGPoint(x: x, y: size.height))
-                context.stroke(path, with: .color(lineColor), lineWidth: lineWidth)
-            }
-            
-            for y in stride(from: 0, to: size.height, by: spacing) {
-                var path = Path()
-                path.move(to: CGPoint(x: 0, y: y))
-                path.addLine(to: CGPoint(x: size.width, y: y))
-                context.stroke(path, with: .color(lineColor), lineWidth: lineWidth)
-            }
-        }
-        .frame(width: size, height: size)
-    }
-}
-
-struct ThoughtBubbleView: View {
-    let thought: Thought
-    let color: Color
-    let zoomLevel: CGFloat
-    
-    // Define a constant size for the bubble
-    private let bubbleSize: CGFloat = 70
-    
-    private var textOpacity: Double {
-            let fadeStart: CGFloat = 0.75
-            let fadeEnd: CGFloat = 1.0 // The zoom level where text is fully visible
-            
-            // Calculate progress between the start and end
-            let progress = (zoomLevel - fadeStart) / (fadeEnd - fadeStart)
-            // Clamp the result between 0.0 and 1.0
-            return max(0.0, min(1.0, progress))
-    }
-    
-    var body: some View {
-            Text(thought.content)
-                .font(.system(size: 12, weight: .medium)) // Use caption font to fit more text
-                .multilineTextAlignment(.center)
-                .lineLimit(3)
-                .foregroundColor(Color(red: 0.35, green: 0.35, blue: 0.45)) // Use primary text color for readability
-                .opacity(textOpacity)
-                .animation(.easeInOut(duration: 0.2), value: textOpacity)
-                .padding(.vertical, 10) // Add some internal padding
-                .padding(.horizontal, 10)
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(.ultraThinMaterial)
-                        .fill(color.opacity(0.5))
-                )
-                .cornerRadius(10)
-                .shadow(color: .black.opacity(0.15), radius: 5, x: 0, y: 4)
-                .frame(maxWidth: 120, maxHeight: 35)
-    }
-}
-
-private func colorForCategory(_ categoryName: String) -> Color {
-        // Get the absolute hash value of the string
-        let hash = abs(categoryName.hashValue)
-        
-        // Map the hash to a hue value (0.0 to 1.0)
-        // Using 360 (degrees in a color wheel) gives a good distribution
-        let hue = Double(hash % 360) / 360.0
-        
-        // Use fixed saturation and brightness for a pleasing, consistent color palette
-        let saturation = 0.7
-        let brightness = 0.85
-        
-        return Color(hue: hue, saturation: saturation, brightness: brightness)
-}
-
-
-
-
-
 #Preview {
     VisualizationView()
         .modelContainer(for: [Thought.self, Category.self], inMemory: false)
-    
 }
 

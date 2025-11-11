@@ -120,6 +120,7 @@ struct ClearTextEditor: UIViewRepresentable {
                       replacementText text: String) -> Bool {
             if text == "\n" {
                 parent.onSubmit?()
+                textView.resignFirstResponder()
                 return false // prevent newline
             }
             return true

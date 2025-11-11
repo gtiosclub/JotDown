@@ -40,13 +40,13 @@ struct OnboardingView: View {
                                     .frame(height: 6)
                                     .padding(.trailing, 5)
                                     .foregroundStyle(
-                                        (currentPage == 1) ? Color(red: 107/255, green: 107/255, blue: 138/255) : Color(red: 191/255, green: 191/255, blue: 213/255)
+                                        (currentPage == 1) ? Color.mediumText : Color.placeholderText
                                     )
                                 RoundedRectangle(cornerRadius: 5)
                                     .frame(height: 6)
                                     .padding(.leading, 5)
                                     .foregroundStyle(
-                                        (currentPage == 2) ? Color(red: 107/255, green: 107/255, blue: 138/255) : Color(red: 191/255, green: 191/255, blue: 213/255)
+                                        (currentPage == 2) ? Color.mediumText : Color.placeholderText
                                     )
                             }
                             .padding(.horizontal, 50)
