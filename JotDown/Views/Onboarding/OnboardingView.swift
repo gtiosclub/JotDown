@@ -164,7 +164,7 @@ struct OnboardingView: View {
         do {
             let generator = CategoryGenerator()
             let newCategories = try await generator.generateCategories(using: trimmedInput)
-            suggestedCategories = newCategories
+            suggestedCategories = newCategories.filter { $0.name.lowercased() != "other" }
             isGenerating = false
         } catch {
             print("Failed to generate categories: \(error)")
@@ -181,11 +181,15 @@ struct OnboardingView: View {
         // Insert the new user into the model context
         context.insert(newUser)
         
+        // Add other category
+        let otherCategory = Category(name: "Other", categoryDescription: "For all other notes that don't match with given categories.")
+        context.insert(otherCategory)
+        
         for category in selectedCategories {
             context.insert(category)
         }
         
-        //save the context
+        // Save the context
         do {
             try context.save()
         } catch {
