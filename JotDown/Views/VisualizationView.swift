@@ -8,23 +8,33 @@
 import SwiftUI
 import SwiftData
 
+enum VisualizationMode: String, CaseIterable {
+    case category = "Categories"
+    case emotion = "Emotions"
+}
+
 struct VisualizationView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.modelContext) private var context
     @Query(sort: \Thought.dateCreated, order: .reverse) var thoughts: [Thought]
     @Query var categories: [Category]
-    
+
     @State private var zoomLevel: CGFloat = 0.6
     @State private var finalZoomLevel: CGFloat = 1.0
-    
+    @State private var visualizationMode: VisualizationMode = .category
+
     let minZoom: CGFloat = 0.67
     let maxZoom: CGFloat = 1.5
     
     private var visibleThoughts: [Thought] {
-        thoughts
-            .filter{$0.category.isActive}
+        switch visualizationMode {
+        case .category:
+            return thoughts.filter { $0.category.isActive }
+        case .emotion:
+            return thoughts.filter { $0.emotion != .unknown }
+        }
     }
-    
+
     private var activeCategories: [Category] {
         categories
             .filter{$0.isActive}
@@ -32,11 +42,13 @@ struct VisualizationView: View {
     private var inactiveCategories: [Category] {
         categories.filter{!$0.isActive}
     }
-    
-    private var usedCategories: [String] {
-            var uniqueNames = [String]()
-            var seenNames = Set<String>()
-            
+
+    private var usedGroups: [String] {
+        var uniqueNames = [String]()
+        var seenNames = Set<String>()
+
+        switch visualizationMode {
+        case .category:
             // Loop through the thoughts in their query order
             for thought in thoughts {
                 let cat = thought.category
@@ -46,7 +58,17 @@ struct VisualizationView: View {
                     seenNames.insert(cat.name)
                 }
             }
-            return uniqueNames
+        case .emotion:
+            // Get unique emotions from visible thoughts
+            for thought in visibleThoughts {
+                let emotionName = thought.emotion?.rawValue.capitalized ?? ""
+                if !seenNames.contains(emotionName) {
+                    uniqueNames.append(emotionName)
+                    seenNames.insert(emotionName)
+                }
+            }
+        }
+        return uniqueNames
     }
     
     private func categoryOpacity(for currentZoom: CGFloat) -> Double {
@@ -63,17 +85,23 @@ struct VisualizationView: View {
                 GridBackground()
                 RadialLayout {
                     ForEach(visibleThoughts.indices, id: \.self) { index in
+                        let thought = visibleThoughts[index]
+                        let groupValue = visualizationMode == .category
+                            ? thought.category.name
+                            : thought.emotion?.rawValue.capitalized ?? ""
                         ThoughtBubbleView(
-                            thought: visibleThoughts[index],
-                            color: colorForCategory(visibleThoughts[index].category.name),
+                            thought: thought,
+                            color: visualizationMode == .category
+                                ? colorForCategory(thought.category.name)
+                            : colorForEmotion(thought.emotion ?? .unknown),
                             zoomLevel: zoomLevel
                         )
-                        .layoutValue(key: CategoryLayoutKey.self, value: visibleThoughts[index].category.name)
+                        .layoutValue(key: CategoryLayoutKey.self, value: groupValue)
                     }
                 } .frame(width: 400, height: 400)
                 RadialLayout {
-                    if usedCategories.count == 1 {
-                        Text(usedCategories.first!)
+                    if usedGroups.count == 1 {
+                        Text(usedGroups.first!)
                             .font(.largeTitle)
                             .fontWeight(.bold)
                             .position(x: -33, y: 25)
@@ -84,9 +112,9 @@ struct VisualizationView: View {
                             .frame(maxWidth: 220) // limits width
                             .fixedSize(horizontal: false, vertical: true) // which axis has a fixed size
                     } else {
-                        ForEach(usedCategories, id: \.self) { category in
-                            Text(category)
-                                .layoutValue(key: CategoryLayoutKey.self, value: category)
+                        ForEach(usedGroups, id: \.self) { groupName in
+                            Text(groupName)
+                                .layoutValue(key: CategoryLayoutKey.self, value: groupName)
                                 .font(.largeTitle)
                                 .fontWeight(.bold)
                                 .foregroundColor(.primaryText)
@@ -117,10 +145,22 @@ struct VisualizationView: View {
         .scrollBounceBehavior(.basedOnSize)
         .scrollContentBackground(.hidden)
         .toolbar {
-            Button(role: .close) {
-                dismiss()
+            ToolbarItem(placement: .principal) {
+                Picker("Visualization Mode", selection: $visualizationMode) {
+                    ForEach(VisualizationMode.allCases, id: \.self) { mode in
+                        Text(mode.rawValue).tag(mode)
+                    }
+                }
+                .pickerStyle(.segmented)
+            }
+
+            ToolbarItem {
+                Button(role: .close) {
+                    dismiss()
+                }
             }
         }
+        .animation(.default, value: visualizationMode)
     }
     
     var magnificationGesture: some Gesture {
