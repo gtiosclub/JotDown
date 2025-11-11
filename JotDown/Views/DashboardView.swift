@@ -16,7 +16,8 @@ struct DashboardView: View {
     @Namespace private var dashboardNamespace
     @State private var isSelecting = false
     @State private var selectedThoughts: Set<Thought> = []
-    
+    @State private var showVisualization = false
+
     // two-column grid layout.
     let columns: [GridItem] = [
         GridItem(.flexible(), spacing: 0),
@@ -49,7 +50,6 @@ struct DashboardView: View {
         }
     }
 
-
     var body: some View {
         ZStack {
             EllipticalGradient.primaryBackground
@@ -75,6 +75,27 @@ struct DashboardView: View {
 
                             StatDisplay(value: "\(categories.count)", label: "categories")
                                 .matchedGeometryEffect(id: "categories-stat", in: dashboardNamespace)
+
+                            Spacer()
+
+                            Button {
+                                withAnimation(.spring) {
+                                    showVisualization = true
+                                }
+                            } label: {
+                                Label("Visualization", systemImage: "map")
+                                    .imageScale(.large)
+                                    .fontWeight(.semibold)
+                                    .padding(6)
+                            }
+                            .labelStyle(.iconOnly)
+                            .buttonStyle(.glassProminent)
+                            .buttonBorderShape(.circle)
+                            .tint(Color.buttonGradientStart)
+                            .matchedTransitionSource(
+                                id: "vis_button",
+                                in: dashboardNamespace
+                            )
                         }
                         .padding(.horizontal)
 
