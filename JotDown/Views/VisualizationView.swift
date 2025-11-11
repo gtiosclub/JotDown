@@ -9,6 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct VisualizationView: View {
+    @Environment(\.dismiss) var dismiss
     @Environment(\.modelContext) private var context
     @Query(sort: \Thought.dateCreated, order: .reverse) var thoughts: [Thought]
     @Query var categories: [Category]
@@ -115,6 +116,11 @@ struct VisualizationView: View {
         .defaultScrollAnchor(.center)
         .scrollBounceBehavior(.basedOnSize)
         .scrollContentBackground(.hidden)
+        .toolbar {
+            Button(role: .close) {
+                dismiss()
+            }
+        }
     }
     
     var magnificationGesture: some Gesture {
