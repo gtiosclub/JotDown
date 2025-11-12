@@ -48,6 +48,9 @@ class HomeViewModel {
         try? await Categorizer()
             .categorizeThought(thought, categories: categories)
 
+        try? await EmotionClassifier()
+            .classifyEmotion(thought)
+
         context.insert(thought)
         dismiss()
 
@@ -64,6 +67,9 @@ class HomeViewModel {
 
         try? await Categorizer()
             .categorizeThought(thoughtToEdit, categories: categories)
+
+        try? await EmotionClassifier()
+            .classifyEmotion(thoughtToEdit)
 
         try? context.save()
 
