@@ -117,6 +117,7 @@ struct VisualizationView: View {
                 // MARK: - Zoom and Pan Applied Here
                 .scaleEffect(scale)
                 .offset(offset)
+                .contentShape(.rect)
                 .gesture(magnificationGesture(in: geo))
                 .animation(.easeInOut(duration: 0.15), value: scale)
                 .animation(.easeInOut(duration: 0.15), value: offset)
