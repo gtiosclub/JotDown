@@ -8,13 +8,19 @@
 import SwiftData
 import SwiftUI
 
+import Foundation
+
+extension Notification.Name {
+    static let openCategory = Notification.Name("openCategory")
+}
+
+
 struct ContentView: View {
     @Environment(\.modelContext) private var context
     @Query var users: [User]
 
     @State private var selectedTab = 0
     @Namespace private var ns
-    @State private var categoryToPresent: Category? = nil
     @State private var dashboardResetID = UUID()
     
     @State private var pendingDashboardResetToken: UUID? = nil
@@ -25,7 +31,7 @@ struct ContentView: View {
         TabView(selection: $selectedTab) {
             Tab(value: 0) {
                 NavigationStack {
-                    HomeView(selectedTab: $selectedTab, categoryToPresent: $categoryToPresent)
+                    HomeView(selectedTab: $selectedTab)
                         .onAppear {
                             if users.isEmpty {
                                 let defaultUser = User(name: "", bio: "")
@@ -34,7 +40,7 @@ struct ContentView: View {
                         }
                 }
             } label: {
-                Image("Home")
+                Image("Visualize")
                     .renderingMode(.template)
             }
 
@@ -46,7 +52,6 @@ struct ContentView: View {
             } label: {
                 Image("Dashboard")
                     .renderingMode(.template)
-                    
             }
 
             Tab(value: 2) {
@@ -58,23 +63,13 @@ struct ContentView: View {
                     .renderingMode(.template)
             }
 
-            Tab(value: 3) {
-                NavigationStack {
-                    VisualizationView()
-                }
-            } label: {
-                Image(.dashboard)
-                    .renderingMode(.template)
-            }
-
-            Tab(value: 4, role: .search) {
+            Tab(value: 3, role: .search) {
                 NavigationStack {
                     CombinedSearchView()
                 }
             } label: {
                 Image("Search")
                     .renderingMode(.template)
-                    .tint(.gray)
             }
         }
         .onChange(of: selectedTab) { oldValue, newValue in
@@ -96,19 +91,12 @@ struct ContentView: View {
                         dashboardResetID = UUID()
                     }
 
-                    categoryToPresent = nil
                     pendingDashboardResetToken = nil
                 }
             }
         }
-
-        .fullScreenCover(item: $categoryToPresent) { show in
-            CategoryDashboardView(
-                category: show,
-                namespace: ns,
-                onDismiss: { categoryToPresent = nil }
-            )
-        }
+        // to change tab icon color onSelected add:
+        // .tint(.gray)
     }
 }
 
