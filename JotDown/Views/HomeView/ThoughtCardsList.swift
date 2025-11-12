@@ -4,6 +4,7 @@
 //
 //  Created by Drew Mendelow on 10/14/25.
 //
+//
 import SwiftUI
 import SwiftData
 
@@ -16,7 +17,6 @@ struct ThoughtCardsList: View {
     @GestureState private var isDragging = false
     @State private var sendHapticFeedback: Bool = true
     @Binding var selectedTab: Int
-    @Binding var categoryToPresent: Category?
 
     private func handlePreferenceChange(offset: CGFloat, proxy: GeometryProxy, thoughtWidth: CGFloat) {
         if viewModel.selectedIndex == 1 && thoughts.count > 0 {
@@ -77,8 +77,7 @@ struct ThoughtCardsList: View {
                                     thought: thought,
                                     isSelecting: viewModel.isSelecting,
                                     isSelected: viewModel.selectedThoughts.contains(thought),
-                                    selectedTab: $selectedTab,
-                                    categoryToPresent: $categoryToPresent
+                                    selectedTab: $selectedTab
                                 )
                                 .background(FirstCardOffsetReporter(isFirst: index == 0))
                                 .id(id)
@@ -151,14 +150,12 @@ private struct ThoughtCardCell: View {
     let isSelecting: Bool
     let isSelected: Bool
     @Binding var selectedTab: Int
-    @Binding var categoryToPresent: Category?
     
     var body: some View {
         ZStack(alignment: .topTrailing) {
             ThoughtCard(
                 thought: thought,
-                selectedTab: $selectedTab,
-                categoryToPresent: $categoryToPresent
+                selectedTab: $selectedTab
             )
                 .opacity(isSelecting && !isSelected ? 0.6 : 1.0)
 
