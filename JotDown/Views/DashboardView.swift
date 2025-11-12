@@ -9,8 +9,9 @@ import SwiftUI
 import SwiftData
 
 struct DashboardView: View {
-    @Query(filter: #Predicate<Category> { $0.isActive == true }) private var categories: [Category]
     @Query var thoughts: [Thought]
+    @Query(filter: #Predicate<Category> { $0.isActive == true }) private var categories: [Category]
+    @Environment(\.modelContext) private var modelContext
 
     @State private var selectedCategory: Category?
     @Namespace private var dashboardNamespace
@@ -148,5 +149,17 @@ struct DashboardView: View {
             )
             .interactiveDismissDisabled()
         }
+        .onReceive(NotificationCenter.default.publisher(for: .openCategory)) { note in
+                    guard
+                        let id = note.object as? PersistentIdentifier,
+                        let category = modelContext.model(for: id) as? Category
+                    else {
+                        return
+                    }
+
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                        selectedCategory = category
+                    }
+                }
     }
 }
