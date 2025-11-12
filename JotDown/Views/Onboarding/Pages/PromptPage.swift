@@ -16,13 +16,6 @@ struct PromptPage: View {
     
     var body: some View {
         ZStack {
-            Rectangle()
-                .foregroundStyle(Color.clear)
-                .onTapGesture {
-                    //isFocused = false;
-                    //Potential error when user changes input and doesnt hit submit.
-                }
-            
             VStack {
                 
                 Spacer()
@@ -50,29 +43,30 @@ struct PromptPage: View {
                         .foregroundStyle(.white.opacity(0.6))
                         .shadow(color: .black.opacity(0.1), radius: 4.95, x: 0, y: 2)
                     
-                    // Placeholder
-                    if userInput.isEmpty {
-                        Text("Type here")
-                            .font(Font.custom("SF Pro", size: 15))
-                            .foregroundColor(.gray.opacity(0.5))
-                            .padding(.leading, 20)
-                            .padding(.top, 23)
-                            .allowsHitTesting(false)
-                    }
-                    
-                    TextEditor(text: $userInput)
+                    TextField("Type here", text: $userInput, axis: .vertical)
                         .font(Font.custom("SF Pro", size: 15))
                         .foregroundColor(Constants.TextDarkText)
-                        .scrollContentBackground(.hidden)
                         .background(Color.clear)
-                        .frame(width: 260, height: 285)
-                        .padding(.leading, 16)
-                        .padding(.top, 15)
+                        .frame(width: 260, height: 285, alignment: .top)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 15)
                         .focused($isFocused)
+                        .submitLabel(.done)
+                        .onChange(of: userInput) {
+                            // If user remove extra line and dismiss keyboard
+                            if userInput.last == "\n" {
+                                userInput.removeLast()
+                                isFocused = false
+                            }
+                        }
                 }
                 
                 Spacer()
             }
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            isFocused = false
         }
         .ignoresSafeArea(.keyboard)
     }
