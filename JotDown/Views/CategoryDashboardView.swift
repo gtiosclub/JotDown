@@ -73,7 +73,10 @@ struct CategoryDashboardView: View {
                             .foregroundStyle(.primaryText)
                             .contentShape(Rectangle())
                         Text(category.name.lowercased())
-                            .titleStyle()
+                            .font(.system(size: 40, weight: .bold))
+                            .foregroundColor(.primaryText)
+                            .multilineTextAlignment(.leading)
+                            .lineLimit(2)
                             .matchedGeometryEffect(id: "\(category.id)-title", in: namespace)
                     }
                     .padding(.horizontal, 24)
