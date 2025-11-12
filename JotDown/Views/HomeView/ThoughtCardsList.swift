@@ -164,6 +164,15 @@ struct ThoughtCardsList: View {
             .animation(.interactiveSpring(response: 0.25, dampingFraction: 0.9), value: revealAmount)
         }
         .frame(height: 472)
+        .onChange(of: thoughts.count) { _, newCount in
+            if newCount == 0 {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                    viewModel.showWritableThought = true
+                    viewModel.selectedIndex = 0
+                }
+                isFocused = true
+            }
+        }
     }
 }
 
