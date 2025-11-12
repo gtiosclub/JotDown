@@ -24,12 +24,39 @@ struct OnboardingView: View {
     
     var body: some View {
         ZStack {
+            // Background
+            EllipticalGradient(
+                stops: [
+                    Gradient.Stop(color: Color(red: 0.88, green: 0.97, blue: 1), location: 0.00),
+                    Gradient.Stop(color: .white.opacity(0), location: 1.00),
+                ],
+                center: UnitPoint(x: 0.2, y: 0.29)
+            )
+            .ignoresSafeArea()
+            
+            EllipticalGradient(
+                stops: [
+                    Gradient.Stop(color: Color(red: 1, green: 0.92, blue: 0.96).opacity(0.86), location: 0.00),
+                    Gradient.Stop(color: .white.opacity(0), location: 1.00),
+                ],
+                center: UnitPoint(x: 0.18, y: 0.7)
+            )
+            .ignoresSafeArea()
+            
+            EllipticalGradient(
+                stops: [
+                    Gradient.Stop(color: Color(red: 0.94, green: 0.94, blue: 0.99), location: 0.10),
+                    Gradient.Stop(color: Color(red: 0.96, green: 0.96, blue: 0.97), location: 1.00),
+                ],
+                center: UnitPoint(x: 0.82, y: 0.42)
+            )
+            .ignoresSafeArea()
+
             VStack {
                 Spacer()
                 ZStack {
                     UnevenRoundedRectangle(topLeadingRadius: 34, topTrailingRadius: 34)
                         .foregroundStyle(.white)
-                        .ignoresSafeArea()
                         .frame(height: CGFloat(pageHeight))
                         .animation(.spring(response: 0.4, dampingFraction: 0.8), value: pageHeight)
                     
@@ -108,43 +135,12 @@ struct OnboardingView: View {
                             .padding(.horizontal, 20)
                             .padding(.bottom, 50)
                         }
-                        
-                        
                     }
                     .frame(height: CGFloat(pageHeight))
                 }
+                .ignoresSafeArea(.container, edges: .bottom)
             }
-            .ignoresSafeArea()
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(
-          EllipticalGradient(
-            stops: [
-              Gradient.Stop(color: Color(red: 0.88, green: 0.97, blue: 1), location: 0.00),
-              Gradient.Stop(color: .white.opacity(0), location: 1.00),
-            ],
-            center: UnitPoint(x: 0.2, y: 0.29)
-          )
-        )
-        .background(
-          EllipticalGradient(
-            stops: [
-              Gradient.Stop(color: Color(red: 1, green: 0.92, blue: 0.96).opacity(0.86), location: 0.00),
-              Gradient.Stop(color: .white.opacity(0), location: 1.00),
-            ],
-            center: UnitPoint(x: 0.18, y: 0.7)
-          )
-        )
-        .background(
-          EllipticalGradient(
-            stops: [
-              Gradient.Stop(color: Color(red: 0.94, green: 0.94, blue: 0.99), location: 0.10),
-              Gradient.Stop(color: Color(red: 0.96, green: 0.96, blue: 0.97), location: 1.00),
-            ],
-            center: UnitPoint(x: 0.82, y: 0.42)
-          )
-        )
-        .ignoresSafeArea()
         .ignoresSafeArea(.keyboard)
     }
     
@@ -195,11 +191,7 @@ struct OnboardingView: View {
             print("Failed to save context: \(error)")
         }
     }
-
-
 }
-
-
 
 #Preview {
     OnboardingView()
