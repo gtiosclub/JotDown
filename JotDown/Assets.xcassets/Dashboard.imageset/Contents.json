@@ -1,12 +1,11 @@
 {
   "images" : [
     {
-      "filename" : "rectangle.portrait.on.rectangle.portrait.angled.svg",
+      "filename" : "categorizing icon.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "rectangle.grid.2x2.svg",
       "idiom" : "universal",
       "scale" : "2x"
     },

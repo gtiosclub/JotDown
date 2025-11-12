@@ -109,6 +109,8 @@ struct NoteCategoryView: View {
             Text(category.name)
                 .font(.system(size: 20, weight: .bold))
                 .foregroundStyle(.primaryText)
+                .frame(maxWidth: 200)
+                .lineLimit(2)
                 .fixedSize()
                 .matchedGeometryEffect(id: "\(category.id)-title", in: namespace)
 
