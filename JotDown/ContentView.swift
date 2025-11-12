@@ -28,7 +28,7 @@ struct ContentView: View {
                     }
                 }
             } label: {
-                Image("Visualize")
+                Image("Home")
                     .renderingMode(.template)
             }
             
@@ -37,6 +37,7 @@ struct ContentView: View {
             } label: {
                 Image("Dashboard")
                     .renderingMode(.template)
+                    
             }
             
             Tab {
@@ -55,11 +56,11 @@ struct ContentView: View {
             } label: {
                 Image("Search")
                     .renderingMode(.template)
+                    .tint(.gray)
             }
             
+            
         }
-        // to change tab icon color onSelected add:
-        // .tint(.gray)
     }
 }
 
