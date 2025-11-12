@@ -15,13 +15,6 @@ struct PromptPage: View {
     var onSubmit: () async -> Void
     
     var body: some View {
-        ZStack {
-            Rectangle()
-                .foregroundStyle(Color.clear)
-                .onTapGesture {
-                    //isFocused = false;
-                    //Potential error when user changes input and doesnt hit submit.
-                }
             
             VStack {
                 
@@ -69,11 +62,26 @@ struct PromptPage: View {
                         .padding(.leading, 16)
                         .padding(.top, 15)
                         .focused($isFocused)
+                        .toolbar {
+                            ToolbarItemGroup(placement: .keyboard) {
+                                Spacer()
+                                
+                                Button() {
+                                    isFocused = false
+                                } label: {
+                                    Image(systemName: "checkmark")
+                                }
+                            }
+                        }
                 }
                 
                 Spacer()
             }
-        }
         .ignoresSafeArea(.keyboard)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            isFocused = false
+        }
     }
 }
