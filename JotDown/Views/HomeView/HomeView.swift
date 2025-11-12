@@ -15,7 +15,6 @@ struct HomeView: View {
     @FocusState private var isFocused: Bool
     @State private var viewModel: HomeViewModel?
     @Binding var selectedTab: Int
-    @Binding var categoryToPresent: Category?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -23,7 +22,7 @@ struct HomeView: View {
 
             if let viewModel {
                 HeaderHomeView(isFocused: _isFocused)
-                ThoughtCardsList(thoughts: thoughts, isFocused: _isFocused, selectedTab: $selectedTab, categoryToPresent: $categoryToPresent)
+                ThoughtCardsList(thoughts: thoughts, isFocused: _isFocused, selectedTab: $selectedTab)
                 FooterHomeView(noteCount: thoughts.count, date: viewModel.selectedIndex != nil && viewModel.selectedIndex != 0 ? thoughts[viewModel.selectedIndex! - 1].dateCreated : Date())
             }
 

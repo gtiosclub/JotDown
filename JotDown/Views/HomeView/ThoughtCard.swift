@@ -5,11 +5,11 @@
 //  Created by Drew Mendelow on 10/14/25.
 //
 import SwiftUI
+import SwiftData
 
 struct ThoughtCard: View {
     var thought: Thought
     @Binding var selectedTab: Int
-    @Binding var categoryToPresent: Category?
     @Environment(\.modelContext) private var context
     @Namespace private var namespace
     
@@ -50,7 +50,10 @@ struct ThoughtCard: View {
                        Button {
                            withAnimation(.spring()) { selectedTab = 1 }
                            DispatchQueue.main.async {
-                               categoryToPresent = thought.category
+                               NotificationCenter.default.post(
+                                   name: .openCategory,
+                                   object: thought.category.persistentModelID
+                               )
                            }
                        } label: {
                            HStack(spacing: 2) {
