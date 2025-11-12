@@ -28,7 +28,7 @@ struct ContentView: View {
                     }
                 }
             } label: {
-                Image("Visualize")
+                Image("Home")
                     .renderingMode(.template)
             }
             
