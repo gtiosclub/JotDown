@@ -44,3 +44,22 @@ func colorForCategory(_ categoryName: String) -> Color {
 
     return Color(hue: hue, saturation: saturation, brightness: brightness)
 }
+
+func colorForEmotion(_ emotion: Emotion) -> Color {
+    switch emotion {
+    case .anger:
+        return Color(red: 0.9, green: 0.3, blue: 0.3) // Red
+    case .fear:
+        return Color(red: 0.6, green: 0.4, blue: 0.8) // Purple
+    case .sadness:
+        return Color(red: 0.4, green: 0.6, blue: 0.9) // Blue
+    case .calm:
+        return Color(red: 0.5, green: 0.8, blue: 0.7) // Teal/Green
+    case .strong:
+        return Color(red: 0.9, green: 0.6, blue: 0.2) // Orange
+    case .happiness:
+        return Color(red: 0.95, green: 0.85, blue: 0.3) // Yellow
+    case .unknown:
+        return Color.gray
+    }
+}

@@ -8,6 +8,11 @@
 import SwiftUI
 import SwiftData
 
+enum VisualizationMode: String, CaseIterable {
+    case category = "Categories"
+    case emotion = "Emotions"
+}
+
 struct VisualizationView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.modelContext) private var context
@@ -134,6 +139,7 @@ struct VisualizationView: View {
                 }
             }
         }
+        .animation(.default, value: visualizationMode)
     }
     
     // MARK: - Gesture Logic

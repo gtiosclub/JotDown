@@ -11,6 +11,11 @@ struct CategoryLayoutKey: LayoutValueKey {
     static var defaultValue: String? = "Other"
 }
 
+struct EmotionLayoutKey: LayoutValueKey {
+    // The default value for any view that doesn't specify an emotion
+    static var defaultValue: String? = "unknown"
+}
+
 // No clue what preconcurrency does but accessing the layout key dosen't work without it...
 struct RadialLayout: @preconcurrency Layout {
     
