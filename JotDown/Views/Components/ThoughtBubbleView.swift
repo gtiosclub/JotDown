@@ -36,13 +36,30 @@ struct ThoughtBubbleView: View {
     }
 }
 
+//func colorForCategory(_ categoryName: String) -> Color {
+//    let hash = abs(categoryName.hashValue)
+//    let hue = Double(hash % 360) / 360.0
+//    let saturation = 0.7
+//    let brightness = 0.85
+//
+//    return Color(hue: hue, saturation: saturation, brightness: brightness)
+//}
 func colorForCategory(_ categoryName: String) -> Color {
-    let hash = abs(categoryName.hashValue)
-    let hue = Double(hash % 360) / 360.0
-    let saturation = 0.7
-    let brightness = 0.85
-
-    return Color(hue: hue, saturation: saturation, brightness: brightness)
+    let colors: [Color] = [
+        Color(red: 1.00, green: 0.94, blue: 0.96), // 0
+        Color(red: 1.00, green: 0.95, blue: 0.97), // 1
+        Color(red: 1.00, green: 0.95, blue: 0.99), // 2
+        Color(red: 0.95, green: 0.99, blue: 1.00), // 3
+        Color(red: 0.94, green: 0.97, blue: 1.00), // 4
+        Color(red: 0.90, green: 0.96, blue: 1.00), // 5
+        Color(red: 0.91, green: 0.86, blue: 1.00), // 6
+        Color(red: 0.91, green: 0.87, blue: 0.99), // 7
+        Color(red: 1.00, green: 0.95, blue: 0.93), // 8
+        Color(red: 1.00, green: 1.00,  blue: 1.00) // 9
+    ]
+    
+    let index = abs(categoryName.hashValue) % colors.count
+    return colors[index]
 }
 
 func colorForEmotion(_ emotion: Emotion) -> Color {
