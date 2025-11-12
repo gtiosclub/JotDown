@@ -65,8 +65,13 @@ struct ThoughtCardsList: View {
                                 WritableThoughtCard(text: $viewModel.thoughtInput, isFocused: _isFocused, addThought: { try await viewModel.addThought() })
                                     .id(0)
                                     .transition(
-                                        .move(edge: .leading)
-                                        .combined(with: .opacity)
+                                        .asymmetric(
+                                            insertion: .move(edge: .leading)
+                                                .combined(with: .opacity)
+                                                .combined(with: .scale(scale: 0.7, anchor: .leading)),
+                                            removal: .move(edge: .leading)
+                                                .combined(with: .opacity)
+                                        )
                                     )
                             }
 
@@ -129,9 +134,7 @@ struct ThoughtCardsList: View {
 
                             if (!isDragging) {
                                 sendHapticFeedback = true
-                                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                                    viewModel.showWritableThought = true
-                                }
+                                viewModel.showWritableThought = true
                                 isFocused = true
                             }
                         } else {
@@ -142,12 +145,17 @@ struct ThoughtCardsList: View {
                         if newIndex != 1 {
                             resetOffsets()
                         }
+                        
+                        if newIndex == 0 {
+                            scrollProxy.scrollTo(0, anchor: .leading)
+                        }
 
                         guard viewModel.showWritableThought && newIndex >= 1 else { return }
 
-                        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                        withAnimation(.spring(response: 0.7, dampingFraction: 0.85, blendDuration: 0.2)) {
                             viewModel.showWritableThought = false
-                            scrollProxy.scrollTo(0, anchor: .leading)
+                            
+//                            scrollProxy.scrollTo(0, anchor: .leading)
                         }
                         isFocused = false
                         viewModel.thoughtInput = ""
@@ -160,7 +168,7 @@ struct ThoughtCardsList: View {
                     )
                 }
             }
-            .animation(.spring(response: 0.35, dampingFraction: 0.8), value: shouldShowNewNote)
+            .animation(.spring(response: 0.7, dampingFraction: 0.85, blendDuration: 0.2), value: shouldShowNewNote)
             .animation(.interactiveSpring(response: 0.25, dampingFraction: 0.9), value: revealAmount)
         }
         .frame(height: 472)
