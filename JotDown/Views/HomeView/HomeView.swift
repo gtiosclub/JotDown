@@ -23,7 +23,9 @@ struct HomeView: View {
             if let viewModel {
                 HeaderHomeView(isFocused: _isFocused)
                 ThoughtCardsList(thoughts: thoughts, isFocused: _isFocused, selectedTab: $selectedTab)
-                FooterHomeView(noteCount: thoughts.count, date: viewModel.selectedIndex != nil && viewModel.selectedIndex != 0 ? thoughts[viewModel.selectedIndex! - 1].dateCreated : Date())
+                if !thoughts.isEmpty {
+                    FooterHomeView(noteCount: thoughts.count, date: viewModel.selectedIndex != nil && viewModel.selectedIndex != 0 ? thoughts[viewModel.selectedIndex! - 1].dateCreated : Date())
+                }
             }
 
             Spacer()
