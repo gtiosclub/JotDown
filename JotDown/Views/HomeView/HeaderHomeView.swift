@@ -128,8 +128,8 @@ struct HeaderHomeView: View {
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)
                 .background(LinearGradient.primaryButton)
-                .disabled(viewModel.selectedIndex == 0)
-                .opacity(viewModel.selectedIndex == 0 ? 0.6 : 1.0)
+                .disabled(viewModel.showWritableThought)
+                .opacity(viewModel.showWritableThought ? 0.6 : 1.0)
                 .cornerRadius(25)
 
                 if viewModel.isSubmitting {
@@ -137,8 +137,10 @@ struct HeaderHomeView: View {
                 } else {
                     Button {
                         isFocused = false
-                        if viewModel.selectedIndex != nil && viewModel.selectedIndex != 0 {
-                            viewModel.showWritableThought = true
+                        if !viewModel.showWritableThought {
+                            withAnimation(.spring(response: 0.7, dampingFraction: 0.85, blendDuration: 0.2)) {
+                                viewModel.showWritableThought = true
+                            }
                             viewModel.selectedIndex = 0
                             isFocused = true
                         } else {
@@ -147,14 +149,14 @@ struct HeaderHomeView: View {
                             }
                         }
                     } label: {
-                        Image(systemName: viewModel.selectedIndex != 0 ? "plus" : "checkmark")
+                        Image(systemName: !viewModel.showWritableThought ? "plus" : "checkmark")
                             .fontWeight(.light)
                             .font(.system(size: 30))
                             .foregroundStyle(Color(red: 109/255, green: 134/255, blue: 166/255))
                             .padding(.vertical, 10)
                             .frame(width: 30, height: 30)
                     }
-                    .disabled(viewModel.thoughtInput.trimmingCharacters(in: .whitespacesAndNewlines) == "" && viewModel.selectedIndex == 0)
+                    .disabled(viewModel.thoughtInput.trimmingCharacters(in: .whitespacesAndNewlines) == "" && viewModel.showWritableThought)
                 }
             }
         }
