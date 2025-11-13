@@ -1,0 +1,58 @@
+{
+  "fill" : {
+    "automatic-gradient" : "extended-gray:0.96943,1.00000"
+  },
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "image-name" : "Frame 356 3.png",
+          "name" : "Frame 356 3",
+          "position" : {
+            "scale" : 1.26,
+            "translation-in-points" : [
+              -5.265105050137322,
+              270.9037412644436
+            ]
+          }
+        },
+        {
+          "image-name" : "Frame 355 3.png",
+          "name" : "Frame 355 3",
+          "position" : {
+            "scale" : 1.26,
+            "translation-in-points" : [
+              197.505,
+              31.63117367536688
+            ]
+          }
+        },
+        {
+          "image-name" : "Frame 354 6.png",
+          "name" : "Frame 354 6",
+          "position" : {
+            "scale" : 1.26,
+            "translation-in-points" : [
+              -60.79499999999996,
+              -77.40623896906868
+            ]
+          }
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}

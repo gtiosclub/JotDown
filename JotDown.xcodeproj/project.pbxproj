@@ -11,6 +11,8 @@
 		220E246D2EAAE46900653A8D /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220E246C2EAAE46900653A8D /* SwiftUI.framework */; };
 		220E247C2EAAE46A00653A8D /* JotDownWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 220E24682EAAE46900653A8D /* JotDownWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		91F461BE2E8C8A5C00CF6134 /* JotDownWatch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 91F461B42E8C8A5B00CF6134 /* JotDownWatch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		B76B671A2EC625B200E3E2DB /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = B76B67192EC625B100E3E2DB /* AppIcon.icon */; };
+		B76B671B2EC625B900E3E2DB /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = B76B67192EC625B100E3E2DB /* AppIcon.icon */; };
 		DA113ED22EA84782002AACD2 /* Orb in Frameworks */ = {isa = PBXBuildFile; productRef = DA113ED12EA84782002AACD2 /* Orb */; };
 /* End PBXBuildFile section */
 
@@ -62,6 +64,7 @@
 		220E246C2EAAE46900653A8D /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		22234CCD2EBD6B4900D4F065 /* JotDownWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = JotDownWidgetExtension.entitlements; sourceTree = "<group>"; };
 		91F461B42E8C8A5B00CF6134 /* JotDownWatch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "JotDownWatch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B76B67192EC625B100E3E2DB /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		B7F375652E821797008F0846 /* JotDown.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JotDown.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -163,6 +166,7 @@
 				220E246E2EAAE46900653A8D /* JotDownWidget */,
 				220E24692EAAE46900653A8D /* Frameworks */,
 				B7F375662E821797008F0846 /* Products */,
+				B76B67192EC625B100E3E2DB /* AppIcon.icon */,
 			);
 			sourceTree = "<group>";
 		};
@@ -307,6 +311,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B76B671B2EC625B900E3E2DB /* AppIcon.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -314,6 +319,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B76B671A2EC625B200E3E2DB /* AppIcon.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
