@@ -19,13 +19,8 @@ struct VisualizationView: View {
     @Query(sort: \Thought.dateCreated, order: .reverse) var thoughts: [Thought]
     @Query var categories: [Category]
     
-    // MARK: - Zoom and Pan States
-    @State private var scale: CGFloat = 1.0
-    @State private var finalScale: CGFloat = 1.0
-    @State private var offset: CGSize = .zero
-    @State private var lastOffset: CGSize = .zero
-    @State private var pinchAnchor: CGPoint? = nil
-
+    // MARK: - Zoom State
+    @State private var scale: CGFloat = 0.8
     @State private var visualizationMode = VisualizationMode.category
 
     // MARK: - Zoom Limits
@@ -55,87 +50,78 @@ struct VisualizationView: View {
         }
         return uniqueNames
     }
-    
-    private func categoryOpacity(for currentZoom: CGFloat) -> Double {
-        let fadePoint: CGFloat = 1.0
-        let progress = (currentZoom - minZoom) / (fadePoint - minZoom)
-        return max(0.0, min(1.0, 1.0 - progress))
+
+    private var usedEmotions: [String] {
+        var uniqueEmotions = [String]()
+        var seenEmotions = Set<String>()
+        for thought in visibleThoughts {
+            if let emotion = thought.emotion {
+                let emotionName = emotion.rawValue.capitalized
+                if !seenEmotions.contains(emotionName) {
+                    uniqueEmotions.append(emotionName)
+                    seenEmotions.insert(emotionName)
+                }
+            }
+        }
+        return uniqueEmotions.sorted()
+    }
+
+    private var displayedLabels: [String] {
+        visualizationMode == .category ? usedCategories : usedEmotions
     }
     
     // MARK: - Body
     var body: some View {
-        GeometryReader { geo in
-            ScrollView([.horizontal, .vertical], showsIndicators: false) {
-                ZStack {
-                    GridBackground()
-                    
-                    // Thought bubbles layout
-                    RadialLayout {
-                        ForEach(visibleThoughts.indices, id: \.self) { index in
-                            ThoughtBubbleView(
-                                thought: visibleThoughts[index],
-                                color: colorForCategory(visibleThoughts[index].category.name),
-                                zoomLevel: scale
+        ZoomableScrollView(minZoom: minZoom, maxZoom: maxZoom, currentZoom: $scale) {
+            ZStack {
+                // Thought bubbles and category labels layout
+                RadialLayout(scale: scale, groupBy: visualizationMode) {
+                    // Thought bubbles
+                    ForEach(visibleThoughts.indices, id: \.self) { index in
+                        ThoughtBubbleView(
+                            thought: visibleThoughts[index],
+                            color: visualizationMode == .category
+                                ? colorForCategory(visibleThoughts[index].category.name)
+                                : colorForEmotion(visibleThoughts[index].emotion ?? .unknown),
+                            zoomLevel: scale
+                        )
+                        .layoutThought(visibleThoughts[index])
+                    }
+
+                    // Category/Emotion labels
+                    ForEach(displayedLabels, id: \.self) { label in
+                        Text(label)
+                            .layoutCategory(label)
+                            .bubbleStyle(
+                                color: visualizationMode == .category
+                                    ? colorForCategory(label)
+                                    : colorForEmotion(Emotion(rawValue: label.lowercased()) ?? .unknown),
+                                size: 24
                             )
-                            .layoutValue(key: CategoryLayoutKey.self, value: visibleThoughts[index].category.name)
-                        }
+                            .opacity(categoryOpacity(for: scale))
                     }
-                    .frame(width: 400, height: 400)
-                    
-                    // Category labels layout
-                    RadialLayout {
-                        if usedCategories.count == 1 {
-                            Text(usedCategories.first!)
-                                .font(.largeTitle)
-                                .fontWeight(.bold)
-                                .position(x: -33, y: 25)
-                                .foregroundColor(.primaryText)
-                                .multilineTextAlignment(.center)
-                                .lineLimit(2)
-                                .minimumScaleFactor(0.5)
-                                .frame(maxWidth: 220)
-                                .fixedSize(horizontal: false, vertical: true)
-                        } else {
-                            ForEach(usedCategories, id: \.self) { category in
-                                Text(category)
-                                    .layoutValue(key: CategoryLayoutKey.self, value: category)
-                                    .font(.largeTitle)
-                                    .fontWeight(.bold)
-                                    .foregroundColor(.primaryText)
-                                    .multilineTextAlignment(.center)
-                                    .lineLimit(2)
-                                    .minimumScaleFactor(0.5)
-                                    .frame(maxWidth: 220)
-                                    .fixedSize(horizontal: false, vertical: true)
-                            }
-                        }
-                    }
-                    .frame(width: 400, height: 400)
-                    .opacity(categoryOpacity(for: scale))
-                    .animation(.easeInOut(duration: 0.2), value: scale)
-                    .zIndex(0)
-                    
-                    // JotDown logo
-                    JotDownLogo(style: .heavy, color: .gray)
-                        .frame(width: 200.0, height: 200.0)
-                        .font(.system(size: 100, weight: .heavy))
-                        .glassEffect(.clear, in: .circle)
                 }
-                // MARK: - Zoom and Pan Applied Here
-                .scaleEffect(scale)
-                .offset(offset)
-                .contentShape(.rect)
-                .gesture(magnificationGesture(in: geo))
-                .animation(.easeInOut(duration: 0.15), value: scale)
-                .animation(.easeInOut(duration: 0.15), value: offset)
-                .frame(width: 1000, height: 1400)
+
+                // JotDown logo
+                JotDownLogo(style: .heavy, color: .gray)
+                    .frame(width: 200.0, height: 200.0)
+                    .font(.system(size: 100, weight: .heavy))
+                    .glassEffect(.clear, in: .circle)
             }
-            .primaryBackground()
-            .scrollIndicators(.hidden)
-            .defaultScrollAnchor(.center)
-            .scrollBounceBehavior(.basedOnSize)
-            .scrollContentBackground(.hidden)
-            .toolbar {
+            .animation(.spring(duration: 0.6, bounce: 0.3), value: visualizationMode)
+        }
+        .primaryBackground()
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                Picker("Visualization Mode", selection: $visualizationMode) {
+                    ForEach(VisualizationMode.allCases, id: \.self) { mode in
+                        Text(mode.rawValue).tag(mode)
+                    }
+                }
+                .pickerStyle(.segmented)
+            }
+
+            ToolbarItem(placement: .topBarTrailing) {
                 Button(role: .close) {
                     dismiss()
                 }
@@ -143,49 +129,15 @@ struct VisualizationView: View {
         }
         .animation(.default, value: visualizationMode)
     }
-    
-    // MARK: - Gesture Logic
-    func magnificationGesture(in geo: GeometryProxy) -> some Gesture {
-        MagnificationGesture()
-            .onChanged { value in
-                if pinchAnchor == nil {
-                    let center = CGPoint(x: geo.size.width / 2, y: geo.size.height / 2)
-                    pinchAnchor = center
-                }
-                
-                let newScale = (finalScale * value).clamped(to: minZoom...maxZoom)
-                let scaleDelta = newScale / scale
-                
-                if let anchor = pinchAnchor {
-                    let anchorVector = CGSize(
-                        width: anchor.x - geo.size.width / 2,
-                        height: anchor.y - geo.size.height / 2
-                    )
-                    
-                    offset = CGSize(
-                        width: lastOffset.width - anchorVector.width * (scaleDelta - 1),
-                        height: lastOffset.height - anchorVector.height * (scaleDelta - 1)
-                    )
-                }
-                
-                scale = newScale
-            }
-            .onEnded { _ in
-                finalScale = scale
-                lastOffset = offset
-                pinchAnchor = nil
-            }
+
+    private func categoryOpacity(for currentZoom: CGFloat) -> Double {
+        let fadePoint: CGFloat = 1.0
+        let progress = (currentZoom - minZoom) / (fadePoint - minZoom)
+        return max(0.0, min(1.0, 1.0 - progress))
     }
 }
 
 #Preview {
     VisualizationView()
         .modelContainer(for: [Thought.self, Category.self], inMemory: false)
-}
-
-// MARK: - Helper
-extension Comparable {
-    func clamped(to range: ClosedRange<Self>) -> Self {
-        min(max(self, range.lowerBound), range.upperBound)
-    }
 }
