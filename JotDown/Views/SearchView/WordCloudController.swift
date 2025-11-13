@@ -88,26 +88,32 @@ final class WordCloudController: ObservableObject {
         phase = .merging
         let c = CGPoint(x: size.width/2, y: size.height/2)
         
+        let totalMergeTime: CGFloat = 1.5
+        let bubbleCount = CGFloat(bubbles.count)
+        let staggerIncrement = bubbleCount > 1 ? totalMergeTime / (bubbleCount - 1) : 0
+        
+        
+        
         // Animate orb growing as words converge - slower and larger
         withAnimation(.linear(duration: 0.06 * Double(bubbles.count))) {
             orbScale = 1.8
         }
         
         for i in bubbles.indices {
-            let delay = bubbles[i].stagger
-            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
-                guard let self else { return }
-                withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
-                    self.bubbles[i].pos = c
-                }
-                withAnimation(.easeOut(duration: 1.2).delay(0.1)) {
-                    self.bubbles[i].opacity = 0
-                }
+            let delay = CGFloat(i) * staggerIncrement
+                DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+                    guard let self else { return }
+                    withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                        self.bubbles[i].pos = c
+                    }
+                    withAnimation(.easeOut(duration: 1.2).delay(0.1)) {
+                        self.bubbles[i].opacity = 0
+                    }
             }
         }
 
-        // After words converge, start streaming (which will trigger morph)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.06 * Double(bubbles.count) + 0.7) {
+        // After words converge, start streaming (which will trigger morph) //0.06 * Double(bubbles.count) + 0.7
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
             self.cancelPulses()
             self.stream(answer)
         }
@@ -143,7 +149,8 @@ final class WordCloudController: ObservableObject {
         guard canvas.width > 0, canvas.height > 0 else { return Array(repeating: .zero, count: sizes.count) }
 
         // Safe region (keep a little margin to edges)
-        let minX = margin, minY = margin
+        let topExclusion: CGFloat = 120
+        let minX = margin, minY = margin + topExclusion
         let maxX = canvas.width  - margin
         let maxY = canvas.height - margin
 
@@ -161,7 +168,7 @@ final class WordCloudController: ObservableObject {
             var placed = false
             var candidate = CGRect(origin: .zero, size: sz)
 
-            while !placed {
+            while !placed && θ <= 200 {
                 let r = a + b * θ
                 let x = C.x + r * cos(θ) - sz.width/2
                 let y = C.y + r * sin(θ) - sz.height/2
@@ -185,16 +192,19 @@ final class WordCloudController: ObservableObject {
                     θ += dθ
                     // very defensive: stop trying after many steps and clamp
                     if θ > 200 { // ~ 10k steps
-                        let clamped = candidate.integral
-                        rects.append(clamped)
-                        centers.append(CGPoint(x: clamped.midX, y: clamped.midY))
-                        break
+//                        let clamped = candidate.integral
+//                        rects.append(clamped)
+//                        centers.append(CGPoint(x: clamped.midX, y: clamped.midY))
+//                        break
+                          centers.append(C) // Place at center as fallback (it will be hidden anyway)
+                          break
                     }
                 }
             }
         }
         return centers
     }
+    
     
     private func spawnBubbles(words: [String], in size: CGSize) -> [WordBubble] {
         // Rank → size (bigger first)
