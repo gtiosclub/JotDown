@@ -18,7 +18,7 @@ class HomeViewModel {
     var selectedThoughts: Set<Thought> = []
     var thoughtBeingEdited: Thought? = nil
 
-    private let context: ModelContext
+    let context: ModelContext
     private let dismiss: DismissAction
 
     init(context: ModelContext, dismiss: DismissAction) {

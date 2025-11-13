@@ -113,6 +113,13 @@ struct HeaderHomeView: View {
                 
             } else {
                 JotDownLogo()
+                    #if DEBUG
+                    .onTapGesture(count: 3) {
+                        Task {
+                            try? await viewModel.populateSampleData()
+                        }
+                    }
+                    #endif
 
                 Spacer()
 
