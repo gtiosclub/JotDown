@@ -44,8 +44,14 @@ struct ZoomableScrollView<Content: View>: UIViewRepresentable {
     }
 
     func updateUIView(_ scrollView: UIScrollView, context: Context) {
-        // Update the hosting controller's content
-        context.coordinator.hostingController?.rootView = content
+        // Update the hosting controller's content with animation support
+        if let transaction = context.transaction.animation {
+            withAnimation(transaction) {
+                context.coordinator.hostingController?.rootView = content
+            }
+        } else {
+            context.coordinator.hostingController?.rootView = content
+        }
 
         // Update zoom scale if needed
         if scrollView.zoomScale != currentZoom {
@@ -54,6 +60,9 @@ struct ZoomableScrollView<Content: View>: UIViewRepresentable {
 
         // Layout the content
         if let hostingView = context.coordinator.hostingController?.view {
+            // Force layout update to respect SwiftUI animations
+            hostingView.layoutIfNeeded()
+
             let contentSize = hostingView.intrinsicContentSize
             hostingView.frame = CGRect(origin: .zero, size: contentSize)
             scrollView.contentSize = contentSize

@@ -31,13 +31,14 @@ struct RadialLayout: Layout {
     static let maxBubbleSize: CGFloat = 150
 
     var scale: Double = 1.0
+    var groupBy: VisualizationMode = .category
 
     struct SectorData {
         let startAngle: Angle
         let sectorWidth: Angle
         let thoughts: [Thought]
         let subviews: [LayoutSubview]
-        let categoryName: String
+        let groupName: String
 
         var positions: [CGPoint] = []
     }
@@ -45,6 +46,7 @@ struct RadialLayout: Layout {
     struct LayoutCache {
         var sectors: [SectorData] = []
         var categoryLabels: [(String, LayoutSubview)] = []
+        var groupBy: VisualizationMode = .category
     }
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout Cache) -> CGSize {
@@ -105,9 +107,9 @@ struct RadialLayout: Layout {
         }
 
         // Place category labels
-        for (categoryName, subview) in cache.categoryLabels {
+        for (labelName, subview) in cache.categoryLabels {
             // Find the matching sector
-            guard let sector = cache.sectors.first(where: { $0.categoryName == categoryName }) else {
+            guard let sector = cache.sectors.first(where: { $0.groupName == labelName }) else {
                 continue
             }
 
@@ -152,6 +154,13 @@ struct RadialLayout: Layout {
         makeSectors(subviews: subviews)
     }
 
+    func updateCache(_ cache: inout Cache, subviews: Subviews) {
+        // Regenerate cache if groupBy mode changed
+        if cache.groupBy != groupBy {
+            cache = makeSectors(subviews: subviews)
+        }
+    }
+
     private func makeSectors(subviews: Subviews) -> LayoutCache {
         var sectors = [SectorData]()
         var categoryLabels: [(String, LayoutSubview)] = []
@@ -167,30 +176,55 @@ struct RadialLayout: Layout {
             return (categoryName, $0)
         }
 
-        let mappedCategories = Dictionary(grouping: thoughts) { $0.0.category }
-
         var currAngle: Angle = .zero
-        for (category, categoryThoughts) in mappedCategories
-            .sorted(by: { $0.key.name < $1.key.name }) {
-            let proportion = Double(categoryThoughts.count) / Double(thoughts.count)
-            let sectorWidth = Angle.degrees(360 * CGFloat(proportion))
 
-            var sectorData = SectorData(
-                startAngle: currAngle,
-                sectorWidth: sectorWidth,
-                thoughts: categoryThoughts.map { $0.0 },
-                subviews: categoryThoughts.map { $0.1 },
-                categoryName: category.name
-            )
+        if groupBy == .category {
+            // Group by category
+            let mappedCategories = Dictionary(grouping: thoughts) { $0.0.category }
 
-            sectorData.positions = calculatePositions(for: sectorData)
+            for (category, categoryThoughts) in mappedCategories
+                .sorted(by: { $0.key.name < $1.key.name }) {
+                let proportion = Double(categoryThoughts.count) / Double(thoughts.count)
+                let sectorWidth = Angle.degrees(360 * CGFloat(proportion))
 
-            sectors.append(sectorData)
+                var sectorData = SectorData(
+                    startAngle: currAngle,
+                    sectorWidth: sectorWidth,
+                    thoughts: categoryThoughts.map { $0.0 },
+                    subviews: categoryThoughts.map { $0.1 },
+                    groupName: category.name
+                )
 
-            currAngle = currAngle + sectorWidth
+                sectorData.positions = calculatePositions(for: sectorData)
+                sectors.append(sectorData)
+                currAngle = currAngle + sectorWidth
+            }
+        } else {
+            // Group by emotion
+            let mappedEmotions = Dictionary(grouping: thoughts) {
+                $0.0.emotion ?? .unknown
+            }
+
+            for (emotion, emotionThoughts) in mappedEmotions
+                .sorted(by: { $0.key.rawValue < $1.key.rawValue }) {
+                let proportion = Double(emotionThoughts.count) / Double(thoughts.count)
+                let sectorWidth = Angle.degrees(360 * CGFloat(proportion))
+
+                var sectorData = SectorData(
+                    startAngle: currAngle,
+                    sectorWidth: sectorWidth,
+                    thoughts: emotionThoughts.map { $0.0 },
+                    subviews: emotionThoughts.map { $0.1 },
+                    groupName: emotion.rawValue.capitalized
+                )
+
+                sectorData.positions = calculatePositions(for: sectorData)
+                sectors.append(sectorData)
+                currAngle = currAngle + sectorWidth
+            }
         }
 
-        return LayoutCache(sectors: sectors, categoryLabels: categoryLabels)
+        return LayoutCache(sectors: sectors, categoryLabels: categoryLabels, groupBy: groupBy)
     }
 
     private func calculatePositions(for sectorData: SectorData) -> [CGPoint] {

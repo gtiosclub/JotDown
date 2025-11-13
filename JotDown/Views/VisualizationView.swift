@@ -20,7 +20,7 @@ struct VisualizationView: View {
     @Query var categories: [Category]
     
     // MARK: - Zoom State
-    @State private var scale: CGFloat = 1.0
+    @State private var scale: CGFloat = 0.8
     @State private var visualizationMode = VisualizationMode.category
 
     // MARK: - Zoom Limits
@@ -50,11 +50,24 @@ struct VisualizationView: View {
         }
         return uniqueNames
     }
-    
-    private func categoryOpacity(for currentZoom: CGFloat) -> Double {
-        let fadePoint: CGFloat = 1.0
-        let progress = (currentZoom - minZoom) / (fadePoint - minZoom)
-        return max(0.0, min(1.0, 1.0 - progress))
+
+    private var usedEmotions: [String] {
+        var uniqueEmotions = [String]()
+        var seenEmotions = Set<String>()
+        for thought in visibleThoughts {
+            if let emotion = thought.emotion {
+                let emotionName = emotion.rawValue.capitalized
+                if !seenEmotions.contains(emotionName) {
+                    uniqueEmotions.append(emotionName)
+                    seenEmotions.insert(emotionName)
+                }
+            }
+        }
+        return uniqueEmotions.sorted()
+    }
+
+    private var displayedLabels: [String] {
+        visualizationMode == .category ? usedCategories : usedEmotions
     }
     
     // MARK: - Body
@@ -62,27 +75,31 @@ struct VisualizationView: View {
         ZoomableScrollView(minZoom: minZoom, maxZoom: maxZoom, currentZoom: $scale) {
             ZStack {
                 // Thought bubbles and category labels layout
-                RadialLayout(scale: scale) {
+                RadialLayout(scale: scale, groupBy: visualizationMode) {
                     // Thought bubbles
                     ForEach(visibleThoughts.indices, id: \.self) { index in
                         ThoughtBubbleView(
                             thought: visibleThoughts[index],
-                            color: colorForCategory(visibleThoughts[index].category.name),
+                            color: visualizationMode == .category
+                                ? colorForCategory(visibleThoughts[index].category.name)
+                                : colorForEmotion(visibleThoughts[index].emotion ?? .unknown),
                             zoomLevel: scale
                         )
                         .layoutThought(visibleThoughts[index])
                     }
 
-                    // Category labels
-                    ForEach(usedCategories, id: \.self) { category in
-                        Text(category)
-                            .layoutCategory(category)
+                    // Category/Emotion labels
+                    ForEach(displayedLabels, id: \.self) { label in
+                        Text(label)
+                            .layoutCategory(label)
                             .bubbleStyle(
-                                color: colorForCategory(category),
+                                color: visualizationMode == .category
+                                    ? colorForCategory(label)
+                                    : colorForEmotion(Emotion(rawValue: label.lowercased()) ?? .unknown),
                                 size: 24
                             )
+                            .opacity(categoryOpacity(for: scale))
                     }
-                    .opacity(categoryOpacity(for: scale))
                 }
 
                 // JotDown logo
@@ -91,14 +108,32 @@ struct VisualizationView: View {
                     .font(.system(size: 100, weight: .heavy))
                     .glassEffect(.clear, in: .circle)
             }
+            .animation(.spring(duration: 0.6, bounce: 0.3), value: visualizationMode)
         }
         .primaryBackground()
         .toolbar {
-            Button(role: .close) {
-                dismiss()
+            ToolbarItem(placement: .principal) {
+                Picker("Visualization Mode", selection: $visualizationMode) {
+                    ForEach(VisualizationMode.allCases, id: \.self) { mode in
+                        Text(mode.rawValue).tag(mode)
+                    }
+                }
+                .pickerStyle(.segmented)
+            }
+
+            ToolbarItem(placement: .topBarTrailing) {
+                Button(role: .close) {
+                    dismiss()
+                }
             }
         }
         .animation(.default, value: visualizationMode)
+    }
+
+    private func categoryOpacity(for currentZoom: CGFloat) -> Double {
+        let fadePoint: CGFloat = 1.0
+        let progress = (currentZoom - minZoom) / (fadePoint - minZoom)
+        return max(0.0, min(1.0, 1.0 - progress))
     }
 }
 
