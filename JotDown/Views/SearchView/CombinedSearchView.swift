@@ -39,6 +39,7 @@ struct CombinedSearchView: View {
             .padding(.top, 40)
             .transition(.opacity)
             WordCloudAnswerView(controller: cloud)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 
         }
         
@@ -64,7 +65,7 @@ struct CombinedSearchView: View {
                 let bc = b.contains(q)
                 return ac && !bc ? true : (!ac && bc ? false : a.count > b.count)
             }
-            let picked = Array(prioritized)
+            let picked = Array(prioritized.prefix(62))
             cloud.reset()
             DispatchQueue.main.async {
                 NotificationCenter.default.post(name: .startCloud, object: picked)
