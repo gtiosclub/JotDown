@@ -7,32 +7,39 @@ struct ThoughtBubbleView: View {
 
     private let bubbleSize: CGFloat = 70
 
-    private var textOpacity: Double {
+    private var opacity: Double {
         let fadeStart: CGFloat = 0.75
         let fadeEnd: CGFloat = 1.0
 
         let progress = (zoomLevel - fadeStart) / (fadeEnd - fadeStart)
-        return max(0.0, min(1.0, progress))
+        return max(0.4, min(1.0, progress))
     }
 
     var body: some View {
-        Text(thought.content)
-            .font(.system(size: 12, weight: .medium))
-            .multilineTextAlignment(.center)
-            .lineLimit(3)
-            .foregroundColor(.primaryText)
-            .opacity(textOpacity)
-            .animation(.easeInOut(duration: 0.2), value: textOpacity)
-            .padding(.vertical, 10)
-            .padding(.horizontal, 10)
-            .background(
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(.ultraThinMaterial)
-                    .fill(color.opacity(0.5))
-            )
-            .cornerRadius(10)
-            .shadow(color: .black.opacity(0.15), radius: 5, x: 0, y: 4)
-            .frame(maxWidth: 120, maxHeight: 35)
+        VStack {
+            if zoomLevel <= 0.8 {
+                Text(thought.content)
+                    .redacted(reason: .placeholder)
+            } else {
+                Text(thought.content)
+            }
+        }
+        .bubbleStyle(color: color)
+        .opacity(opacity)
+    }
+}
+
+extension View {
+    func bubbleStyle(color: Color, size: CGFloat = 18) -> some View {
+        self
+            .font(.system(size: size, weight: .medium))
+            .foregroundStyle(Color(red: 0.3, green: 0.3, blue: 0.3))
+            .lineLimit(5)
+            .multilineTextAlignment(.leading)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
+            .frame(maxWidth: 200)
+            .glassEffect(.clear.tint(color), in: .rect(cornerRadius: 24))
     }
 }
 
