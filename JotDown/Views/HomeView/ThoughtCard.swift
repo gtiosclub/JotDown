@@ -5,9 +5,11 @@
 //  Created by Drew Mendelow on 10/14/25.
 //
 import SwiftUI
+import SwiftData
 
 struct ThoughtCard: View {
     var thought: Thought
+    @Binding var selectedTab: Int
     @Environment(\.modelContext) private var context
     @Namespace private var namespace
     
@@ -45,22 +47,28 @@ struct ThoughtCard: View {
                    Spacer()
                    
                    if (thought.category.isActive) {
-                       NavigationLink(destination: CategoryDashboardView(category: thought.category, namespace: namespace)) {
+                       Button {
+                           withAnimation(.spring()) { selectedTab = 1 }
+                           DispatchQueue.main.async {
+                               NotificationCenter.default.post(
+                                   name: .openCategory,
+                                   object: thought.category.persistentModelID
+                               )
+                           }
+                       } label: {
                            HStack(spacing: 2) {
                                Text(thought.category.name)
                                    .font(.system(size: 16, weight: .regular))
                                    .italic()
                                    .foregroundColor(Color(red: 107/255, green: 107/255, blue: 138/255))
-                                   .lineLimit(1)
-                                   .truncationMode(.tail)
                                Text("→")
                                    .font(.system(size: 16, weight: .regular))
                                    .italic()
                                    .foregroundColor(Color(red: 107/255, green: 107/255, blue: 138/255))
-                                   .padding(EdgeInsets(top: 0, leading: -2, bottom: 0, trailing: 0))
                            }
                        }
                        .buttonStyle(PlainButtonStyle())
+
                    } else {
                        Text(thought.category.name)
                            .font(.system(size: 16, weight: .regular))
