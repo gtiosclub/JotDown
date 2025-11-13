@@ -26,6 +26,8 @@ struct VisualizationView: View {
     @State private var lastOffset: CGSize = .zero
     @State private var pinchAnchor: CGPoint? = nil
 
+    @State private var visualizationMode = VisualizationMode.category
+
     // MARK: - Zoom Limits
     let minZoom: CGFloat = 0.67
     let maxZoom: CGFloat = 1.5
