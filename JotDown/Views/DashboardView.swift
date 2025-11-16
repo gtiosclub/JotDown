@@ -90,7 +90,7 @@ struct DashboardView: View {
                                     .padding(6)
                             }
                             .labelStyle(.iconOnly)
-                            .buttonStyle(.glassProminent)
+                            .buttonStyle(.borderedProminent)
                             .buttonBorderShape(.circle)
                             .tint(Color.buttonGradientStart)
                             .matchedTransitionSource(
