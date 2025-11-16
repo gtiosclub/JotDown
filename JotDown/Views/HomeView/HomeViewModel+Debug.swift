@@ -64,12 +64,18 @@ extension HomeViewModel {
             categoryDescription: "Classes, assignments, and academic activities",
             isActive: true
         )
+        let otherCategory = Category(
+            name: "Other",
+            categoryDescription: "Thoughts which don't fit into the other categories",
+            isActive: true
+        )
 
         context.insert(photographyCategory)
         context.insert(filmMakingCategory)
         context.insert(appDevCategory)
         context.insert(tasksCategory)
         context.insert(schoolCategory)
+        context.insert(otherCategory)
 
         // Create sample thoughts with appropriate emotions
         let sampleThoughts: [(String, Category, Emotion)] = [

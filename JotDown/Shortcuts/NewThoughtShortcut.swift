@@ -28,7 +28,10 @@ struct NewThoughtShortcut: AppIntent {
             
             try? await Categorizer()
                 .categorizeThought(newThought, categories: categories)
-            
+
+            try? await EmotionClassifier()
+                .classifyEmotion(newThought)
+
             modelContext.insert(newThought)
             return .result()
         } catch {
