@@ -24,7 +24,7 @@ struct VisualizationView: View {
     @State private var visualizationMode = VisualizationMode.category
 
     // MARK: - Zoom Limits
-    let minZoom: CGFloat = 0.67
+    let minZoom: CGFloat = 0.4
     let maxZoom: CGFloat = 1.5
     
     // MARK: - Derived Collections
